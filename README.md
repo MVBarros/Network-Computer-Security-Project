@@ -1,8 +1,8 @@
 # Network-Computer-Security-Project
 
-Project for the Network & Computer Security Class
+## Project for the Network & Computer Security Class
 
-Group Members:
+### Group Members:
 
 Carolina Carreira
 
