@@ -24,10 +24,10 @@ public class DocumentServer {
 		}
 
 		final int port = Integer.parseInt(args[0]);
-		//final BindableService impl = new DocumentServiceImpl();
+		final BindableService impl = new TigServiceImpl();
 
 		// Create a new server to listen on port
-		/*Server server = ServerBuilder.forPort(port).addService(impl).build();
+		Server server = ServerBuilder.forPort(port).addService(impl).build();
 
 		// Start the server
 		server.start();
@@ -36,7 +36,7 @@ public class DocumentServer {
 		System.out.println("Server started");
 
 		// Do not exit the main thread. Wait until server is terminated.
-		server.awaitTermination();*/
+		server.awaitTermination();
 	}
 
 }
