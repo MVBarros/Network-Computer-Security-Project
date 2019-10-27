@@ -9,10 +9,9 @@ service TigService {
   rpc uploadFile(stream FileChunk) returns (StatusReply);
   rpc editFile(stream FileChunk) returns (StatusReply);
   rpc deleteFile(FileRequest) returns (StatusReply);
-  rpc setFile(OperationRequest) returns (StatusReply);
+  rpc accessControlFile(OperationRequest) returns (StatusReply);
   rpc listFiles(SessionRequest) returns (ListFilesReply);
 }
-
 
 // LOGIN OPERATION
 message LoginRequest {
@@ -30,12 +29,11 @@ enum LoginStatus {
   FAIL = 1;
 }
 
-//LOGOUT OPERATION
 message SessionRequest {
   string sessionId = 1;
 }
 
-// ADD OPERATION
+// FILE STREAM OPERATION
 message FileChunk {
   bytes content = 1;
   string sessionId = 2;
@@ -52,14 +50,13 @@ enum StatusCode {
   FAILED = 2;
 }
 
-//EDIT OPERATION
-//DELETE OPERATION
+//FILE OPERATION
 message FileRequest {
   string sessionId = 1;
   string fileName = 2;
 }
 
-//SHARE and UNSHARE OPERATION
+//ACCESS CONTROL OPERATION
 message OperationRequest {
   string sessionId = 1;
   string fileName = 2;
@@ -75,4 +72,3 @@ enum OperationEnum {
 message ListFilesReply {
   repeated string fileNames = 1;
 }
-
