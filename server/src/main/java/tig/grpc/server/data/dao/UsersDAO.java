@@ -17,10 +17,7 @@ public class UsersDAO {
             PreparedStatement stmt = conn.prepareStatement("INSERT INTO users VALUES(?,?)");
             stmt.setString(1, username);
 
-
-
-            // FIXME verificar se e seguro
-            byte[] b = password.getBytes(StandardCharsets.UTF_8); // Java 7+ only
+            byte[] b = password.getBytes(StandardCharsets.UTF_8);
             stmt.setBytes(2,  MessageDigest.getInstance("SHA-1").digest(b));
 
             int i = stmt.executeUpdate();
