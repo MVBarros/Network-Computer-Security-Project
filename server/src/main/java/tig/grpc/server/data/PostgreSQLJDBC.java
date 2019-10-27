@@ -7,6 +7,12 @@ public class PostgreSQLJDBC {
     private static Integer port = null;
     private static String password = null;
     private static PostgreSQLJDBC instance = null;
+    private Connection conn;
+
+
+    public Connection getConn() {
+        return conn;
+    }
 
 
     public static void setPassword(String password) {
@@ -18,10 +24,10 @@ public class PostgreSQLJDBC {
     }
 
     private PostgreSQLJDBC() {
-        Connection c = null;
+        conn = null;
         try {
             Class.forName("org.postgresql.Driver");
-            c = DriverManager
+            conn = DriverManager
                     .getConnection("jdbc:postgresql://localhost:" + Integer.toString(port) + "/tigdb",
                             "postgres", password);
         } catch (Exception e) {
