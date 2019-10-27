@@ -8,6 +8,10 @@ import tig.grpc.contract.TigServiceGrpc;
 import io.grpc.stub.StreamObserver;
 
 public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
+    @Override
+    public void register(Tig.LoginRequest request, StreamObserver<Tig.StatusReply> responseObserver) {
+
+    }
 
     @Override
     public void login(Tig.LoginRequest request, StreamObserver<Tig.LoginReply> responseObserver) {
