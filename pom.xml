@@ -7,4 +7,10 @@
 		<version>1.0.0-SNAPSHOT</version>
 		<packaging>pom</packaging>
 
+	<modules>
+		<module>client</module>
+		<module>contract</module>
+		<module>server</module>
+	</modules>
+	
 </project>
