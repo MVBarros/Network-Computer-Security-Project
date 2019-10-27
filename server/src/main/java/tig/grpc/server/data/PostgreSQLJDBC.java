@@ -4,8 +4,20 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 
 public class PostgreSQLJDBC {
+    private static Integer port = null;
+    private static String password = null;
+    private static PostgreSQLJDBC instance = null;
 
-    public PostgreSQLJDBC(int port, String password) {
+
+    public static void setPassword(String password) {
+        PostgreSQLJDBC.password = password;
+    }
+
+    public static void setPort(int port) {
+        PostgreSQLJDBC.port = port;
+    }
+
+    private PostgreSQLJDBC() {
         Connection c = null;
         try {
             Class.forName("org.postgresql.Driver");
@@ -18,5 +30,13 @@ public class PostgreSQLJDBC {
             System.exit(0);
         }
         System.out.println("Opened database successfully");
+    }
+
+    public static PostgreSQLJDBC getInstance() {
+        if (instance == null) {
+            instance = new PostgreSQLJDBC();
+        }
+        return instance;
+
     }
 }

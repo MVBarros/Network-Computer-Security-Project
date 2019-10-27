@@ -12,16 +12,18 @@ public class DocumentServer {
 		System.out.println(DocumentServer.class.getSimpleName());
 
 		// check arguments
-		if (args.length < 1) {
+		if (args.length < 3) {
 			System.err.println("Argument(s) missing!");
-			System.err.printf("<Usage> java %s port%n", DocumentServer.class.getName());
+			System.err.printf("<Usage> java %s port dbport dbpassword%n", DocumentServer.class.getName());
 			return;
 		}
 
 		final int port = Integer.parseInt(args[0]);
 		final BindableService impl = new TigServiceImpl();
 
-		PostgreSQLJDBC db = new PostgreSQLJDBC(5432, "root");
+		PostgreSQLJDBC.setPort(Integer.parseInt(args[1]));
+		PostgreSQLJDBC.setPassword(args[2]);
+		PostgreSQLJDBC.getInstance();
 		// Create a new server to listen on port
 		Server server = ServerBuilder.forPort(port).addService(impl).build();
 
