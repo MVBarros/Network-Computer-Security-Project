@@ -1,5 +1,5 @@
 syntax = "proto3";
-package tig.grpc.contract.api;
+package tig.grpc.contract;
 import "google/protobuf/empty.proto";
 
 
@@ -28,7 +28,6 @@ enum LoginStatus {
   SUCCESS = 0;
   FAIL = 1;
 }
-
 message SessionRequest {
   string sessionId = 1;
 }

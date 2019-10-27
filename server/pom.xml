@@ -34,7 +34,7 @@
 		<!-- contract brings gRPC dependencies with it -->
 		<dependency>
 			<groupId>T17.SIRS</groupId>
-			<artifactId>proj-SIRS-contract</artifactId>
+			<artifactId>tig-contract</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 		<!-- JUnit -->
