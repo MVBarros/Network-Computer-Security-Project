@@ -2,7 +2,7 @@ package tig.grpc.server.api;
 
 
 import com.google.protobuf.Empty;
-import tig.grpc.contract.Tig.*;
+import tig.grpc.contract.Tig;
 import tig.grpc.contract.TigServiceGrpc;
 
 import io.grpc.stub.StreamObserver;
@@ -10,38 +10,37 @@ import io.grpc.stub.StreamObserver;
 public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
 
     @Override
-    public void login(LoginRequest request, StreamObserver<LoginReply> responseObserver) {
+    public void login(Tig.LoginRequest request, StreamObserver<Tig.LoginReply> responseObserver) {
 
     }
 
     @Override
-    public void logout(SessionRequest request, StreamObserver<Empty> responseObserver) {
+    public void logout(Tig.SessionRequest request, StreamObserver<Empty> responseObserver) {
 
     }
 
     @Override
-    public void deleteFile(FileRequest request, StreamObserver<StatusReply> responseObserver) {
+    public void deleteFile(Tig.FileRequest request, StreamObserver<Tig.StatusReply> responseObserver) {
 
     }
 
     @Override
-    public void accessControlFile(OperationRequest request, StreamObserver<StatusReply> responseObserver) {
+    public void accessControlFile(Tig.OperationRequest request, StreamObserver<Tig.StatusReply> responseObserver) {
 
     }
 
     @Override
-    public void listFiles(SessionRequest request, StreamObserver<ListFilesReply> responseObserver) {
+    public void listFiles(Tig.SessionRequest request, StreamObserver<Tig.ListFilesReply> responseObserver) {
 
     }
 
-
     @Override
-    public StreamObserver<FileChunk> uploadFile(StreamObserver<StatusReply> responseObserver) {
+    public StreamObserver<Tig.FileChunk> uploadFile(StreamObserver<Tig.StatusReply> responseObserver) {
         return null;
     }
 
     @Override
-    public StreamObserver<FileChunk> editFile(StreamObserver<StatusReply> responseObserver) {
+    public StreamObserver<Tig.FileChunk> editFile(StreamObserver<Tig.StatusReply> responseObserver) {
         return null;
     }
 
