@@ -10,6 +10,13 @@
 
 	<name>${project.artifactId}</name>
 
+
+  <parent>
+    <groupId>T17.SIRS</groupId>
+    <artifactId>tig</artifactId>
+    <version>1.0.0.RELEASE</version>
+  </parent>
+
 	<properties>
 		<!-- compiler properties -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
