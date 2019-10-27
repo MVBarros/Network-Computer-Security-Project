@@ -4,6 +4,7 @@ import "google/protobuf/empty.proto";
 
 
 service TigService {
+  rpc register(LoginRequest) returns (StatusReply);
   rpc login(LoginRequest) returns (LoginReply);
   rpc logout(SessionRequest) returns (google.protobuf.Empty);
   rpc uploadFile(stream FileChunk) returns (StatusReply);
@@ -20,14 +21,11 @@ message LoginRequest {
 }
 
 message LoginReply {
-  LoginStatus response = 1;
+  StatusCode code = 1;
   string sessionId = 2;
 }
 
-enum LoginStatus {
-  SUCCESS = 0;
-  FAIL = 1;
-}
+
 message SessionRequest {
   string sessionId = 1;
 }
@@ -40,7 +38,7 @@ message FileChunk {
 }
 
 message StatusReply {
-  StatusCode Code = 1;
+  StatusCode code = 1;
 }
 
 enum StatusCode {
