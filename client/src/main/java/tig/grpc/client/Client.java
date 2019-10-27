@@ -36,6 +36,10 @@ public class Client {
 		// Here we create a blocking stub, but an async stub,
 		// or an async stub with Future are always possible.
 		TigServiceGrpc.TigServiceBlockingStub stub = TigServiceGrpc.newBlockingStub(channel);
+
+
+		System.out.println(stub.register(Tig.LoginRequest.newBuilder().setUsername("carolzocas").setPassword("1234").build()).getCode().toString());
+
 		/*HelloWorld.HelloRequest request = HelloWorld.HelloRequest.newBuilder().setName("friend").build();
 
 		// Finally, make the call using the stub
