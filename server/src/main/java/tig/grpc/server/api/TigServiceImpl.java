@@ -1,11 +1,13 @@
 package tig.grpc.server.api;
 
+import com.google.protobuf.ByteString;
 import com.google.protobuf.Empty;
 import org.apache.log4j.Logger;
 import tig.grpc.contract.Tig;
 import tig.grpc.contract.TigServiceGrpc;
 import io.grpc.stub.StreamObserver;
 import tig.grpc.server.data.dao.UsersDAO;
+import tig.grpc.server.data.dao.FileDAO;
 
 public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
     private final static Logger logger = Logger.getLogger(TigServiceImpl.class);
@@ -50,7 +52,31 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
 
     @Override
     public StreamObserver<Tig.FileChunk> uploadFile(StreamObserver<Tig.StatusReply> responseObserver) {
-        return null;
+        return new StreamObserver<Tig.FileChunk>() {
+
+            private ByteString file = ByteString.EMPTY;
+            private String filename;
+
+            @Override
+            public void onNext(Tig.FileChunk value) {
+                filename = value.getFileName();
+                file.concat(value.getContent());
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                responseObserver.onError(t);
+            }
+
+            @Override
+            public void onCompleted() {
+                responseObserver.onNext(Tig.StatusReply.newBuilder().setCode(Tig.StatusCode.OK).build());
+                FileDAO.fileUpload(filename, file);
+
+            }
+
+        };
+
     }
 
     @Override
