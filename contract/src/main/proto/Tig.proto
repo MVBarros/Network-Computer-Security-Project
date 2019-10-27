@@ -1,12 +1,20 @@
 syntax = "proto3";
 package tig.grpc.contract.api;
+import "google/protobuf/empty.proto";
 
 
-enum LoginStatus {
-  SUCCESS = 0;
-  FAIL = 1;
+service TigService {
+  rpc login(LoginRequest) returns (LoginReply);
+  rpc logout(SessionRequest) returns (google.protobuf.Empty);
+  rpc uploadFile(stream FileChunk) returns (StatusReply);
+  rpc editFile(stream FileChunk) returns (StatusReply);
+  rpc deleteFile(FileRequest) returns (StatusReply);
+  rpc setFile(OperationRequest) returns (StatusReply);
+  rpc listFiles(SessionRequest) returns (ListFilesReply);
 }
 
+
+// LOGIN OPERATION
 message LoginRequest {
   string username = 1;
   string password = 2;
@@ -17,7 +25,54 @@ message LoginReply {
   string sessionId = 2;
 }
 
-
-service TigService {
-  rpc login(LoginRequest) returns (LoginReply);
+enum LoginStatus {
+  SUCCESS = 0;
+  FAIL = 1;
 }
+
+//LOGOUT OPERATION
+message SessionRequest {
+  string sessionId = 1;
+}
+
+// ADD OPERATION
+message FileChunk {
+  bytes content = 1;
+  string sessionId = 2;
+  string fileName = 3;
+}
+
+message StatusReply {
+  StatusCode Code = 1;
+}
+
+enum StatusCode {
+  UNKNOWN = 0;
+  OK = 1;
+  FAILED = 2;
+}
+
+//EDIT OPERATION
+//DELETE OPERATION
+message FileRequest {
+  string sessionId = 1;
+  string fileName = 2;
+}
+
+//SHARE and UNSHARE OPERATION
+message OperationRequest {
+  string sessionId = 1;
+  string fileName = 2;
+  OperationEnum operation = 3;
+}
+
+enum OperationEnum {
+  PUBLIC = 0;
+  PRIVATE = 1;
+}
+
+//LIST FILES
+message ListFilesReply {
+  repeated string fileNames = 1;
+}
+
