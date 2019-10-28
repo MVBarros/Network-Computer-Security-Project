@@ -1,5 +1,6 @@
 package tig.grpc.client;
 
+import com.google.protobuf.CodedOutputStream;
 import io.grpc.StatusRuntimeException;
 import tig.grpc.contract.Tig;
 
@@ -51,6 +52,53 @@ public class Operations {
             System.exit(1);
         }
     }
+
+    public static void deleteFile(Client client, String fileId) {
+        try {
+            System.out.println(String.format("Delete File with fileid %s ", fileId));
+            client.getStub().deleteFile(Tig.FileRequest.newBuilder()
+                    .setSessionId(client.getSessionId())
+                    .setFileName(fileId).build());
+            System.out.println(String.format("File %s Successfully deleted", fileId));
+        } catch (StatusRuntimeException e) {
+            System.out.print("Error deleting file: ");
+            System.out.println(e.getStatus().getDescription());
+            System.exit(1);
+        }
+    }
+
+    public static void setAccessControl (Client client, String fileid, String permissions) {
+
+       // Tig.OperationEnum perm = new Tig.OperationEnum(permissions);
+
+
+       /* System.out.println(String.format("Set access control File fileid %s with PUBLIC = %b ", fileId, permissions));
+        client.getStub().accessControlFile(Tig.OperationRequest.newBuilder()
+                                            .setFileName(fileid)
+                                            .setSessionId(client.getSessionId())
+                                            .setOperation(permissions).build());
+*/
+    }
+
+    public static void listFiles(Client client) {
+        try {
+            System.out.println("List all Files");
+            Tig.ListFilesReply reply = client.getStub().listFiles(Tig.SessionRequest.newBuilder()
+                    .setSessionId(client.getSessionId()).build());
+            System.out.println(reply.toString());
+
+        } catch (StatusRuntimeException e) {
+            System.out.print("Error listing files: ");
+            System.out.println(e.getStatus().getDescription());
+            System.exit(1);
+         }
+
+        // sera melhor usar?
+        // String s  = reply.writeTo(?);
+        // String i  = reply.getFileNames(i);
+    }
+
+
 
     //TODO If server sent the file percentage could have completion percentage show up on the terminal
     //TODO Maybe make it an asynchronous stub

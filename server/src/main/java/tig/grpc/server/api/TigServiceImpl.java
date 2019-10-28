@@ -13,6 +13,7 @@ import tig.grpc.server.session.SessionAuthenticator;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.List;
 
 public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
     private final static Logger logger = Logger.getLogger(TigServiceImpl.class);
@@ -87,8 +88,12 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
     public void listFiles(Tig.SessionRequest request, StreamObserver<Tig.ListFilesReply> responseObserver) {
         logger.info("List files");
         String username = SessionAuthenticator.authenticateSession(request.getSessionId());
-        //AuthenticationDAO.authenticateFileAccess(username, request.getFileName());
+        List<String> files = FileDAO.listFiles(username);
 
+        Tig.ListFilesReply.Builder builder = Tig.ListFilesReply.newBuilder();
+        builder.addAllFileNames(files);
+        responseObserver.onNext(builder.build());
+        responseObserver.onCompleted();
 
     }
 
