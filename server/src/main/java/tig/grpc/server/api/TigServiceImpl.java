@@ -202,7 +202,7 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
         String username = SessionAuthenticator.authenticateSession(request.getSessionId());
         AuthenticationDAO.authenticateFileAccess(username, request.getFileName(), request.getOwner(), request.getPermission());
 
-        byte[] file = FileDAO.getFileContent(request.getFileName());
+        byte[] file = FileDAO.getFileContent(request.getFileName(), request.getOwner());
 
         //Send file 1kb chunk at a time
         for (int i = 0; i < file.length; i += 1024) {

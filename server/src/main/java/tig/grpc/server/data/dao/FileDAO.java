@@ -74,14 +74,15 @@ public class FileDAO {
         }
     }
 
-    public static byte[] getFileContent(String fileId) {
+    public static byte[] getFileContent(String filename, String owner) {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
 
         try {
             PreparedStatement stmt = conn.prepareStatement("SELECT filecontent FROM files " +
-                    "WHERE fileId = (?)");
+                    "WHERE filename = (?) AND owner = (?)");
 
-            stmt.setString(1, fileId);
+            stmt.setString(1, filename);
+            stmt.setString(2, owner);
             ResultSet rs = stmt.executeQuery();
             rs.next();
             return rs.getBytes("filecontent");
