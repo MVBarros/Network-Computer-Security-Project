@@ -3,11 +3,14 @@ package tig.grpc.client;
 import com.google.longrunning.Operation;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.CodedOutputStream;
+import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
+import io.grpc.stub.StreamObserver;
 import tig.grpc.contract.Tig;
 
 import java.io.*;
 import java.util.Iterator;
+import java.util.concurrent.CountDownLatch;
 
 public class Operations {
 
@@ -54,27 +57,53 @@ public class Operations {
     }
 
     public static void uploadFile(Client client, String filename) {
-        byte[] data = new byte[1024];
-        int bytes = 0;
-
         System.out.println(String.format("Upload new file with filename %s", filename));
+
+        final CountDownLatch finishLatch = new CountDownLatch(1);
+        StreamObserver<Tig.StatusReply> responseObserver = new StreamObserver<Tig.StatusReply>() {
+            @Override
+            public void onNext(Tig.StatusReply statusReply) {
+                System.out.println(statusReply.getCode().toString());
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                Status status = Status.fromThrowable(throwable);
+                finishLatch.countDown();
+            }
+
+            @Override
+            public void onCompleted() {
+                finishLatch.countDown();
+            }
+        };
+
+        byte[] data = new byte[1024];
+
+        StreamObserver<Tig.FileChunk> requestObserver = client.getAsyncStub().uploadFile(responseObserver);
 
         try {
             BufferedInputStream in = new BufferedInputStream(new FileInputStream(filename));
 
-            while ((bytes = in.read(data)) != -1) {
+            while ((in.read(data)) != -1) {
                 Tig.FileChunk.Builder fileChunk = Tig.FileChunk.newBuilder();
                 fileChunk.setContent(ByteString.copyFrom(data));
                 fileChunk.setFileName(filename);
-                //client.getStub().
+                requestObserver.onNext(fileChunk.build());
             }
 
+            requestObserver.onCompleted();
+
+            finishLatch.wait();
 
         } catch(FileNotFoundException e) {
-
+            System.out.println(String.format("File with filename: %s not found.", filename));
         } catch(IOException e) {
-
+            System.exit(1);
+        } catch(InterruptedException e) {
+            System.exit(1);
         }
+
     }
 
     public static void deleteFile(Client client, String fileId) {
