@@ -51,20 +51,20 @@ public class FileDAO {
         } catch (SQLException e) {
             fileUpload(filename, fileContent, username);
         }
-        AuthenticationDAO.createAuth(username, fileID, false);
+        AuthenticationDAO.createAuth(filename, username, username, 1);
     }
 
-    public static void fileEdit(String fileID, String filename, byte[] fileContent) {
+    public static void fileEdit(String filename, byte[] fileContent, String owner) {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
 
         try {
-            PreparedStatement stmt = conn.prepareStatement("UPDATE INTO files VALUES (?,?,?)");
+            PreparedStatement stmt = conn.prepareStatement("UPDATE INTO files VALUES (?,?,?,?)");
 
-            stmt.setString(1, fileID);
-
-            stmt.setString(2, filename);
-
-            stmt.setBytes(3, fileContent);
+            stmt.setString(1, filename);
+            stmt.setString(2, owner);
+            // TODO rever!
+            stmt.setString(3, LocalDateTime.now().toString());
+            stmt.setBytes(4, fileContent);
 
             stmt.executeUpdate();
 
@@ -126,7 +126,7 @@ public class FileDAO {
 
             stmt = conn.prepareStatement("SELECT filename,owner,R,W FROM authorizations WHERE user = (?)");
             stmt.setString(1, username);
-            ResultSet rs = stmt.executeQuery();
+            rs = stmt.executeQuery();
             while (rs.next()) {
                 result.add(rs.getString("filename") + " " + rs.getString("owner") +
                         " R:" +  rs.getString("R")  + " W:" + rs.getString("W"));

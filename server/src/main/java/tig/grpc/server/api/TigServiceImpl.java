@@ -58,7 +58,7 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
     public void deleteFile(Tig.FileRequest request, StreamObserver<Tig.StatusReply> responseObserver) {
         logger.info(String.format("Delete filename: %s", request.getFileName()));
         String username = SessionAuthenticator.authenticateSession(request.getSessionId());
-        AuthenticationDAO.authenticateFileAccess(username, request.getFileName(), request.getOwner());
+        AuthenticationDAO.authenticateFileAccess(username, request.getFileName(), request.getOwner(), request.getPermission());
 
         FileDAO.deleteFile(username, request.getFileName(), request.getOwner());
         // FIXME e assim?
@@ -73,7 +73,7 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
         // FIXME !!! Da trabalhooo
         logger.info(String.format("Access Control from: %s and make it: %s", request.getFileName(), request.getOperation()));
         String username = SessionAuthenticator.authenticateSession(request.getSessionId());
-        AuthenticationDAO.authenticateFileAccess(username, request.getFileName(), request.getOwner());
+        AuthenticationDAO.authenticateFileAccess(username, request.getFileName(), request.getOwner(), request.getPermission());
 
         boolean flag = request.getOperation().equals("PUBLIC");
         AuthenticationDAO.updateAccessControl(username, request.getFileName(), flag);
@@ -150,10 +150,9 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
         return new StreamObserver<Tig.FileChunk>() {
             private int counter = 0;
             private ByteString file = ByteString.copyFrom(new byte[0]);
-            //private String fileID;
+            private String username;
             private String filename;
             private String owner;
-            private String username;
             private final Object lock = new Object();
 
             @Override
@@ -169,11 +168,12 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
                     }
                     if (counter == 0) {
                         username = SessionAuthenticator.authenticateSession(value.getSessionId());
-                        AuthenticationDAO.(SessionAuthenticator.authenticateSession(value.getSessionId()), value.getFileName(), value.getOwner());
-                        filename = value.getFileName();
-                        owner = value.getOwner();
-
+                        AuthenticationDAO.authenticateFileAccess(username, value.getFileName(), value.getOwner(), value.getPermission());
                     }
+
+                    filename = value.getFileName();
+                    owner = value.getOwner();
+
                     logger.info(String.format("Edit file %s chunk %d", filename, value.getSequence()));
                     file = file.concat(value.getContent());
                     counter++;
@@ -188,7 +188,7 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
             @Override
             public void onCompleted() {
                 responseObserver.onNext(Tig.StatusReply.newBuilder().setCode(Tig.StatusCode.OK).build());
-                FileDAO.fileEdit(fileID, filename, file.toByteArray());
+                FileDAO.fileEdit(filename, file.toByteArray(), owner);
             }
 
         };
@@ -200,7 +200,7 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
         logger.info(String.format("Download file: %s", request.getFileName()));
 
         String username = SessionAuthenticator.authenticateSession(request.getSessionId());
-        AuthenticationDAO.authenticateFileAccess(username, request.getFileName());
+        AuthenticationDAO.authenticateFileAccess(username, request.getFileName(), request.getOwner(), request.getPermission());
 
         byte[] file = FileDAO.getFileContent(request.getFileName());
 
