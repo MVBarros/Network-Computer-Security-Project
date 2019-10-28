@@ -89,6 +89,7 @@ public class Operations {
                 Tig.FileChunk.Builder fileChunk = Tig.FileChunk.newBuilder();
                 fileChunk.setContent(ByteString.copyFrom(data));
                 fileChunk.setFileName(filename);
+                fileChunk.setSessionId(client.getSessionId());
                 requestObserver.onNext(fileChunk.build());
             }
 
@@ -143,6 +144,7 @@ public class Operations {
                 Tig.FileChunk.Builder fileChunk = Tig.FileChunk.newBuilder();
                 fileChunk.setContent(ByteString.copyFrom(data));
                 fileChunk.setFileName(fileID);
+                fileChunk.setSessionId(client.getSessionId());
                 requestObserver.onNext(fileChunk.build());
             }
 
