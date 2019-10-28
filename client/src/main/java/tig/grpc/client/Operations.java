@@ -222,7 +222,7 @@ public class Operations {
             System.out.println("List all Files");
             Tig.ListFilesReply reply = client.getStub().listFiles(Tig.SessionRequest.newBuilder()
                     .setSessionId(client.getSessionId()).build());
-            Object[] names = reply.getFileNamesList().toArray();
+            Object[] names = reply.getFileInfoList().toArray();
             for (Object name : names) {
                 System.out.println(name.toString() + "\n");
             }

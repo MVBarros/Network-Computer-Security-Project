@@ -6,6 +6,7 @@ import tig.grpc.server.utils.EncryptionUtils;
 import tig.grpc.server.utils.StringGenerator;
 
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -84,14 +85,18 @@ public class FileDAO {
     public static byte[] getFileContent(String filename, String owner) {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
         try {
-            PreparedStatement stmt = conn.prepareStatement("SELECT filecontent FROM files " +
+            PreparedStatement stmt = conn.prepareStatement("SELECT filecontent, encrytionKey FROM files " +
                     "WHERE filename = (?) AND owner = (?)");
 
             stmt.setString(1, filename);
             stmt.setString(2, owner);
             ResultSet rs = stmt.executeQuery();
             rs.next();
-            return rs.getBytes("filecontent");
+
+            SecretKeySpec key = EncryptionUtils.getAesKey(rs.getBytes("encryptionKey"));
+
+            return EncryptionUtils.decryptFile(rs.getBytes("filecontent"), key);
+            
         } catch (SQLException e) {
             //Should never happen
             throw new RuntimeException();
