@@ -58,14 +58,15 @@ public class AuthenticationDAO {
         }
     }
 
-    public static void updateAccessControl(String username, String fileid, Boolean auth) {
+    public static void updateAccessControl(String filename, String owner, String username, int permission) {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
 
-        PreparedStatement stmt = null;
         try {
-                PreparedStatement update_stmt = conn.prepareStatement("UPDATE authorizations SET public =(?) WHERE fileid =(?)");
-                update_stmt.setBoolean(1, auth);
-                update_stmt.setString(2, fileid);
+                PreparedStatement update_stmt = conn.prepareStatement("UPDATE authorizations SET permission = (?) WHERE filename =(?) AND owner = (?) AND username =(?)");
+                update_stmt.setInt(1, permission);
+                update_stmt.setString(2, filename);
+                update_stmt.setString(3, owner);
+                update_stmt.setString(4, username);
                 update_stmt.executeUpdate();
 
         } catch (SQLException e) {
