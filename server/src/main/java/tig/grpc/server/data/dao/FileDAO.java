@@ -2,6 +2,7 @@ package tig.grpc.server.data.dao;
 
 import com.google.protobuf.ByteString;
 import tig.grpc.server.data.PostgreSQLJDBC;
+import tig.grpc.server.utils.StringGenerator;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -9,7 +10,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class FileDAO {
 
@@ -37,7 +37,7 @@ public class FileDAO {
         try {
             PreparedStatement stmt = conn.prepareStatement("INSERT INTO files VALUES (?,?,?)");
 
-            String fileID = UUID.randomUUID().toString();
+            String fileID = StringGenerator.randomString(256);
             stmt.setString(1, fileID);
 
             stmt.setString(2, filename);
