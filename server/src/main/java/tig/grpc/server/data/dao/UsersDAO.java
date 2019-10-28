@@ -1,71 +1,60 @@
 package tig.grpc.server.data.dao;
 
 import tig.grpc.server.data.PostgreSQLJDBC;
+import tig.grpc.server.utils.PasswordUtils;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.UUID;
 
 public class UsersDAO {
 
     public static void insertUser(String username, String password) {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
         try {
-            PreparedStatement stmt = conn.prepareStatement("INSERT INTO users VALUES(?,?,?)");
+            PreparedStatement stmt = conn.prepareStatement("INSERT INTO users VALUES(?,?,?,?)");
             stmt.setString(1, username);
-            String uuid = UUID.randomUUID().toString();
-
-            //add salt to string to decrease the chance of the resulting password being in a SHA table
-            password += uuid;
-
-            byte[] b = password.getBytes(StandardCharsets.UTF_8);
-
-            //FIXME Lookup Google Guava Library
-
-            stmt.setBytes(2, MessageDigest.getInstance("SHA-256").digest(b));
-            stmt.setString(3, uuid);
-
-            stmt.executeUpdate();
-
+            byte[] salt = PasswordUtils.generateRandomSalt();
+            int iterations = PasswordUtils.iterations;
+            byte[] hash = PasswordUtils.generateStrongPasswordHash(password, salt, iterations);
+            stmt.setBytes(2, hash);
+            stmt.setBytes(3, salt);
+            stmt.setInt(3, iterations);
+            int result = stmt.executeUpdate();
+            if (result == 0) {
+                //Should never happen
+                throw new RuntimeException();
+            }
         } catch (SQLException e) {
-            //Username already exists
+            //Username already exists (Will happen because of a PrimaryKeyViolation)
             throw new IllegalArgumentException("Username already in use");
-        } catch (NoSuchAlgorithmException e) {
-            //will never happen
-            e.printStackTrace();
-            throw new RuntimeException();
         }
     }
 
     public static void authenticateUser(String username, String password) {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
         try {
-            PreparedStatement stmt = conn.prepareStatement("SELECT password, salt FROM users WHERE username =(?)");
+            PreparedStatement stmt = conn.prepareStatement("SELECT PasswordHash, PasswordSalt, Iterations FROM users WHERE username =(?)");
             stmt.setString(1, username);
             ResultSet rs = stmt.executeQuery();
-            rs.next();
-            byte[] realSha = rs.getBytes("password");
-            password += rs.getString("salt");
+            //Get single result
+            if (rs.next()) {
+                byte[] realHash = rs.getBytes("PasswordHash");
+                byte[] salt = rs.getBytes("PasswordSalt");
+                int iterations = rs.getInt("Iterations");
+                byte[] calculatedHash = PasswordUtils.generateStrongPasswordHash(password, salt, iterations);
 
-            byte[] requestSha = password.getBytes(StandardCharsets.UTF_8);
-            requestSha = MessageDigest.getInstance("SHA-256").digest(requestSha);
-
-            if (!Arrays.equals(requestSha, realSha)) {
-                throw new IllegalArgumentException("Invalid Password");
+                if (!PasswordUtils.validatePassword(realHash, calculatedHash)) {
+                    throw new IllegalArgumentException("Invalid Password or Username");
+                }
+            } else {
+                //Query was empty
+                throw new IllegalArgumentException("No such Username");
             }
 
         } catch (SQLException e) {
-            //Username does not exist
-            throw new IllegalArgumentException("No such Username");
-        } catch (NoSuchAlgorithmException e) {
-            //will never happen
-            e.printStackTrace();
+            //Should never happen
             throw new RuntimeException();
         }
     }
