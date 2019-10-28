@@ -102,6 +102,64 @@ public class Operations {
             System.exit(1);
         } catch(InterruptedException e) {
             System.exit(1);
+        } catch (StatusRuntimeException e) {
+            System.out.print("Error uploading file: ");
+            System.out.println(e.getStatus().getDescription());
+            System.exit(1);
+        }
+
+    }
+
+    public static void editFile(Client client, String fileID, String filename) {
+        System.out.println(String.format("Edit file with fileId %s e filename %s", fileID, filename));
+
+        final CountDownLatch finishLatch = new CountDownLatch(1);
+        StreamObserver<Tig.StatusReply> responseObserver = new StreamObserver<Tig.StatusReply>() {
+            @Override
+            public void onNext(Tig.StatusReply statusReply) {
+                System.out.println(statusReply.getCode().toString());
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                Status status = Status.fromThrowable(throwable);
+                finishLatch.countDown();
+            }
+
+            @Override
+            public void onCompleted() {
+                finishLatch.countDown();
+            }
+        };
+
+        byte[] data = new byte[1024];
+
+        StreamObserver<Tig.FileChunk> requestObserver = client.getAsyncStub().editFile(responseObserver);
+
+        try {
+            BufferedInputStream in = new BufferedInputStream(new FileInputStream(filename));
+
+            while ((in.read(data)) != -1) {
+                Tig.FileChunk.Builder fileChunk = Tig.FileChunk.newBuilder();
+                fileChunk.setContent(ByteString.copyFrom(data));
+                fileChunk.setFileName(fileID);
+                requestObserver.onNext(fileChunk.build());
+            }
+
+            requestObserver.onCompleted();
+
+            finishLatch.wait();
+
+        } catch(FileNotFoundException e) {
+            System.out.println(String.format("File with filename: %s not found.", filename));
+        } catch(IOException e) {
+            System.exit(1);
+        } catch(InterruptedException e) {
+            System.exit(1);
+        } catch (StatusRuntimeException e) {
+            System.out.print("Error editing file: ");
+            System.out.println(e.getStatus().getDescription());
+            System.exit(1);
         }
 
     }

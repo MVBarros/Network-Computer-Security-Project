@@ -42,6 +42,18 @@ public class OptionManager {
         register.setRequired(false);
         options.addOption(access);
 
+        Option upload = new Option("u", "Use to upload a new file");
+        upload.setArgs(1);
+        upload.setArgName("filename");
+        register.setRequired(false);
+        options.addOption(upload);
+
+        Option edit = new Option("e", "Use to edit a file");
+        edit.setArgs(2);
+        edit.setArgName("fileId filename");
+        register.setRequired(false);
+        options.addOption(edit);
+
         return options;
     }
 
@@ -59,7 +71,12 @@ public class OptionManager {
         }
 
         if (cmd.hasOption('u')) {
+            Operations.uploadFile(client, cmd.getOptionValues('u')[0]);
+            return;
+        }
 
+        if (cmd.hasOption('e')) {
+            Operations.editFile(client, cmd.getOptionValues('e')[0], cmd.getOptionValues('e')[1]);
             return;
         }
 
