@@ -58,16 +58,18 @@ public class AuthenticationDAO {
         }
     }
 
-    public static void updateAccessControl(String filename, String owner, String username, int permission) {
+    public static void updateAccessControl(String filename, String owner, String target, int permission) {
+        //so o owner pode executar esta funcao
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
 
         try {
-                PreparedStatement update_stmt = conn.prepareStatement("UPDATE authorizations SET permission = (?) WHERE filename =(?) AND owner = (?) AND username =(?)");
-                update_stmt.setInt(1, permission);
-                update_stmt.setString(2, filename);
-                update_stmt.setString(3, owner);
-                update_stmt.setString(4, username);
-                update_stmt.executeUpdate();
+            // nao verificamos se user tem este file porque se nao tiver da SQL violation (neste caso foreign key violation)
+            PreparedStatement stmt = conn.prepareStatement("REPLACE INTO authorizations (filename, owner, username, permission) VALUES (?,?,?,?");
+            stmt.setString(1, filename);
+            stmt.setString(2, owner);
+            stmt.setString(3, target);
+            stmt.setInt(4, permission);
+            stmt.executeUpdate();
 
         } catch (SQLException e) {
             // TODO rever

@@ -76,7 +76,7 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
         AuthenticationDAO.authenticateFileAccess(username, request.getFileName(), request.getOwner(), request.getPermission());
 
         //boolean flag = request.getOperation().equals("PUBLIC");
-        AuthenticationDAO.updateAccessControl(request.getFileName(), request.getOwner(), username, request.getPermission());
+        AuthenticationDAO.updateAccessControl(request.getFileName(), username, request.getTarget(), request.getPermission());
 
         Tig.StatusReply.Builder builder = Tig.StatusReply.newBuilder();
         builder.setCode(Tig.StatusCode.OK);
