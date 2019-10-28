@@ -38,6 +38,8 @@ public class App {
         final ManagedChannel channel = ManagedChannelBuilder.forTarget(target).usePlaintext().build();
 
         TigServiceGrpc.TigServiceBlockingStub stub = TigServiceGrpc.newBlockingStub(channel);
+        TigServiceGrpc.TigServiceStub asyncStub = TigServiceGrpc.newStub(channel);
+
 
         //Always Safely terminate connection and logout user
         Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -55,7 +57,7 @@ public class App {
         String username = System.console().readLine("Username:");
         String password = Arrays.toString(System.console().readPassword("Password:"));
 
-        client = new Client(stub, username, password);
+        client = new Client(stub, asyncStub, username, password);
 
         OptionManager.executeOptions(cmd, client);
     }
