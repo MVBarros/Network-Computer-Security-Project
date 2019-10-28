@@ -11,6 +11,7 @@ import tig.grpc.server.data.dao.FileDAO;
 import tig.grpc.server.data.dao.UsersDAO;
 import tig.grpc.server.session.SessionAuthenticator;
 
+import java.io.File;
 import java.util.Arrays;
 
 public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
@@ -125,7 +126,35 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
 
     @Override
     public StreamObserver<Tig.FileChunk> editFile(StreamObserver<Tig.StatusReply> responseObserver) {
-        return null;
+        return new StreamObserver<Tig.FileChunk>() {
+            private int counter = 0;
+            private ByteString file = ByteString.EMPTY;
+            private String fileID;
+            private String filename;
+
+            @Override
+            public void onNext(Tig.FileChunk value) {
+                if (counter == 0)
+                    SessionAuthenticator.authenticateSession(value.getSessionId());
+                    AuthenticationDAO.authenticateFileAccess(SessionAuthenticator.authenticateSession(value.getSessionId()), value.getFileName());
+                counter++;
+                fileID = value.getFileName();
+                filename = FileDAO.getFilename(fileID).toString();
+                file.concat(value.getContent());
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                responseObserver.onError(t);
+            }
+
+            @Override
+            public void onCompleted() {
+                responseObserver.onNext(Tig.StatusReply.newBuilder().setCode(Tig.StatusCode.OK).build());
+                FileDAO.fileEdit(fileID, filename, file);
+            }
+
+        };
     }
 
     @Override
