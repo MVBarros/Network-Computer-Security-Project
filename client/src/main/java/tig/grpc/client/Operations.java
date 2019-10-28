@@ -1,13 +1,12 @@
 package tig.grpc.client;
 
 import com.google.longrunning.Operation;
+import com.google.protobuf.ByteString;
 import com.google.protobuf.CodedOutputStream;
 import io.grpc.StatusRuntimeException;
 import tig.grpc.contract.Tig;
 
-import java.io.BufferedOutputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.Iterator;
 
 public class Operations {
@@ -51,6 +50,30 @@ public class Operations {
             System.out.print("Error logging out: ");
             System.out.println(e.getStatus().getDescription());
             System.exit(1);
+        }
+    }
+
+    public static void uploadFile(Client client, String filename) {
+        byte[] data = new byte[1024];
+        int bytes = 0;
+
+        System.out.println(String.format("Upload new file with filename %s", filename));
+
+        try {
+            BufferedInputStream in = new BufferedInputStream(new FileInputStream(filename));
+
+            while ((bytes = in.read(data)) != -1) {
+                Tig.FileChunk.Builder fileChunk = Tig.FileChunk.newBuilder();
+                fileChunk.setContent(ByteString.copyFrom(data));
+                fileChunk.setFileName(filename);
+                //client.getStub().
+            }
+
+
+        } catch(FileNotFoundException e) {
+
+        } catch(IOException e) {
+
         }
     }
 
