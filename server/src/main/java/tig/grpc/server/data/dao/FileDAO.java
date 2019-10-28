@@ -2,8 +2,10 @@ package tig.grpc.server.data.dao;
 
 import com.google.protobuf.ByteString;
 import tig.grpc.server.data.PostgreSQLJDBC;
+import tig.grpc.server.utils.EncryptionUtils;
 import tig.grpc.server.utils.StringGenerator;
 
+import javax.crypto.SecretKey;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -37,19 +39,22 @@ public class FileDAO {
 
         String fileID = StringGenerator.randomStringNoMetacharacters(256);
         try {
-            PreparedStatement stmt = conn.prepareStatement("INSERT INTO files VALUES (?,?,?,?)");
+            PreparedStatement stmt = conn.prepareStatement("INSERT INTO files VALUES (?,?,?,?,?)");
+
+            SecretKey secretKey = EncryptionUtils.generateAESKey();
+            byte[] encryptedContent = EncryptionUtils.encryptFile(fileContent, secretKey);
 
             stmt.setString(1, filename);
-
             stmt.setString(2, username);
-            // TODO rever!
             stmt.setString(3, LocalDateTime.now().toString());
-            stmt.setBytes(4, fileContent);
+            stmt.setBytes(4, encryptedContent);
+            stmt.setBytes(5, secretKey.getEncoded());
 
             stmt.executeUpdate();
 
         } catch (SQLException e) {
-            fileUpload(filename, fileContent, username);
+            //Primary Key violation
+            throw new IllegalArgumentException("Filename Provided already exists");
         }
         AuthenticationDAO.createAuth(filename, username, username, 1);
     }
@@ -58,14 +63,16 @@ public class FileDAO {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
 
         try {
-            PreparedStatement stmt = conn.prepareStatement("UPDATE INTO files VALUES (?,?,?,?)");
+            PreparedStatement stmt = conn.prepareStatement("UPDATE INTO files VALUES (?,?,?,?,?)");
+
+            SecretKey secretKey = EncryptionUtils.generateAESKey();
+            byte[] encryptedContent = EncryptionUtils.encryptFile(fileContent, secretKey);
 
             stmt.setString(1, filename);
             stmt.setString(2, owner);
-            // TODO rever!
             stmt.setString(3, LocalDateTime.now().toString());
-            stmt.setBytes(4, fileContent);
-
+            stmt.setBytes(4, encryptedContent);
+            stmt.setBytes(5, secretKey.getEncoded());
             stmt.executeUpdate();
 
         } catch (SQLException e) {
@@ -76,7 +83,6 @@ public class FileDAO {
 
     public static byte[] getFileContent(String filename, String owner) {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
-
         try {
             PreparedStatement stmt = conn.prepareStatement("SELECT filecontent FROM files " +
                     "WHERE filename = (?) AND owner = (?)");
