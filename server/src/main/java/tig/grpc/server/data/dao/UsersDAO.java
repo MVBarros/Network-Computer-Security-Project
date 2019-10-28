@@ -20,7 +20,7 @@ public class UsersDAO {
             byte[] hash = PasswordUtils.generateStrongPasswordHash(password, salt, iterations);
             stmt.setBytes(2, hash);
             stmt.setBytes(3, salt);
-            stmt.setInt(3, iterations);
+            stmt.setInt(4, iterations);
             int result = stmt.executeUpdate();
             if (result == 0) {
                 //Should never happen
@@ -35,14 +35,14 @@ public class UsersDAO {
     public static void authenticateUser(String username, String password) {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
         try {
-            PreparedStatement stmt = conn.prepareStatement("SELECT PasswordHash, PasswordSalt, Iterations FROM users WHERE username =(?)");
+            PreparedStatement stmt = conn.prepareStatement("SELECT passwordhash, passwordsalt, iterations FROM users WHERE username =(?)");
             stmt.setString(1, username);
             ResultSet rs = stmt.executeQuery();
             //Get single result
             if (rs.next()) {
-                byte[] realHash = rs.getBytes("PasswordHash");
-                byte[] salt = rs.getBytes("PasswordSalt");
-                int iterations = rs.getInt("Iterations");
+                byte[] realHash = rs.getBytes("passwordhash");
+                byte[] salt = rs.getBytes("passwordsalt");
+                int iterations = rs.getInt("iterations");
                 byte[] calculatedHash = PasswordUtils.generateStrongPasswordHash(password, salt, iterations);
 
                 if (!PasswordUtils.validatePassword(realHash, calculatedHash)) {

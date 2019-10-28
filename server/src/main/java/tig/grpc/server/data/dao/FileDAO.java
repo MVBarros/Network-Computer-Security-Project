@@ -17,10 +17,9 @@ import java.util.List;
 
 public class FileDAO {
 
-    public static void fileUpload(String filename, byte[] fileContent, String username) {
+    public static void fileUpload(String filename, byte[] fileContent, String owner) {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
 
-        String fileID = StringGenerator.randomStringNoMetacharacters(256);
         try {
             PreparedStatement stmt = conn.prepareStatement("INSERT INTO files VALUES (?,?,?,?,?)");
 
@@ -28,7 +27,7 @@ public class FileDAO {
             byte[] encryptedContent = EncryptionUtils.encryptFile(fileContent, secretKey);
 
             stmt.setString(1, filename);
-            stmt.setString(2, username);
+            stmt.setString(2, owner);
             stmt.setString(3, LocalDateTime.now().toString());
             stmt.setBytes(4, encryptedContent);
             stmt.setBytes(5, secretKey.getEncoded());
@@ -45,16 +44,15 @@ public class FileDAO {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
 
         try {
-            PreparedStatement stmt = conn.prepareStatement("UPDATE INTO files VALUES (?,?,?,?,?)");
+            PreparedStatement stmt = conn.prepareStatement("UPDATE files SET filecontent=(?), encryption_key=(?) WHERE filename=(?) AND owner=(?)");
 
             SecretKey secretKey = EncryptionUtils.generateAESKey();
             byte[] encryptedContent = EncryptionUtils.encryptFile(fileContent, secretKey);
 
-            stmt.setString(1, filename);
-            stmt.setString(2, owner);
-            stmt.setString(3, LocalDateTime.now().toString());
-            stmt.setBytes(4, encryptedContent);
-            stmt.setBytes(5, secretKey.getEncoded());
+            stmt.setBytes(1, encryptedContent);
+            stmt.setBytes(2, secretKey.getEncoded());
+            stmt.setString(3, filename);
+            stmt.setString(4, owner);
             stmt.executeUpdate();
 
         } catch (SQLException e) {
@@ -84,14 +82,10 @@ public class FileDAO {
         }
     }
 
-    public static void deleteFile(String username, String filename, String owner) {
+    public static void deleteFile(String username, String filename) {
 
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
         try {
-            // So o owner pode apagar um ficheiro
-            if (!username.equals(owner))
-                throw new IllegalArgumentException("Only the owner of the file can delete the file.");
-
             PreparedStatement delete_stmt = conn.prepareStatement("DELETE FROM files WHERE filename=(?) AND owner=(?)");
             delete_stmt.setString(1, filename);
             delete_stmt.setString(2, username);
