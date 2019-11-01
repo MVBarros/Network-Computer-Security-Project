@@ -1,8 +1,10 @@
 package tig.grpc.server.session;
 
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import tig.grpc.server.utils.StringGenerator;
 
 public class SessionAuthenticator {
 
@@ -11,7 +13,7 @@ public class SessionAuthenticator {
     public synchronized static String createSession(String username) {
         String sessionId ;
         do {
-            sessionId = UUID.randomUUID().toString();
+            sessionId = StringGenerator.RandomString(256);
         } while (sessions.containsKey(sessionId));
         //Session Id valid for 5 minutes
         sessions.put(sessionId, new UserToken(LocalDateTime.now().plusMinutes(5), username));

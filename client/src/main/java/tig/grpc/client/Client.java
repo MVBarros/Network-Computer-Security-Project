@@ -32,14 +32,14 @@ public class Client {
 
         try {
             System.out.println("Register User");
-            System.out.println(stub.register(Tig.LoginRequest.newBuilder().setUsername("micaszocas7").setPassword("1234").build()).getCode().toString());
+            System.out.println(stub.register(Tig.LoginRequest.newBuilder().setUsername("micaszocas8").setPassword("1234").build()).getCode().toString());
             System.out.println("Login User");
-            String sessionId = stub.login(Tig.LoginRequest.newBuilder().setUsername("micaszocas7").setPassword("1234").build()).getSessionId();
+            String sessionId = stub.login(Tig.LoginRequest.newBuilder().setUsername("micaszocas8").setPassword("1234").build()).getSessionId();
             System.out.println(sessionId);
             System.out.println("Logout User");
             stub.logout(Tig.SessionRequest.newBuilder().setSessionId(sessionId).build());
             System.out.println("Login User again");
-            sessionId = stub.login(Tig.LoginRequest.newBuilder().setUsername("micaszocas7").setPassword("1234").build()).getSessionId();
+            sessionId = stub.login(Tig.LoginRequest.newBuilder().setUsername("micaszocas8").setPassword("1234").build()).getSessionId();
             System.out.println(sessionId);
             System.out.println("Logout User again");
             stub.logout(Tig.SessionRequest.newBuilder().setSessionId(sessionId).build());
