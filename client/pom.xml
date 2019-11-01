@@ -27,7 +27,7 @@
 		<exec-maven-plugin.version>1.6.0</exec-maven-plugin.version>
 
 		<!-- application properties -->
-		<mainclass>tig.grpc.client.Client</mainclass>
+		<mainclass>tig.grpc.client.app.App</mainclass>
 
 		<server.host>localhost</server.host>
 		<server.port>8080</server.port>
