@@ -65,13 +65,17 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
 
     @Override
     public StreamObserver<Tig.FileChunk> uploadFile(StreamObserver<Tig.StatusReply> responseObserver) {
-        return new StreamObserver<Tig.FileChunk>() {
 
+        return new StreamObserver<Tig.FileChunk>() {
+            private int counter = 0;
             private ByteString file = ByteString.EMPTY;
             private String filename;
 
             @Override
             public void onNext(Tig.FileChunk value) {
+                if (counter == 0)
+                    SessionAuthenticator.authenticateSession(value.getSessionId());
+                counter++;
                 filename = value.getFileName();
                 file.concat(value.getContent());
             }
