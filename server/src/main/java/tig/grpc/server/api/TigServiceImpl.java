@@ -5,6 +5,7 @@ import org.apache.log4j.Logger;
 import tig.grpc.contract.Tig;
 import tig.grpc.contract.TigServiceGrpc;
 import io.grpc.stub.StreamObserver;
+import tig.grpc.server.connection.SessionAuthenticator;
 import tig.grpc.server.data.dao.UsersDAO;
 
 public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
@@ -12,11 +13,11 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
 
     @Override
     public void register(Tig.LoginRequest request, StreamObserver<Tig.StatusReply> responseObserver) {
-        logger.info(String.format("Register username:%s", request.getUsername()));
+        logger.info(String.format("Register username: %s", request.getUsername()));
 
-        Tig.StatusReply.Builder builder = Tig.StatusReply.newBuilder();
         UsersDAO.insertUser(request.getUsername(), request.getPassword());
 
+        Tig.StatusReply.Builder builder = Tig.StatusReply.newBuilder();
         builder.setCode(Tig.StatusCode.OK);
 
         responseObserver.onNext(builder.build());
@@ -25,12 +26,24 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
 
     @Override
     public void login(Tig.LoginRequest request, StreamObserver<Tig.LoginReply> responseObserver) {
+        logger.info(String.format("Login username: %s", request.getUsername()));
 
+        UsersDAO.authenticateUser(request.getUsername(), request.getPassword());
+        String sessionId = SessionAuthenticator.createSession(request.getUsername());
+
+        Tig.LoginReply.Builder builder = Tig.LoginReply.newBuilder().setSessionId(sessionId);
+
+        responseObserver.onNext(builder.build());
+        responseObserver.onCompleted();
     }
 
     @Override
     public void logout(Tig.SessionRequest request, StreamObserver<Empty> responseObserver) {
+        logger.info("Logout");
 
+        SessionAuthenticator.clearSession(request.getSessionId());
+        responseObserver.onNext(Empty.newBuilder().build());
+        responseObserver.onCompleted();
     }
 
     @Override
