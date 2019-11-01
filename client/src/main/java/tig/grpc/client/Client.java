@@ -31,7 +31,7 @@ public class Client {
         TigServiceGrpc.TigServiceBlockingStub stub = TigServiceGrpc.newBlockingStub(channel);
 
         try {
-
+            // TODO testar deleteFile!
             System.out.println("Register User");
             System.out.println(stub.register(Tig.LoginRequest.newBuilder().setUsername("micaszocas8").setPassword("1234").build()).getCode().toString());
             System.out.println("Login User");
