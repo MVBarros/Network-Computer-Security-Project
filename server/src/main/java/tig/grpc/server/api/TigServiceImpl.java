@@ -63,16 +63,26 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
         builder.setCode(Tig.StatusCode.OK);
         responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
-
     }
 
     @Override
     public void accessControlFile(Tig.OperationRequest request, StreamObserver<Tig.StatusReply> responseObserver) {
+        logger.info(String.format("Access Control from: %s and make it: %s", request.getFileName(), request.getOperation()));
+        String username = SessionAuthenticator.authenticateSession(request.getSessionId());
+        boolean flag = request.getOperation().equals("PUBLIC");
+        UsersDAO.updateAccessControl(username, request.getFileName(), flag);
 
+        // FIXME confirmar
+        Tig.StatusReply.Builder builder = Tig.StatusReply.newBuilder();
+        builder.setCode(Tig.StatusCode.OK);
+        responseObserver.onNext(builder.build());
+        responseObserver.onCompleted();
     }
 
     @Override
     public void listFiles(Tig.SessionRequest request, StreamObserver<Tig.ListFilesReply> responseObserver) {
+        logger.info("List files");
+        String username = SessionAuthenticator.authenticateSession(request.getSessionId());
 
     }
 
