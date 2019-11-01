@@ -11,8 +11,7 @@ public class StringGenerator {
 
     private static final Random random = new SecureRandom();
 
-    public static String RandomString(int length)
-    {
+    public static String RandomString(int length) {
         char[] buf = new char[length];
 
         for (int idx = 0; idx < buf.length; ++idx)
