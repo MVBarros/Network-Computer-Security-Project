@@ -56,7 +56,7 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
         logger.info(String.format("Delete filename: %s", request.getFileName()));
         String username = SessionAuthenticator.authenticateSession(request.getSessionId());
 
-        UsersDAO.deleteFile(username, request.getFileName());
+        FileDAO.deleteFile(username, request.getFileName());
 
         // FIXME e assim?
         Tig.StatusReply.Builder builder = Tig.StatusReply.newBuilder();
