@@ -112,7 +112,6 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
             public void onCompleted() {
                 responseObserver.onNext(Tig.StatusReply.newBuilder().setCode(Tig.StatusCode.OK).build());
                 FileDAO.fileUpload(filename, file);
-
             }
 
         };

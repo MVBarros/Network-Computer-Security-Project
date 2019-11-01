@@ -7,6 +7,7 @@ import tig.grpc.contract.Tig;
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Iterator;
 
 public class Operations {
 
@@ -55,46 +56,19 @@ public class Operations {
     public static void downloadFile(Client client, String fileId, String filename) {
         try {
             System.out.println("Download File");
-            client.getStub().downloadFile(Tig.FileRequest.newBuilder()
+            Iterator<Tig.FileChunk> iterator = client.getStub().downloadFile(Tig.FileRequest.newBuilder()
                             .setSessionId(client.getSessionId())
-                            .setFileName(fileId).build(),
-                    new StreamObserver<Tig.FileChunk>() {
+                            .setFileName(fileId).build());
 
-                        BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(filename));
+            BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(filename));
 
-                        @Override
-                        public void onNext(Tig.FileChunk fileChunk) {
-                            synchronized (this) {
-                                try {
-                                    out.write(fileChunk.getContent().toByteArray());
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        }
-
-                        @Override
-                        public void onCompleted() {
-                            try {
-                                out.flush();
-                                out.close();
-                                System.out.println("File successfully downloaded");
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
-
-                        @Override
-                        public void onError(Throwable throwable) {
-                            try {
-                                out.flush();
-                                out.close();
-                                System.out.println("Unknown error downloading file, try again");
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    });
+            for (; iterator.hasNext();) {
+                Tig.FileChunk chunk = iterator.next();
+                byte[] fileBytes = chunk.getContent().toByteArray();
+                out.write(fileBytes);
+            }
+            out.flush();
+            out.close();
         } catch (StatusRuntimeException e) {
             System.out.println("Error downloading file");
             System.out.println(e.getStatus().getCode());
