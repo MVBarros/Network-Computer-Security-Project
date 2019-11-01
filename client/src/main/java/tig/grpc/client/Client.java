@@ -6,7 +6,44 @@ import tig.grpc.contract.TigServiceGrpc;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 
+import java.util.Arrays;
+
 public class Client {
+
+    private String username;
+    private String password;
+    private TigServiceGrpc.TigServiceBlockingStub stub;
+    private String sessionId;
+
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
+    }
+
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+
+    public TigServiceGrpc.TigServiceBlockingStub getStub() {
+        return stub;
+    }
+
+
+    public Client(TigServiceGrpc.TigServiceBlockingStub stub, String username, String password) {
+        this.stub = stub;
+        this.username = username;
+        this.password = password;
+    }
+
 
     public static void main(String[] args) throws Exception {
 
@@ -21,34 +58,32 @@ public class Client {
         final int port = Integer.parseInt(args[1]);
         final String target = host + ":" + port;
 
-        // Channel is the abstraction to connect to a service endpoint
-        // Let us use plaintext communication because we do not have certificates
         final ManagedChannel channel = ManagedChannelBuilder.forTarget(target).usePlaintext().build();
 
-        // It is up to the client to determine whether to block the call
-        // Here we create a blocking stub, but an async stub,
-        // or an async stub with Future are always possible.
         TigServiceGrpc.TigServiceBlockingStub stub = TigServiceGrpc.newBlockingStub(channel);
 
-        try {
-            // TODO testar deleteFile!
-            System.out.println("Register User");
-            System.out.println(stub.register(Tig.LoginRequest.newBuilder().setUsername("micaszocas8").setPassword("1234").build()).getCode().toString());
-            System.out.println("Login User");
-            String sessionId = stub.login(Tig.LoginRequest.newBuilder().setUsername("micaszocas8").setPassword("1234").build()).getSessionId();
-            System.out.println(sessionId);
-            System.out.println("Logout User");
-            stub.logout(Tig.SessionRequest.newBuilder().setSessionId(sessionId).build());
-            System.out.println("Login User again");
-            sessionId = stub.login(Tig.LoginRequest.newBuilder().setUsername("micaszocas8").setPassword("1234").build()).getSessionId();
-            System.out.println(sessionId);
-            System.out.println("Logout User again");
-            stub.logout(Tig.SessionRequest.newBuilder().setSessionId(sessionId).build());
+        //Always Safely terminate connection
+//        Runtime.getRuntime().addShutdownHook(new Thread() {
+//            @Override
+//            public void run() {
+//                System.out.println("Shutting down channel");
+//                channel.shutdownNow();
+//            }
+//        });
 
-        } catch (StatusRuntimeException e) {
-            System.out.println(e.getStatus().getCode());
-            System.out.println(e.getStatus().getDescription());
-        }
+        String username = System.console().readLine("Username:");
+        String password = Arrays.toString(System.console().readPassword("Password:"));
+
+        Client client = new Client(stub, username, password);
+
+
+        // TODO testar deleteFile downloadFile!
+        Operations.registerClient(client);
+        Operations.loginClient(client);
+        Operations.logoutClient(client);
+        Operations.loginClient(client);
+        Operations.logoutClient(client);
+
         // A Channel should be shutdown before stopping the process.
         channel.shutdownNow();
     }

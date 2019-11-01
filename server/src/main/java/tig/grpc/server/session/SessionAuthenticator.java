@@ -12,7 +12,7 @@ public class SessionAuthenticator {
     public synchronized static String createSession(String username) {
         String sessionId;
         do {
-            sessionId = StringGenerator.RandomString(256);
+            sessionId = StringGenerator.randomString(256);
         } while (sessions.containsKey(sessionId));
         //Session Id valid for 5 minutes
         sessions.put(sessionId, new UserToken(LocalDateTime.now().plusMinutes(5), username));
