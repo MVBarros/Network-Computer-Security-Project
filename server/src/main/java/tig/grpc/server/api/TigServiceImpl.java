@@ -60,12 +60,14 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
         builder.setCode(Tig.StatusCode.OK);
         responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
-
     }
 
     @Override
     public void accessControlFile(Tig.OperationRequest request, StreamObserver<Tig.StatusReply> responseObserver) {
-
+        // FIXME
+        logger.info(String.format("Access Control from: %s"));
+        String username = SessionAuthenticator.authenticateSession(request.getSessionId());
+        
     }
 
     @Override
