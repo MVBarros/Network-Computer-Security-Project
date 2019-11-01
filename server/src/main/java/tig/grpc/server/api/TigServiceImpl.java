@@ -6,9 +6,12 @@ import io.grpc.stub.StreamObserver;
 import org.apache.log4j.Logger;
 import tig.grpc.contract.Tig;
 import tig.grpc.contract.TigServiceGrpc;
+import tig.grpc.server.data.dao.AuthenticationDAO;
 import tig.grpc.server.data.dao.FileDAO;
 import tig.grpc.server.data.dao.UsersDAO;
 import tig.grpc.server.session.SessionAuthenticator;
+
+import java.util.Arrays;
 
 public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
     private final static Logger logger = Logger.getLogger(TigServiceImpl.class);
@@ -115,7 +118,23 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
 
     @Override
     public void downloadFile(Tig.FileRequest request, StreamObserver<Tig.FileChunk> responseObserver) {
+        //FIXME Test this
+        logger.info(String.format("Download file: %s", request.getFileName()));
 
+        String username = SessionAuthenticator.authenticateSession(request.getSessionId());
+        AuthenticationDAO.authenticateFileAccess(username, request.getFileName());
+
+        byte[] file = FileDAO.getFileContent(request.getFileName());
+
+        //Send file 1kb chunk at a time
+        for(int i = 0; i < file.length; i += 1024) {
+            int chunkSize = Math.min(1024, file.length - 1024);
+            Tig.FileChunk.Builder builder = Tig.FileChunk.newBuilder();
+            builder.setFileName(request.getFileName());
+            builder.setContent(ByteString.copyFrom(Arrays.copyOfRange(file, i, i + chunkSize)));
+            responseObserver.onNext(builder.build());
+        }
+        responseObserver.onCompleted();
     }
 
 }

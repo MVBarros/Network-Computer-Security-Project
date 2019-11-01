@@ -5,6 +5,7 @@ import tig.grpc.server.data.PostgreSQLJDBC;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
 
@@ -29,4 +30,25 @@ public class FileDAO {
             fileUpload(filename, fileContent);
         }
     }
+
+    public static byte[] getFileContent (String fileId) {
+        Connection conn = PostgreSQLJDBC.getInstance().getConn();
+
+        try {
+            PreparedStatement stmt = conn.prepareStatement("SELECT filecontent FROM files " +
+                                                            "WHERE filecontent = (?)");
+
+            String fileID = UUID.randomUUID().toString();
+            stmt.setString(1, fileID);
+
+
+            ResultSet rs = stmt.executeQuery();
+            rs.next();
+            return rs.getBytes("filecontent");
+        } catch (SQLException e) {
+            //Should never happen
+            throw new RuntimeException();
+        }
+    }
+
 }
