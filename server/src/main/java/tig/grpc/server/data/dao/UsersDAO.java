@@ -97,5 +97,34 @@ public class UsersDAO {
         }
 
     }
+
+
+    public static void updateAccessControl(String username, String filename, Boolean auth) {
+        Connection conn = PostgreSQLJDBC.getInstance().getConn();
+
+        PreparedStatement stmt = null;
+        try {
+            stmt = conn.prepareStatement("SELECT fileid FROM authorizations WHERE username = (?) and filename = (?)");
+            stmt.setString(1, username);
+            stmt.setString(2, filename);
+            ResultSet rs = stmt.executeQuery();
+
+
+            if (rs.next()) {
+                // apagar o file
+                PreparedStatement update_stmt = conn.prepareStatement("UPDATE authorizations SET public =(?) WHERE fileid =(?)");
+                update_stmt.setBoolean(1, auth);
+                update_stmt.setString(2, rs.getString("fileid"));
+                update_stmt.executeUpdate();
+            } else
+                throw new IllegalArgumentException("No such file name.");
+
+
+        } catch (SQLException e) {
+            // TODO rever
+            throw new IllegalArgumentException("No such file name.");
+        }
+
+    }
 }
 
