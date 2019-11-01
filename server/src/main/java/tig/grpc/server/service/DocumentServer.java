@@ -21,6 +21,7 @@ public class DocumentServer {
 		final int port = Integer.parseInt(args[0]);
 		final BindableService impl = new TigServiceImpl();
 
+		//Initialize Postgres Connection
 		PostgreSQLJDBC.setPort(Integer.parseInt(args[1]));
 		PostgreSQLJDBC.setPassword(args[2]);
 		PostgreSQLJDBC.getInstance();

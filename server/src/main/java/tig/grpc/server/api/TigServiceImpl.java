@@ -1,17 +1,14 @@
 package tig.grpc.server.api;
 
-
 import com.google.protobuf.Empty;
 import org.apache.log4j.Logger;
 import tig.grpc.contract.Tig;
 import tig.grpc.contract.TigServiceGrpc;
-
 import io.grpc.stub.StreamObserver;
 import tig.grpc.server.data.dao.UsersDAO;
 
-
 public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
-    final static Logger logger = Logger.getLogger(TigServiceImpl.class);
+    private final static Logger logger = Logger.getLogger(TigServiceImpl.class);
 
     @Override
     public void register(Tig.LoginRequest request, StreamObserver<Tig.StatusReply> responseObserver) {
@@ -20,8 +17,7 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
 
         if (UsersDAO.insertUser(request.getUsername(), request.getPassword())) {
             builder.setCode(Tig.StatusCode.OK);
-        }
-        else {
+        } else {
             builder.setCode(Tig.StatusCode.FAILED);
         }
         responseObserver.onNext(builder.build());
@@ -61,6 +57,11 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
     @Override
     public StreamObserver<Tig.FileChunk> editFile(StreamObserver<Tig.StatusReply> responseObserver) {
         return null;
+    }
+
+    @Override
+    public void downloadFile(Tig.FileRequest request, StreamObserver<Tig.FileChunk> responseObserver) {
+
     }
 
 }

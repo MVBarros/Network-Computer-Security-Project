@@ -11,6 +11,7 @@ service TigService {
   rpc editFile(stream FileChunk) returns (StatusReply);
   rpc deleteFile(FileRequest) returns (StatusReply);
   rpc accessControlFile(OperationRequest) returns (StatusReply);
+  rpc downloadFile(FileRequest) returns (stream FileChunk);
   rpc listFiles(SessionRequest) returns (ListFilesReply);
 }
 
