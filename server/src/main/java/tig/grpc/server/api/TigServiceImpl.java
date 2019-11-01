@@ -81,6 +81,8 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
 
     @Override
     public void listFiles(Tig.SessionRequest request, StreamObserver<Tig.ListFilesReply> responseObserver) {
+        logger.info("List files");
+        String username = SessionAuthenticator.authenticateSession(request.getSessionId());
 
     }
 
