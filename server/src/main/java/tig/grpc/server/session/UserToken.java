@@ -1,4 +1,4 @@
-package tig.grpc.server.connection;
+package tig.grpc.server.session;
 
 import java.time.LocalDateTime;
 

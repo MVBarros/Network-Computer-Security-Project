@@ -5,7 +5,7 @@ import org.apache.log4j.Logger;
 import tig.grpc.contract.Tig;
 import tig.grpc.contract.TigServiceGrpc;
 import io.grpc.stub.StreamObserver;
-import tig.grpc.server.connection.SessionAuthenticator;
+import tig.grpc.server.session.SessionAuthenticator;
 import tig.grpc.server.data.dao.UsersDAO;
 
 public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {

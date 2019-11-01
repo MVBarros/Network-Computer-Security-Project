@@ -1,6 +1,5 @@
-package tig.grpc.server.connection;
+package tig.grpc.server.session;
 
-import java.security.InvalidAlgorithmParameterException;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
