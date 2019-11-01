@@ -126,5 +126,25 @@ public class UsersDAO {
         }
 
     }
+
+    public static void listFiles(String username) {
+        Connection conn = PostgreSQLJDBC.getInstance().getConn();
+
+        PreparedStatement stmt = null;
+        try {
+            // TODO acabar isto
+            stmt = conn.prepareStatement("SELECT filename FROM authorizations WHERE username = (?) or public = 1");
+            stmt.setString(1, username);
+            ResultSet rs = stmt.executeQuery();
+
+
+
+
+        } catch (SQLException e) {
+            // TODO rever
+            throw new IllegalArgumentException("No such file name.");
+        }
+
+    }
 }
 
