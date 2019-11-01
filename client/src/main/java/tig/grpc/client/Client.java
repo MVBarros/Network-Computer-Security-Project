@@ -31,6 +31,7 @@ public class Client {
         TigServiceGrpc.TigServiceBlockingStub stub = TigServiceGrpc.newBlockingStub(channel);
 
         try {
+
             System.out.println("Register User");
             System.out.println(stub.register(Tig.LoginRequest.newBuilder().setUsername("micaszocas8").setPassword("1234").build()).getCode().toString());
             System.out.println("Login User");
@@ -43,7 +44,6 @@ public class Client {
             System.out.println(sessionId);
             System.out.println("Logout User again");
             stub.logout(Tig.SessionRequest.newBuilder().setSessionId(sessionId).build());
-
 
         } catch (StatusRuntimeException e) {
             System.out.println(e.getStatus().getCode());

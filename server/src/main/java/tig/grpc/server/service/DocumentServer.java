@@ -1,7 +1,7 @@
 package tig.grpc.server.service;
 
-import io.grpc.Server;
 import io.grpc.BindableService;
+import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import tig.grpc.server.api.TigServiceImpl;
 import tig.grpc.server.data.PostgreSQLJDBC;

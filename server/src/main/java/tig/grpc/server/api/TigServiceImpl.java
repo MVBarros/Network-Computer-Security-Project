@@ -2,13 +2,13 @@ package tig.grpc.server.api;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Empty;
+import io.grpc.stub.StreamObserver;
 import org.apache.log4j.Logger;
 import tig.grpc.contract.Tig;
 import tig.grpc.contract.TigServiceGrpc;
-import io.grpc.stub.StreamObserver;
-import tig.grpc.server.session.SessionAuthenticator;
-import tig.grpc.server.data.dao.UsersDAO;
 import tig.grpc.server.data.dao.FileDAO;
+import tig.grpc.server.data.dao.UsersDAO;
+import tig.grpc.server.session.SessionAuthenticator;
 
 public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
     private final static Logger logger = Logger.getLogger(TigServiceImpl.class);

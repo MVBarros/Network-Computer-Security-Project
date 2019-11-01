@@ -1,6 +1,7 @@
 package tig.grpc.server.data.dao;
 
 import tig.grpc.server.data.PostgreSQLJDBC;
+
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
