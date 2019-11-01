@@ -50,6 +50,16 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
 
     @Override
     public void deleteFile(Tig.FileRequest request, StreamObserver<Tig.StatusReply> responseObserver) {
+        logger.info(String.format("Delete filename: %s", request.getFileName()));
+        String username = SessionAuthenticator.authenticateSession(request.getSessionId());
+
+        UsersDAO.deleteFile(username, request.getFileName());
+
+        // FIXME e assim?
+        Tig.StatusReply.Builder builder = Tig.StatusReply.newBuilder();
+        builder.setCode(Tig.StatusCode.OK);
+        responseObserver.onNext(builder.build());
+        responseObserver.onCompleted();
 
     }
 
