@@ -33,6 +33,14 @@ public class DocumentServer {
 		// Server threads are running in the background.
 		System.out.println("Server started");
 
+		//So we can use CTRL-C when testing
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+			@Override
+			public void run() {
+				System.out.println("Shutting down server");
+				server.shutdownNow();
+			}
+		});
 		// Do not exit the main thread. Wait until server is terminated.
 		server.awaitTermination();
 	}

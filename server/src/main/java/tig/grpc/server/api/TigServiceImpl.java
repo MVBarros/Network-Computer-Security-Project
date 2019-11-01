@@ -2,15 +2,20 @@ package tig.grpc.server.api;
 
 
 import com.google.protobuf.Empty;
+import org.apache.log4j.Logger;
 import tig.grpc.contract.Tig;
 import tig.grpc.contract.TigServiceGrpc;
 
 import io.grpc.stub.StreamObserver;
 import tig.grpc.server.data.dao.UsersDAO;
 
+
 public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
+    final static Logger logger = Logger.getLogger(TigServiceImpl.class);
+
     @Override
     public void register(Tig.LoginRequest request, StreamObserver<Tig.StatusReply> responseObserver) {
+        logger.info(String.format("Register username:%s", request.getUsername()));
         Tig.StatusReply.Builder builder = Tig.StatusReply.newBuilder();
 
         if (UsersDAO.insertUser(request.getUsername(), request.getPassword())) {
