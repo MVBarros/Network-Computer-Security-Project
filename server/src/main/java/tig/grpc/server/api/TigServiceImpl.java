@@ -12,13 +12,10 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
     @Override
     public void register(Tig.LoginRequest request, StreamObserver<Tig.StatusReply> responseObserver) {
         Tig.StatusReply.Builder builder = Tig.StatusReply.newBuilder();
+        UsersDAO.insertUser(request.getUsername(), request.getPassword());
 
-        if (UsersDAO.insertUser(request.getUsername(), request.getPassword())) {
-            builder.setCode(Tig.StatusCode.OK);
-        }
-        else {
-            builder.setCode(Tig.StatusCode.FAILED);
-        }
+        builder.setCode(Tig.StatusCode.OK);
+
         responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
     }

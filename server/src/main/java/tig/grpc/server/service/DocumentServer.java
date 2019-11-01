@@ -5,6 +5,7 @@ import io.grpc.BindableService;
 import io.grpc.ServerBuilder;
 import tig.grpc.server.api.TigServiceImpl;
 import tig.grpc.server.data.PostgreSQLJDBC;
+import tig.grpc.server.interceptor.ExceptionHandler;
 
 public class DocumentServer {
 
@@ -24,16 +25,17 @@ public class DocumentServer {
 		PostgreSQLJDBC.setPort(Integer.parseInt(args[1]));
 		PostgreSQLJDBC.setPassword(args[2]);
 		PostgreSQLJDBC.getInstance();
-		// Create a new server to listen on port
-		Server server = ServerBuilder.forPort(port).addService(impl).build();
 
-		// Start the server
+		Server server = ServerBuilder
+				.forPort(port)
+				.intercept(new ExceptionHandler())
+				.addService(impl)
+				.build();
+
 		server.start();
 
-		// Server threads are running in the background.
 		System.out.println("Server started");
 
-		// Do not exit the main thread. Wait until server is terminated.
 		server.awaitTermination();
 	}
 
