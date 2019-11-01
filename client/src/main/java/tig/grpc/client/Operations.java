@@ -1,7 +1,6 @@
 package tig.grpc.client;
 
 import io.grpc.StatusRuntimeException;
-import io.grpc.stub.StreamObserver;
 import tig.grpc.contract.Tig;
 
 import java.io.BufferedOutputStream;
@@ -19,7 +18,6 @@ public class Operations {
                     .setPassword(client.getPassword()).build()).getCode().toString());
         } catch (StatusRuntimeException e) {
             System.out.println("Error registering user");
-            System.out.println(e.getStatus().getCode());
             System.out.println(e.getStatus().getDescription());
             System.exit(1);
         }
@@ -33,7 +31,6 @@ public class Operations {
                     .setPassword(client.getPassword()).build()).getSessionId().toString());
         } catch (StatusRuntimeException e) {
             System.out.println("Error logging in");
-            System.out.println(e.getStatus().getCode());
             System.out.println(e.getStatus().getDescription());
             System.exit(1);
         }
@@ -46,7 +43,6 @@ public class Operations {
             client.setSessionId(null);
         } catch (StatusRuntimeException e) {
             System.out.println("Error logging out");
-            System.out.println(e.getStatus().getCode());
             System.out.println(e.getStatus().getDescription());
             System.exit(1);
         }
@@ -57,12 +53,12 @@ public class Operations {
         try {
             System.out.println("Download File");
             Iterator<Tig.FileChunk> iterator = client.getStub().downloadFile(Tig.FileRequest.newBuilder()
-                            .setSessionId(client.getSessionId())
-                            .setFileName(fileId).build());
+                    .setSessionId(client.getSessionId())
+                    .setFileName(fileId).build());
 
             BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(filename));
 
-            for (; iterator.hasNext();) {
+            for (; iterator.hasNext(); ) {
                 Tig.FileChunk chunk = iterator.next();
                 byte[] fileBytes = chunk.getContent().toByteArray();
                 out.write(fileBytes);
@@ -71,7 +67,6 @@ public class Operations {
             out.close();
         } catch (StatusRuntimeException e) {
             System.out.println("Error downloading file");
-            System.out.println(e.getStatus().getCode());
             System.out.println(e.getStatus().getDescription());
         } catch (IOException e) {
             e.printStackTrace();

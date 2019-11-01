@@ -1,12 +1,6 @@
 package tig.grpc.client;
 
-import io.grpc.StatusRuntimeException;
-import tig.grpc.contract.Tig;
 import tig.grpc.contract.TigServiceGrpc;
-import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
-
-import java.util.Arrays;
 
 public class Client {
 
