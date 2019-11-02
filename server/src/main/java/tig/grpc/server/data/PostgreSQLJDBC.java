@@ -1,12 +1,18 @@
 package tig.grpc.server.data;
 
+import org.apache.log4j.Logger;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 
 public class PostgreSQLJDBC {
+
+    private static final Logger logger = Logger.getLogger(PostgreSQLJDBC.class);
+
     private static Integer port = null;
     private static String password = null;
     private static PostgreSQLJDBC instance = null;
+
     private Connection conn;
 
 
@@ -35,7 +41,7 @@ public class PostgreSQLJDBC {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
         }
-        System.out.println("Opened database successfully");
+        logger.info("Opened database successfully");
     }
 
     public static PostgreSQLJDBC getInstance() {

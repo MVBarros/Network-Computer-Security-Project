@@ -13,9 +13,10 @@ public class Operations {
     public static void registerClient(Client client) {
         try {
             System.out.println(String.format("Register Client %s", client.getUsername()));
-            System.out.println(client.getStub().register(Tig.LoginRequest.newBuilder()
+            client.getStub().register(Tig.LoginRequest.newBuilder()
                     .setUsername(client.getUsername())
-                    .setPassword(client.getPassword()).build()).getCode().toString());
+                    .setPassword(client.getPassword()).build());
+            System.out.println(String.format("User %s Successfully registered", client.getUsername()));
         } catch (StatusRuntimeException e) {
             System.out.print("Error registering user: ");
             System.out.println(e.getStatus().getDescription());
@@ -30,6 +31,7 @@ public class Operations {
             client.setSessionId(client.getStub().login(Tig.LoginRequest.newBuilder()
                     .setUsername(client.getUsername())
                     .setPassword(client.getPassword()).build()).getSessionId().toString());
+            System.out.println(String.format("User %s Successfully logged in", client.getUsername()));
         } catch (StatusRuntimeException e) {
             System.out.print("Error logging in: ");
             System.out.println(e.getStatus().getDescription());
@@ -42,6 +44,7 @@ public class Operations {
             System.out.println(String.format("logout Client %s ", client.getUsername() ));
             client.getStub().logout(Tig.SessionRequest.newBuilder().setSessionId(client.getSessionId()).build());
             client.setSessionId(null);
+            System.out.println(String.format("User %s Successfully logged out", client.getUsername()));
         } catch (StatusRuntimeException e) {
             System.out.print("Error logging out: ");
             System.out.println(e.getStatus().getDescription());
@@ -67,6 +70,8 @@ public class Operations {
 
             out.flush();
             out.close();
+            System.out.println(String.format("File %s successfully written with contents of fileId %s",
+                                                fileId, filename));
         } catch (StatusRuntimeException e) {
             System.out.print("Error downloading file: ");
             System.out.println(e.getStatus().getDescription());
