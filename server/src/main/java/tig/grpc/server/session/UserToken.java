@@ -7,7 +7,6 @@ public class UserToken {
     private LocalDateTime expiration;
     private String username;
 
-
     public UserToken(LocalDateTime expiration, String username) {
         this.expiration = expiration;
         this.username = username;
@@ -24,5 +23,4 @@ public class UserToken {
     public String getUsername() {
         return username;
     }
-
 }

@@ -15,9 +15,10 @@ public class AuthenticationDAO {
 
         try {
             PreparedStatement stmt = conn.prepareStatement("SELECT * FROM authorizations " +
-        "                                                   WHERE username=(?) AND fileId=(?)");
+                    "WHERE username=(?) AND fileId=(?)");
             stmt.setString(1, username);
             stmt.setString(2, fileId);
+
             ResultSet rs = stmt.executeQuery();
             if (!rs.next()) {
                 //Query was empty

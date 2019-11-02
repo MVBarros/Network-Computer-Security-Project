@@ -10,7 +10,7 @@ import java.sql.SQLException;
 import java.util.UUID;
 
 public class FileDAO {
-    public static void fileUpload (String filename, ByteString fileContent) {
+    public static void fileUpload(String filename, ByteString fileContent) {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
 
         try {
@@ -31,12 +31,12 @@ public class FileDAO {
         }
     }
 
-    public static byte[] getFileContent (String fileId) {
+    public static byte[] getFileContent(String fileId) {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
 
         try {
             PreparedStatement stmt = conn.prepareStatement("SELECT filecontent FROM files " +
-                                                            "WHERE filecontent = (?)");
+                    "WHERE filecontent = (?)");
 
             String fileID = UUID.randomUUID().toString();
             stmt.setString(1, fileID);
@@ -78,8 +78,6 @@ public class FileDAO {
         }
 
     }
-
-
 
 
 }

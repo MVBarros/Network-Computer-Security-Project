@@ -134,7 +134,7 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
         byte[] file = FileDAO.getFileContent(request.getFileName());
 
         //Send file 1kb chunk at a time
-        for(int i = 0; i < file.length; i += 1024) {
+        for (int i = 0; i < file.length; i += 1024) {
             int chunkSize = Math.min(1024, file.length - i);
             Tig.FileChunk.Builder builder = Tig.FileChunk.newBuilder();
             builder.setFileName(request.getFileName());

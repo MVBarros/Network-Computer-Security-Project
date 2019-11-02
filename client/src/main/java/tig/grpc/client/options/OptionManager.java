@@ -9,10 +9,8 @@ import tig.grpc.client.Operations;
 
 public class OptionManager {
 
-    private static Options options = null;
-
     public static Options createOptions() {
-        options = new Options();
+        Options options = new Options();
 
         Option register = new Option("r", "Use to register new user");
         register.setArgs(0);
@@ -31,14 +29,20 @@ public class OptionManager {
     public static void executeOptions(CommandLine cmd, Client client) {
         if (cmd.hasOption('r')) {
             Operations.registerClient(client);
+            return;
         }
 
         Operations.loginClient(client);
 
         if (cmd.hasOption('d')) {
             Operations.downloadFile(client, cmd.getOptionValues('d')[0], cmd.getOptionValues('d')[1]);
+            return;
         }
 
+        if (cmd.hasOption('u')) {
+
+            return;
+        }
 
     }
 }

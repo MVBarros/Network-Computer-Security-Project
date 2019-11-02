@@ -12,6 +12,7 @@ import java.util.Arrays;
 
 
 public class App {
+    //Client is static so we can logout in the Shutdown Hook
     private static Client client = null;
 
     public static void main(String[] args) throws Exception {
@@ -43,10 +44,10 @@ public class App {
             @Override
             public void run() {
                 if (client != null && client.getSessionId() != null) {
-                    System.out.println("Logging Out");
+                    System.out.println("Shutdown detected, logging out");
                     Operations.logoutClient(client);
                 }
-                System.out.println("Shutting down channel");
+                System.out.println("Closing channel before exiting");
                 channel.shutdownNow();
             }
         });

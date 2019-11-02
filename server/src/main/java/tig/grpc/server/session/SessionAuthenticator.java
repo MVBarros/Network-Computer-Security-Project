@@ -7,9 +7,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionAuthenticator {
 
-    private static ConcurrentHashMap<String, UserToken> sessions = new ConcurrentHashMap<String, UserToken>();
+    private static final ConcurrentHashMap<String, UserToken> sessions = new ConcurrentHashMap<>();
 
-    public synchronized static String createSession(String username) {
+    public static String createSession(String username) {
         String sessionId;
         do {
             sessionId = StringGenerator.randomString(256);
@@ -20,7 +20,7 @@ public class SessionAuthenticator {
     }
 
 
-    public synchronized static String authenticateSession(String sessionId) {
+    public static String authenticateSession(String sessionId) {
 
         if (!sessions.containsKey(sessionId)) {
             throw new IllegalArgumentException("Invalid SessionId");
@@ -35,6 +35,7 @@ public class SessionAuthenticator {
 
         //Update expiration if user authenticates successfully
         token.setExpiration(LocalDateTime.now().plusMinutes(5));
+
         return token.getUsername();
     }
 

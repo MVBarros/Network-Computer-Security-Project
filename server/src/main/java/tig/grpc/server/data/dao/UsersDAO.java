@@ -70,9 +70,6 @@ public class UsersDAO {
         }
     }
 
-
-
-
     public static void updateAccessControl(String username, String filename, Boolean auth) {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
 
