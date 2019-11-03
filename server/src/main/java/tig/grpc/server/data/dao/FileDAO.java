@@ -50,22 +50,13 @@ public class FileDAO {
         }
     }
 
-    public static void deleteFile(String username, String filename) {
+    public static void deleteFile(String username, String fileid) {
 
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
         try {
-            // verificar se user tem esse file
-            PreparedStatement stmt = conn.prepareStatement("SELECT fileid FROM authorizations WHERE username = (?) and filename = (?)");
-            stmt.setString(1, username);
-            stmt.setString(2, filename);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                // apagar o file
-                PreparedStatement delete_stmt = conn.prepareStatement("DELETE FROM files WHERE fileid = (?)");
-                delete_stmt.setString(1, rs.getString("fileid"));
-                delete_stmt.executeUpdate();
-            } else
-                throw new IllegalArgumentException("No such file name.");
+            PreparedStatement delete_stmt = conn.prepareStatement("DELETE FROM files WHERE fileid = (?)");
+            delete_stmt.setString(1, fileid);
+            delete_stmt.executeUpdate();
 
             /* Tambem posso fazer query toda junta
             PreparedStatement stmt = conn.prepareStatement("DELETE FROM files UNION authorizations ON files.fileid = authorizations.fileid WHERE username = (?) and filename = (?)");
