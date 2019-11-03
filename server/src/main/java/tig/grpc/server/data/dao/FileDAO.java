@@ -36,10 +36,9 @@ public class FileDAO {
 
         try {
             PreparedStatement stmt = conn.prepareStatement("SELECT filecontent FROM files " +
-                    "WHERE filecontent = (?)");
+                    "WHERE fileId = (?)");
 
-            String fileID = UUID.randomUUID().toString();
-            stmt.setString(1, fileID);
+            stmt.setString(1, fileId);
 
 
             ResultSet rs = stmt.executeQuery();
