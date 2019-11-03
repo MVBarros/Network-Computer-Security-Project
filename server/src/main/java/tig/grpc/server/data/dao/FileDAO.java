@@ -7,6 +7,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class FileDAO {
@@ -39,8 +41,6 @@ public class FileDAO {
                     "WHERE fileId = (?)");
 
             stmt.setString(1, fileId);
-
-
             ResultSet rs = stmt.executeQuery();
             rs.next();
             return rs.getBytes("filecontent");
@@ -69,21 +69,23 @@ public class FileDAO {
 
     }
 
-    public static void listFiles(String username) {
+    public static  List<String> listFiles(String username) {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
 
         PreparedStatement stmt = null;
         try {
-            // TODO acabar isto
-            stmt = conn.prepareStatement("SELECT filename FROM authorizations WHERE username = (?) or public = 1");
+            // TODO rever
+            stmt = conn.prepareStatement("SELECT filename,fileid FROM authorizations UNION files ON files.fileid = authorizations.fileid WHERE username = (?) or public = 1");
             stmt.setString(1, username);
             ResultSet rs = stmt.executeQuery();
 
-
-
+            List<String> result = new ArrayList<String>();
+            while (rs.next()) {
+                result.add(rs.getString("filename") + rs.getString("fileid"));
+            }
+            return result;
 
         } catch (SQLException e) {
-            // TODO rever
             throw new IllegalArgumentException("No such file name.");
         }
 
