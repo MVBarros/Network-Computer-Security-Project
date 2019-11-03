@@ -55,6 +55,7 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
     public void deleteFile(Tig.FileRequest request, StreamObserver<Tig.StatusReply> responseObserver) {
         logger.info(String.format("Delete filename: %s", request.getFileName()));
         String username = SessionAuthenticator.authenticateSession(request.getSessionId());
+        AuthenticationDAO.authenticateFileAccess(username, request.getFileName());
 
         FileDAO.deleteFile(username, request.getFileName());
 
@@ -69,8 +70,10 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
     public void accessControlFile(Tig.OperationRequest request, StreamObserver<Tig.StatusReply> responseObserver) {
         logger.info(String.format("Access Control from: %s and make it: %s", request.getFileName(), request.getOperation()));
         String username = SessionAuthenticator.authenticateSession(request.getSessionId());
+        AuthenticationDAO.authenticateFileAccess(username, request.getFileName());
+
         boolean flag = request.getOperation().equals("PUBLIC");
-        UsersDAO.updateAccessControl(username, request.getFileName(), flag);
+        AuthenticationDAO.updateAccessControl(username, request.getFileName(), flag);
 
         // FIXME confirmar
         Tig.StatusReply.Builder builder = Tig.StatusReply.newBuilder();
@@ -83,6 +86,8 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
     public void listFiles(Tig.SessionRequest request, StreamObserver<Tig.ListFilesReply> responseObserver) {
         logger.info("List files");
         String username = SessionAuthenticator.authenticateSession(request.getSessionId());
+        //AuthenticationDAO.authenticateFileAccess(username, request.getFileName());
+
 
     }
 
