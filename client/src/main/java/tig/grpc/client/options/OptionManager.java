@@ -1,10 +1,12 @@
 package tig.grpc.client.options;
 
+import jdk.nashorn.internal.runtime.regexp.joni.constants.OPCode;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import tig.grpc.client.Client;
 import tig.grpc.client.Operations;
+import tig.grpc.contract.Tig;
 
 
 public class OptionManager {
@@ -72,7 +74,10 @@ public class OptionManager {
         }
 
         if (cmd.hasOption('c')) {
-            Operations.setAccessControl(client, cmd.getOptionValues('c')[0], cmd.getOptionValues('c')[1]);
+            if (cmd.getOptionValues("c")[1].equals("PUBLIC"))
+                Operations.setAccessControl(client, cmd.getOptionValues('c')[0], Tig.OperationEnum.PUBLIC);
+            else
+                Operations.setAccessControl(client, cmd.getOptionValues('c')[0], Tig.OperationEnum.PRIVATE);
             return;
         }
 
