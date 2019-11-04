@@ -1,5 +1,6 @@
 package tig.grpc.client;
 
+import com.google.protobuf.CodedOutputStream;
 import io.grpc.StatusRuntimeException;
 import tig.grpc.contract.Tig;
 
@@ -51,6 +52,22 @@ public class Operations {
             System.exit(1);
         }
     }
+
+    public static void listFiles(Client client) {
+        // TODO nao ha excepcao?
+        System.out.println("List all Files");
+        Tig.ListFilesReply reply = client.getStub().listFiles(Tig.SessionRequest.newBuilder()
+                .setSessionId(client.getSessionId()).build());
+        System.out.println(reply.toString());
+
+        // sera melhor usar?
+        // String s  = reply.writeTo(?);
+        // String i  = reply.getFileNames(i);
+
+
+    }
+
+
 
     //TODO If server sent the file percentage could have completion percentage show up on the terminal
     //TODO Maybe make it an asynchronous stub
