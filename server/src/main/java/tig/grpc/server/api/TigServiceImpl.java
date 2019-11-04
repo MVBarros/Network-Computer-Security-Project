@@ -89,16 +89,11 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
         logger.info("List files");
         String username = SessionAuthenticator.authenticateSession(request.getSessionId());
         List<String> files = FileDAO.listFiles(username);
-        for (String f : files) {
-            Tig.ListFilesReply.Builder builder = Tig.ListFilesReply.newBuilder();
 
-            //builder.setField(f);
-            responseObserver.onNext(builder.build());
-        }
-
-
-
-
+        Tig.ListFilesReply.Builder builder = Tig.ListFilesReply.newBuilder();
+        builder.addAllFileNames(files);
+        responseObserver.onNext(builder.build());
+        responseObserver.onCompleted();
 
     }
 
