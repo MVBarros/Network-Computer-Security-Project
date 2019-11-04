@@ -67,6 +67,19 @@ public class Operations {
         }
     }
 
+    public static void setAccessControl (Client client, String fileid, String permissions) {
+
+       // Tig.OperationEnum perm = new Tig.OperationEnum(permissions);
+
+
+       /* System.out.println(String.format("Set access control File fileid %s with PUBLIC = %b ", fileId, permissions));
+        client.getStub().accessControlFile(Tig.OperationRequest.newBuilder()
+                                            .setFileName(fileid)
+                                            .setSessionId(client.getSessionId())
+                                            .setOperation(permissions).build());
+*/
+    }
+
     public static void listFiles(Client client) {
         try {
             System.out.println("List all Files");
