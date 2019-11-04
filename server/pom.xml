@@ -28,7 +28,7 @@
 		<mainclass>tig.grpc.server.service.DocumentServer</mainclass>
 
 		<server.port>8080</server.port>
-		<db.port>5432</db.port>
+		<db.port>5433</db.port>
 		<db.password>root</db.password>
 	</properties>
 

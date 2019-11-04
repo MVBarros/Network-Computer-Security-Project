@@ -12,6 +12,25 @@ import java.util.List;
 import java.util.UUID;
 
 public class FileDAO {
+
+    public static byte[] getFilename(String fileID) {
+        Connection conn = PostgreSQLJDBC.getInstance().getConn();
+
+        try {
+            PreparedStatement stmt = conn.prepareStatement("SELECT filename FROM files WHERE fileId =(?)");
+            stmt.setString(1, fileID);
+
+
+            ResultSet rs = stmt.executeQuery();
+            rs.next();
+            return rs.getBytes("filename");
+
+        } catch (SQLException e) {
+            //Should never happen
+            throw new RuntimeException();
+        }
+    }
+
     public static void fileUpload(String filename, ByteString fileContent) {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
 
@@ -30,6 +49,27 @@ public class FileDAO {
 
         } catch (SQLException e) {
             fileUpload(filename, fileContent);
+        }
+    }
+
+    public static void fileEdit(String fileID, String filename, ByteString fileContent) {
+        Connection conn = PostgreSQLJDBC.getInstance().getConn();
+
+        try {
+            PreparedStatement stmt = conn.prepareStatement("UPDATE INTO files VALUES (?,?,?)");
+
+            stmt.setString(1, fileID);
+
+            stmt.setString(2, filename);
+
+            byte[] content = fileContent.toByteArray();
+            stmt.setBytes(3, content);
+
+            stmt.executeUpdate();
+
+        } catch (SQLException e) {
+            //Should never happen
+            throw new RuntimeException();
         }
     }
 
