@@ -43,8 +43,8 @@ public class OptionManager {
         options.addOption(access);
 
         Option upload = new Option("u", "Use to upload a new file");
-        upload.setArgs(1);
-        upload.setArgName("filename");
+        upload.setArgs(2);
+        upload.setArgName("filepath filename");
         register.setRequired(false);
         options.addOption(upload);
 
@@ -71,7 +71,7 @@ public class OptionManager {
         }
 
         if (cmd.hasOption('u')) {
-            Operations.uploadFile(client, cmd.getOptionValues('u')[0]);
+            Operations.uploadFile(client, cmd.getOptionValues('u')[0], cmd.getOptionValues('u')[1]);
             return;
         }
 

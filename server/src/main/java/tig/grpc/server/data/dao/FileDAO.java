@@ -98,10 +98,7 @@ public class FileDAO {
             delete_stmt.setString(1, fileid);
             delete_stmt.executeUpdate();
 
-            /* Tambem posso fazer query toda junta
-            PreparedStatement stmt = conn.prepareStatement("DELETE FROM files UNION authorizations ON files.fileid = authorizations.fileid WHERE username = (?) and filename = (?)");
-            mas assim nao faz verificacao segue
-             */
+
         } catch (SQLException e) {
             // TODO rever
             throw new IllegalArgumentException("No such file name.");
@@ -126,7 +123,7 @@ public class FileDAO {
             return result;
 
         } catch (SQLException e) {
-            throw new IllegalArgumentException("No such file name.");
+            throw new IllegalArgumentException("User has no files");
         }
 
     }

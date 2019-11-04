@@ -56,7 +56,7 @@ public class Operations {
         }
     }
 
-    public static void uploadFile(Client client, String filename) {
+    public static void uploadFile(Client client, String filePath, String filename) {
         System.out.println(String.format("Upload new file with filename %s", filename));
 
         final CountDownLatch finishLatch = new CountDownLatch(1);
@@ -74,7 +74,8 @@ public class Operations {
 
             @Override
             public void onCompleted() {
-                finishLatch.countDown();
+
+                    finishLatch.countDown();
             }
         };
 
@@ -83,7 +84,7 @@ public class Operations {
         StreamObserver<Tig.FileChunk> requestObserver = client.getAsyncStub().uploadFile(responseObserver);
 
         try {
-            BufferedInputStream in = new BufferedInputStream(new FileInputStream(filename));
+            BufferedInputStream in = new BufferedInputStream(new FileInputStream(filePath));
 
             while ((in.read(data)) != -1) {
                 Tig.FileChunk.Builder fileChunk = Tig.FileChunk.newBuilder();
@@ -91,11 +92,16 @@ public class Operations {
                 fileChunk.setFileName(filename);
                 fileChunk.setSessionId(client.getSessionId());
                 requestObserver.onNext(fileChunk.build());
+                if (finishLatch.getCount() == 0) {
+                    // RPC completed or errored before we finished sending.
+                    // Sending further requests won't error, but they will just be thrown away.
+                    return;
+                }
             }
 
-            requestObserver.onCompleted();
+        requestObserver.onCompleted();
 
-            finishLatch.wait();
+        finishLatch.await();
 
         } catch(FileNotFoundException e) {
             System.out.println(String.format("File with filename: %s not found.", filename));

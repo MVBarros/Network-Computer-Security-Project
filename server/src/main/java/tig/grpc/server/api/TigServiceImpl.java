@@ -99,7 +99,6 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
 
     @Override
     public StreamObserver<Tig.FileChunk> uploadFile(StreamObserver<Tig.StatusReply> responseObserver) {
-
         return new StreamObserver<Tig.FileChunk>() {
             private int counter = 0;
             private ByteString file = ByteString.EMPTY;
@@ -107,8 +106,10 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
 
             @Override
             public void onNext(Tig.FileChunk value) {
-                if (counter == 0)
+                if (counter == 0) {
                     SessionAuthenticator.authenticateSession(value.getSessionId());
+                    logger.info(String.format("Upload file %s", value.getFileName()));
+                }
                 counter++;
                 filename = value.getFileName();
                 file.concat(value.getContent());
@@ -123,6 +124,7 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
             public void onCompleted() {
                 responseObserver.onNext(Tig.StatusReply.newBuilder().setCode(Tig.StatusCode.OK).build());
                 FileDAO.fileUpload(filename, file);
+                responseObserver.onCompleted();
             }
 
         };
