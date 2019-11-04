@@ -12,7 +12,7 @@ public class OptionManager {
     public static Options createOptions() {
         Options options = new Options();
 
-        Option register = new Option("r", "Use to register new user");
+        Option register = new Option("n", "Use to register new user");
         register.setArgs(0);
         register.setRequired(false);
         options.addOption(register);
@@ -23,11 +23,28 @@ public class OptionManager {
         register.setRequired(false);
         options.addOption(download);
 
+        Option delete = new Option("r", "Use to remove (delete) a file");
+        delete.setArgs(1);
+        delete.setArgName("fileId");
+        register.setRequired(false);
+        options.addOption(delete);
+
+        Option list = new Option("l", "Use to list all files");
+        list.setArgs(0);
+        register.setRequired(false);
+        options.addOption(list);
+
+        Option access = new Option("c", "Use to change Access Options of a file");
+        access.setArgs(1);
+        access.setArgName("fileId permission");
+        register.setRequired(false);
+        options.addOption(access);
+
         return options;
     }
 
     public static void executeOptions(CommandLine cmd, Client client) {
-        if (cmd.hasOption('r')) {
+        if (cmd.hasOption('n')) {
             Operations.registerClient(client);
             return;
         }
@@ -41,6 +58,21 @@ public class OptionManager {
 
         if (cmd.hasOption('u')) {
 
+            return;
+        }
+
+        if (cmd.hasOption('r')) {
+            Operations.deleteFile(client, cmd.getOptionValues('r')[0]);
+            return;
+        }
+
+        if (cmd.hasOption('l')) {
+            Operations.listFiles(client);
+            return;
+        }
+
+        if (cmd.hasOption('c')) {
+            Operations.setAccessControl(client, cmd.getOptionValues('c')[0], cmd.getOptionValues('c')[1]);
             return;
         }
 
