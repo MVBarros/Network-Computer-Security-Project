@@ -31,13 +31,13 @@ public class FileDAO {
         }
     }
 
-    public static void fileUpload(String filename, ByteString fileContent) {
+    public static void fileUpload(String filename, ByteString fileContent, String username) {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
 
+        String fileID = StringGenerator.randomString(256);
         try {
             PreparedStatement stmt = conn.prepareStatement("INSERT INTO files VALUES (?,?,?)");
 
-            String fileID = StringGenerator.randomString(256);
             stmt.setString(1, fileID);
 
             stmt.setString(2, filename);
@@ -48,8 +48,9 @@ public class FileDAO {
             stmt.executeUpdate();
 
         } catch (SQLException e) {
-            fileUpload(filename, fileContent);
+            fileUpload(filename, fileContent, username);
         }
+        AuthenticationDAO.createAuth(username, fileID, false);
     }
 
     public static void fileEdit(String fileID, String filename, ByteString fileContent) {
@@ -112,13 +113,13 @@ public class FileDAO {
         PreparedStatement stmt = null;
         try {
             // TODO rever
-            stmt = conn.prepareStatement("SELECT filename,fileid FROM authorizations UNION files ON files.fileid = authorizations.fileid WHERE username = (?) or public = 1");
+            stmt = conn.prepareStatement("SELECT filename,fileid FROM authorizations NATURAL JOIN files WHERE username = (?) or public = 1");
             stmt.setString(1, username);
             ResultSet rs = stmt.executeQuery();
 
             List<String> result = new ArrayList<String>();
             while (rs.next()) {
-                result.add(rs.getString("filename") + rs.getString("fileid"));
+                result.add(rs.getString("filename") + " " + rs.getString("fileid"));
             }
             return result;
 

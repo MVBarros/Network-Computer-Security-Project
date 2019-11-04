@@ -30,6 +30,21 @@ public class AuthenticationDAO {
         }
     }
 
+    public static void createAuth(String username, String fileId, Boolean auth) {
+        Connection conn = PostgreSQLJDBC.getInstance().getConn();
+        //FIXME se if auth already exists on intermediary version
+        try {
+            PreparedStatement stmt = conn.prepareStatement("INSERT INTO authorizations VALUES (?,?,?)");
+            stmt.setString(1, username);
+            stmt.setString(2, fileId);
+            stmt.setBoolean(3, auth);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            //Auth already exists
+            throw new IllegalArgumentException("Impossible.");
+        }
+    }
+
     public static void updateAccessControl(String username, String fileid, Boolean auth) {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
 

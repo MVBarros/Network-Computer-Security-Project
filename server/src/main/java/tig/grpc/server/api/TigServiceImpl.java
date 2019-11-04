@@ -102,6 +102,7 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
             private int counter = 0;
             private final ByteString file = ByteString.EMPTY;
             private String filename;
+            private String username;
 
             @Override
             public void onNext(Tig.FileChunk value) {
@@ -115,7 +116,7 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
                         }
                     }
                     if (counter == 0) {
-                        SessionAuthenticator.authenticateSession(value.getSessionId());
+                        username = SessionAuthenticator.authenticateSession(value.getSessionId());
                         filename = value.getFileName();
                     }
                     logger.info(String.format("Upload file %s chunk %d", filename, value.getSequence()));
@@ -133,7 +134,7 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
             @Override
             public void onCompleted() {
                 responseObserver.onNext(Tig.StatusReply.newBuilder().setCode(Tig.StatusCode.OK).build());
-                FileDAO.fileUpload(filename, file);
+                FileDAO.fileUpload(filename, file, username);
                 responseObserver.onCompleted();
             }
 

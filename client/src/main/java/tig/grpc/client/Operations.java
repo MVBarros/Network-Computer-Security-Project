@@ -145,13 +145,15 @@ public class Operations {
             }
         };
 
-        byte[] data = new byte[1024];
+        //Send file one megabyte at a time
+        byte[] data = new byte[1024 * 1024];
 
         StreamObserver<Tig.FileChunk> requestObserver = client.getAsyncStub().editFile(responseObserver);
 
         try {
             BufferedInputStream in = new BufferedInputStream(new FileInputStream(filename));
 
+            //Send file chunks to server
             while ((in.read(data)) != -1) {
                 Tig.FileChunk.Builder fileChunk = Tig.FileChunk.newBuilder();
                 fileChunk.setContent(ByteString.copyFrom(data));
@@ -177,6 +179,7 @@ public class Operations {
         } catch (FileNotFoundException e) {
             System.out.println(String.format("File with filename: %s not found.", filename));
         } catch (IOException | InterruptedException e) {
+            //Should Never Happen
             System.exit(1);
         } catch (StatusRuntimeException e) {
             System.out.print("Error editing file: ");
