@@ -11,7 +11,6 @@ import tig.grpc.server.data.dao.FileDAO;
 import tig.grpc.server.data.dao.UsersDAO;
 import tig.grpc.server.session.SessionAuthenticator;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
@@ -101,18 +100,29 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
     public StreamObserver<Tig.FileChunk> uploadFile(StreamObserver<Tig.StatusReply> responseObserver) {
         return new StreamObserver<Tig.FileChunk>() {
             private int counter = 0;
-            private ByteString file = ByteString.EMPTY;
+            private final ByteString file = ByteString.EMPTY;
             private String filename;
 
             @Override
             public void onNext(Tig.FileChunk value) {
-                if (counter == 0) {
-                    SessionAuthenticator.authenticateSession(value.getSessionId());
-                    logger.info(String.format("Upload file %s", value.getFileName()));
+                //Synchronize onNext calls by sequence
+                synchronized (file) {
+                    while (counter != value.getSequence()) {
+                        try {
+                            file.wait();
+                        } catch (InterruptedException e) {
+                            //Should never happen
+                        }
+                    }
+                    if (counter == 0) {
+                        SessionAuthenticator.authenticateSession(value.getSessionId());
+                        filename = value.getFileName();
+                    }
+                    logger.info(String.format("Upload file %s chunk %d", filename, value.getSequence()));
+                    file.concat(value.getContent());
+                    counter++;
+                    file.notify();
                 }
-                counter++;
-                filename = value.getFileName();
-                file.concat(value.getContent());
             }
 
             @Override
@@ -135,21 +145,33 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
     public StreamObserver<Tig.FileChunk> editFile(StreamObserver<Tig.StatusReply> responseObserver) {
         return new StreamObserver<Tig.FileChunk>() {
             private int counter = 0;
-            private ByteString file = ByteString.EMPTY;
+            private final ByteString file = ByteString.EMPTY;
             private String fileID;
             private String filename;
 
             @Override
             public void onNext(Tig.FileChunk value) {
-                if (counter == 0)
-                    SessionAuthenticator.authenticateSession(value.getSessionId());
-                    AuthenticationDAO.authenticateFileAccess(SessionAuthenticator.authenticateSession(value.getSessionId()), value.getFileName());
-                counter++;
-                fileID = value.getFileName();
-                filename = FileDAO.getFilename(fileID).toString();
-                file.concat(value.getContent());
+                //Synchronize onNext calls
+                synchronized (file) {
+                    while (counter != value.getSequence()) {
+                        try {
+                            file.wait();
+                        } catch (InterruptedException e) {
+                            //Should never happen
+                        }
+                    }
+                    if (counter == 0) {
+                        SessionAuthenticator.authenticateSession(value.getSessionId());
+                        AuthenticationDAO.authenticateFileAccess(SessionAuthenticator.authenticateSession(value.getSessionId()), value.getFileName());
+                        filename = FileDAO.getFilename(fileID);
+                        fileID = value.getFileName();
+                    }
+                    logger.info(String.format("Edit file %s chunk %d", fileID, value.getSequence()));
+                    file.concat(value.getContent());
+                    counter++;
+                    file.notify();
+                }
             }
-
             @Override
             public void onError(Throwable t) {
                 responseObserver.onError(t);

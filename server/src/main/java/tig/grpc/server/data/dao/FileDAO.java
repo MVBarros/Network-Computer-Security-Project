@@ -13,7 +13,7 @@ import java.util.List;
 
 public class FileDAO {
 
-    public static byte[] getFilename(String fileID) {
+    public static String getFilename(String fileID) {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
 
         try {
@@ -23,7 +23,7 @@ public class FileDAO {
 
             ResultSet rs = stmt.executeQuery();
             rs.next();
-            return rs.getBytes("filename");
+            return rs.getString("filename");
 
         } catch (SQLException e) {
             //Should never happen

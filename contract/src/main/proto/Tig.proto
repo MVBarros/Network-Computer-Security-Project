@@ -36,6 +36,7 @@ message FileChunk {
   bytes content = 1;
   string sessionId = 2;
   string fileName = 3;
+  int32 sequence = 4;
 }
 
 message StatusReply {

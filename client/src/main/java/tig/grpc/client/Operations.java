@@ -1,14 +1,13 @@
 package tig.grpc.client;
 
-import com.google.longrunning.Operation;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.CodedOutputStream;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import tig.grpc.contract.Tig;
 
 import java.io.*;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.concurrent.CountDownLatch;
 
@@ -45,7 +44,7 @@ public class Operations {
 
     public static void logoutClient(Client client) {
         try {
-            System.out.println(String.format("logout Client %s ", client.getUsername() ));
+            System.out.println(String.format("logout Client %s ", client.getUsername()));
             client.getStub().logout(Tig.SessionRequest.newBuilder().setSessionId(client.getSessionId()).build());
             client.setSessionId(null);
             System.out.println(String.format("User %s Successfully logged out", client.getUsername()));
@@ -60,54 +59,59 @@ public class Operations {
         System.out.println(String.format("Upload new file with filename %s", filename));
 
         final CountDownLatch finishLatch = new CountDownLatch(1);
+        int sequence = 0;
+
         StreamObserver<Tig.StatusReply> responseObserver = new StreamObserver<Tig.StatusReply>() {
             @Override
             public void onNext(Tig.StatusReply statusReply) {
-                System.out.println(statusReply.getCode().toString());
             }
 
             @Override
             public void onError(Throwable throwable) {
-                Status status = Status.fromThrowable(throwable);
                 finishLatch.countDown();
             }
 
             @Override
             public void onCompleted() {
-
-                    finishLatch.countDown();
+                finishLatch.countDown();
             }
         };
 
-        byte[] data = new byte[1024];
+        //Send file one megabyte at a time
+        byte[] data = new byte[1024 * 1024];
 
         StreamObserver<Tig.FileChunk> requestObserver = client.getAsyncStub().uploadFile(responseObserver);
 
         try {
             BufferedInputStream in = new BufferedInputStream(new FileInputStream(filePath));
 
+            //Send file chunks to server
             while ((in.read(data)) != -1) {
                 Tig.FileChunk.Builder fileChunk = Tig.FileChunk.newBuilder();
                 fileChunk.setContent(ByteString.copyFrom(data));
                 fileChunk.setFileName(filename);
                 fileChunk.setSessionId(client.getSessionId());
+                fileChunk.setSequence(sequence);
                 requestObserver.onNext(fileChunk.build());
+
                 if (finishLatch.getCount() == 0) {
                     // RPC completed or errored before we finished sending.
                     // Sending further requests won't error, but they will just be thrown away.
+                    //This should never happen
                     return;
                 }
+                sequence++;
             }
 
-        requestObserver.onCompleted();
+            requestObserver.onCompleted();
 
-        finishLatch.await();
+            //Wait for server to finish saving file to Database
+            finishLatch.await();
 
-        } catch(FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             System.out.println(String.format("File with filename: %s not found.", filename));
-        } catch(IOException e) {
-            System.exit(1);
-        } catch(InterruptedException e) {
+        } catch (IOException | InterruptedException e) {
+            //Should Never Happen
             System.exit(1);
         } catch (StatusRuntimeException e) {
             System.out.print("Error uploading file: ");
@@ -121,6 +125,8 @@ public class Operations {
         System.out.println(String.format("Edit file with fileId %s e filename %s", fileID, filename));
 
         final CountDownLatch finishLatch = new CountDownLatch(1);
+        int sequence = 0;
+
         StreamObserver<Tig.StatusReply> responseObserver = new StreamObserver<Tig.StatusReply>() {
             @Override
             public void onNext(Tig.StatusReply statusReply) {
@@ -151,18 +157,26 @@ public class Operations {
                 fileChunk.setContent(ByteString.copyFrom(data));
                 fileChunk.setFileName(fileID);
                 fileChunk.setSessionId(client.getSessionId());
+                fileChunk.setSequence(sequence);
                 requestObserver.onNext(fileChunk.build());
+
+                if (finishLatch.getCount() == 0) {
+                    // RPC completed or errored before we finished sending.
+                    // Sending further requests won't error, but they will just be thrown away.
+                    //This should never happen
+                    return;
+                }
+                sequence++;
             }
 
             requestObserver.onCompleted();
 
+            //Wait for server to finish saving file to Database
             finishLatch.wait();
 
-        } catch(FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             System.out.println(String.format("File with filename: %s not found.", filename));
-        } catch(IOException e) {
-            System.exit(1);
-        } catch(InterruptedException e) {
+        } catch (IOException | InterruptedException e) {
             System.exit(1);
         } catch (StatusRuntimeException e) {
             System.out.print("Error editing file: ");
@@ -186,13 +200,13 @@ public class Operations {
         }
     }
 
-    public static void setAccessControl (Client client, String fileid, Tig.OperationEnum permissions) {
+    public static void setAccessControl(Client client, String fileid, Tig.OperationEnum permissions) {
         try {
-        System.out.println(String.format("Set access control File fileid %s with PUBLIC = %b ", fileid, permissions));
-        client.getStub().accessControlFile(Tig.OperationRequest.newBuilder()
-                                            .setFileName(fileid)
-                                            .setSessionId(client.getSessionId())
-                                            .setOperation(permissions).build());
+            System.out.println(String.format("Set access control File fileid %s with PUBLIC = %b ", fileid, permissions));
+            client.getStub().accessControlFile(Tig.OperationRequest.newBuilder()
+                    .setFileName(fileid)
+                    .setSessionId(client.getSessionId())
+                    .setOperation(permissions).build());
         } catch (StatusRuntimeException e) {
             System.out.print("Error deleting file: ");
             System.out.println(e.getStatus().getDescription());
@@ -205,23 +219,16 @@ public class Operations {
             System.out.println("List all Files");
             Tig.ListFilesReply reply = client.getStub().listFiles(Tig.SessionRequest.newBuilder()
                     .setSessionId(client.getSessionId()).build());
-            System.out.println(reply.toString());
+            System.out.println(Arrays.toString(reply.getFileNamesList().toArray()));
 
         } catch (StatusRuntimeException e) {
             System.out.print("Error listing files: ");
             System.out.println(e.getStatus().getDescription());
             System.exit(1);
-         }
-
-        // sera melhor usar?
-        // String s  = reply.writeTo(?);
-        // String i  = reply.getFileNames(i);
+        }
     }
 
 
-
-    //TODO If server sent the file percentage could have completion percentage show up on the terminal
-    //TODO Maybe make it an asynchronous stub
     public static void downloadFile(Client client, String fileId, String filename) {
         try {
             System.out.println(String.format("Download File with fileid %s into file %s", fileId, filename));
@@ -231,7 +238,7 @@ public class Operations {
 
             BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(filename));
 
-            for (Tig.FileChunk chunk = iterator.next(); iterator.hasNext(); chunk = iterator.next() ) {
+            for (Tig.FileChunk chunk = iterator.next(); iterator.hasNext(); chunk = iterator.next()) {
                 byte[] fileBytes = chunk.getContent().toByteArray();
                 out.write(fileBytes);
             }
@@ -239,7 +246,7 @@ public class Operations {
             out.flush();
             out.close();
             System.out.println(String.format("File %s successfully written with contents of fileId %s",
-                                                fileId, filename));
+                    fileId, filename));
         } catch (StatusRuntimeException e) {
             System.out.print("Error downloading file: ");
             System.out.println(e.getStatus().getDescription());
