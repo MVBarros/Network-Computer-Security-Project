@@ -11,7 +11,9 @@ import tig.grpc.server.data.dao.FileDAO;
 import tig.grpc.server.data.dao.UsersDAO;
 import tig.grpc.server.session.SessionAuthenticator;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
@@ -100,17 +102,18 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
     public StreamObserver<Tig.FileChunk> uploadFile(StreamObserver<Tig.StatusReply> responseObserver) {
         return new StreamObserver<Tig.FileChunk>() {
             private int counter = 0;
-            private final ByteString file = ByteString.EMPTY;
+            private ByteString file = ByteString.copyFrom(new byte[] {});
             private String filename;
             private String username;
+            private final Object lock = new Object();
 
             @Override
             public void onNext(Tig.FileChunk value) {
                 //Synchronize onNext calls by sequence
-                synchronized (file) {
+                synchronized (lock) {
                     while (counter != value.getSequence()) {
                         try {
-                            file.wait();
+                            lock.wait();
                         } catch (InterruptedException e) {
                             //Should never happen
                         }
@@ -120,9 +123,10 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
                         filename = value.getFileName();
                     }
                     logger.info(String.format("Upload file %s chunk %d", filename, value.getSequence()));
-                    file.concat(value.getContent());
+
+                    file = file.concat(value.getContent());
                     counter++;
-                    file.notify();
+                    lock.notify();
                 }
             }
 
@@ -134,7 +138,7 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
             @Override
             public void onCompleted() {
                 responseObserver.onNext(Tig.StatusReply.newBuilder().setCode(Tig.StatusCode.OK).build());
-                FileDAO.fileUpload(filename, file, username);
+                FileDAO.fileUpload(filename, file.toByteArray(), username);
                 responseObserver.onCompleted();
             }
 
@@ -146,17 +150,18 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
     public StreamObserver<Tig.FileChunk> editFile(StreamObserver<Tig.StatusReply> responseObserver) {
         return new StreamObserver<Tig.FileChunk>() {
             private int counter = 0;
-            private final ByteString file = ByteString.EMPTY;
+            private ByteString file = ByteString.copyFrom(new byte[0]);
             private String fileID;
             private String filename;
+            private final Object lock = new Object();
 
             @Override
             public void onNext(Tig.FileChunk value) {
                 //Synchronize onNext calls
-                synchronized (file) {
+                synchronized (lock) {
                     while (counter != value.getSequence()) {
                         try {
-                            file.wait();
+                            lock.wait();
                         } catch (InterruptedException e) {
                             //Should never happen
                         }
@@ -168,9 +173,9 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
                         fileID = value.getFileName();
                     }
                     logger.info(String.format("Edit file %s chunk %d", fileID, value.getSequence()));
-                    file.concat(value.getContent());
+                    file = file.concat(value.getContent());
                     counter++;
-                    file.notify();
+                    lock.notify();
                 }
             }
             @Override
@@ -181,7 +186,7 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
             @Override
             public void onCompleted() {
                 responseObserver.onNext(Tig.StatusReply.newBuilder().setCode(Tig.StatusCode.OK).build());
-                FileDAO.fileEdit(fileID, filename, file);
+                FileDAO.fileEdit(fileID, filename, file.toByteArray());
             }
 
         };

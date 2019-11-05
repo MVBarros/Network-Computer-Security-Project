@@ -84,11 +84,11 @@ public class Operations {
 
         try {
             BufferedInputStream in = new BufferedInputStream(new FileInputStream(filePath));
-
+            int numRead;
             //Send file chunks to server
-            while ((in.read(data)) != -1) {
+            while ((numRead =in.read(data)) >= 0) {
                 Tig.FileChunk.Builder fileChunk = Tig.FileChunk.newBuilder();
-                fileChunk.setContent(ByteString.copyFrom(data));
+                fileChunk.setContent(ByteString.copyFrom(Arrays.copyOfRange(data, 0, numRead)));
                 fileChunk.setFileName(filename);
                 fileChunk.setSessionId(client.getSessionId());
                 fileChunk.setSequence(sequence);
@@ -222,7 +222,10 @@ public class Operations {
             System.out.println("List all Files");
             Tig.ListFilesReply reply = client.getStub().listFiles(Tig.SessionRequest.newBuilder()
                     .setSessionId(client.getSessionId()).build());
-            System.out.println(Arrays.toString(reply.getFileNamesList().toArray()));
+            Object[] names = reply.getFileNamesList().toArray();
+            for (Object name : names) {
+                System.out.println(name.toString() + "\n");
+            }
 
         } catch (StatusRuntimeException e) {
             System.out.print("Error listing files: ");
@@ -241,12 +244,14 @@ public class Operations {
 
             BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(filename));
 
-            for (Tig.FileChunk chunk = iterator.next(); iterator.hasNext(); chunk = iterator.next()) {
+            while(iterator.hasNext()) {
+                Tig.FileChunk chunk = iterator.next();
+                System.out.println(Arrays.toString(chunk.getContent().toByteArray()));
                 byte[] fileBytes = chunk.getContent().toByteArray();
                 out.write(fileBytes);
             }
 
-            out.flush();
+            //out.flush();
             out.close();
             System.out.println(String.format("File %s successfully written with contents of fileId %s",
                     fileId, filename));
