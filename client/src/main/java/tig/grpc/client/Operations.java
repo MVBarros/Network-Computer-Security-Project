@@ -244,6 +244,7 @@ public class Operations {
 
             BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(filename));
 
+            //Write bytes to file
             while(iterator.hasNext()) {
                 Tig.FileChunk chunk = iterator.next();
                 System.out.println(Arrays.toString(chunk.getContent().toByteArray()));
@@ -251,7 +252,6 @@ public class Operations {
                 out.write(fileBytes);
             }
 
-            //out.flush();
             out.close();
             System.out.println(String.format("File %s successfully written with contents of fileId %s",
                     fileId, filename));
