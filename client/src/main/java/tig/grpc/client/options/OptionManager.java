@@ -62,41 +62,41 @@ public class OptionManager {
             Operations.registerClient(client);
             return;
         }
-
         Operations.loginClient(client);
 
         if (cmd.hasOption('d')) {
-            Operations.downloadFile(client, cmd.getOptionValues('d')[0], cmd.getOptionValues('d')[1]);
+            Operations.downloadFile(client, cmd.getOptionValues('d')[0], cmd.getOptionValues('d')[1], cmd.getOptionValues('d')[2]) ;
             return;
         }
-
         if (cmd.hasOption('u')) {
             Operations.uploadFile(client, cmd.getOptionValues('u')[0], cmd.getOptionValues('u')[1]);
             return;
         }
-
         if (cmd.hasOption('e')) {
-            Operations.editFile(client, cmd.getOptionValues('e')[0], cmd.getOptionValues('e')[1]);
+            Operations.editFile(client, cmd.getOptionValues('e')[0], cmd.getOptionValues('e')[1], cmd.getOptionValues('e')[2]);
             return;
         }
-
         if (cmd.hasOption('r')) {
             Operations.deleteFile(client, cmd.getOptionValues('r')[0]);
             return;
         }
-
         if (cmd.hasOption('l')) {
             Operations.listFiles(client);
             return;
         }
-
         if (cmd.hasOption('c')) {
-            if (cmd.getOptionValues("c")[1].equals("PUBLIC"))
-                Operations.setAccessControl(client, cmd.getOptionValues('c')[0], Tig.OperationEnum.PUBLIC);
-            else
-                Operations.setAccessControl(client, cmd.getOptionValues('c')[0], Tig.OperationEnum.PRIVATE);
+            switch (cmd.getOptionValues("c")[1]) {
+                case "READ":
+                    Operations.setAccessControl(client, cmd.getOptionValues('c')[0], cmd.getOptionValues('c')[1], Tig.PermissionEnum.READ);
+                    break;
+                case "WRITE":
+                    Operations.setAccessControl(client, cmd.getOptionValues('c')[0], cmd.getOptionValues('c')[1], Tig.PermissionEnum.WRITE);
+                    break;
+                case "NONE":
+                    Operations.setAccessControl(client, cmd.getOptionValues('c')[0], cmd.getOptionValues('c')[1], Tig.PermissionEnum.NONE);
+                    break;
+            }
             return;
         }
-
     }
 }

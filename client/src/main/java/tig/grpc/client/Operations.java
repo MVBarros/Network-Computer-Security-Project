@@ -56,7 +56,7 @@ public class Operations {
         }
     }
 
-    public static void uploadFile(Client client, String filePath, String filename) {
+    public static void uploadFile(Client client, String filename, String filePath) {
         System.out.println(String.format("Upload new file with filename %s", filename));
 
         final CountDownLatch finishLatch = new CountDownLatch(1);
