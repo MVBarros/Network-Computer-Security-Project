@@ -64,8 +64,7 @@ public class Operations {
 
         StreamObserver<Empty> responseObserver = new StreamObserver<Empty>() {
             @Override
-            public void onNext(Empty empty) {
-            }
+            public void onNext(Empty empty) { }
             @Override
             public void onError(Throwable throwable) {
                 finishLatch.countDown();
@@ -120,24 +119,20 @@ public class Operations {
 
     }
 
-    public static void editFile(Client client, String fileID, String filename) {
-        System.out.println(String.format("Edit file with fileId %s e filename %s", fileID, filename));
+    public static void editFile(Client client, String filename, String owner, String filepath) {
+        System.out.println(String.format("Edit file with filename %s and owner %s", filename, owner));
 
         final CountDownLatch finishLatch = new CountDownLatch(1);
         int sequence = 0;
 
-        StreamObserver<Tig.StatusReply> responseObserver = new StreamObserver<Tig.StatusReply>() {
+        StreamObserver<Empty> responseObserver = new StreamObserver<Empty>() {
             @Override
-            public void onNext(Tig.StatusReply statusReply) {
-                System.out.println(statusReply.getCode().toString());
-            }
-
+            public void onNext(Empty empty) { }
             @Override
             public void onError(Throwable throwable) {
                 Status status = Status.fromThrowable(throwable);
                 finishLatch.countDown();
             }
-
             @Override
             public void onCompleted() {
                 finishLatch.countDown();
@@ -147,16 +142,17 @@ public class Operations {
         //Send file one megabyte at a time
         byte[] data = new byte[1024 * 1024];
 
-        StreamObserver<Tig.FileChunk> requestObserver = client.getAsyncStub().editFile(responseObserver);
+        StreamObserver<Tig.FileChunkClientEdit> requestObserver = client.getAsyncStub().editFile(responseObserver);
 
         try {
             BufferedInputStream in = new BufferedInputStream(new FileInputStream(filename));
 
             //Send file chunks to server
             while ((in.read(data)) != -1) {
-                Tig.FileChunk.Builder fileChunk = Tig.FileChunk.newBuilder();
+                Tig.FileChunkClientEdit.Builder fileChunk = Tig.FileChunkClientEdit.newBuilder();
                 fileChunk.setContent(ByteString.copyFrom(data));
-                fileChunk.setFileName(fileID);
+                fileChunk.setFileName(filename);
+                fileChunk.setOwner(owner);
                 fileChunk.setSessionId(client.getSessionId());
                 fileChunk.setSequence(sequence);
                 requestObserver.onNext(fileChunk.build());
