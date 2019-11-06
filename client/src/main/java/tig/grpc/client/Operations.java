@@ -121,10 +121,8 @@ public class Operations {
 
     public static void editFile(Client client, String filename, String owner, String filepath) {
         System.out.println(String.format("Edit file with filename %s and owner %s", filename, owner));
-
         final CountDownLatch finishLatch = new CountDownLatch(1);
         int sequence = 0;
-
         StreamObserver<Empty> responseObserver = new StreamObserver<Empty>() {
             @Override
             public void onNext(Empty empty) { }
@@ -138,14 +136,11 @@ public class Operations {
                 finishLatch.countDown();
             }
         };
-
         //Send file one megabyte at a time
         byte[] data = new byte[1024 * 1024];
-
         StreamObserver<Tig.FileChunkClientEdit> requestObserver = client.getAsyncStub().editFile(responseObserver);
-
         try {
-            BufferedInputStream in = new BufferedInputStream(new FileInputStream(filename));
+            BufferedInputStream in = new BufferedInputStream(new FileInputStream(filepath));
 
             //Send file chunks to server
             while ((in.read(data)) != -1) {
@@ -156,7 +151,6 @@ public class Operations {
                 fileChunk.setSessionId(client.getSessionId());
                 fileChunk.setSequence(sequence);
                 requestObserver.onNext(fileChunk.build());
-
                 if (finishLatch.getCount() == 0) {
                     // RPC completed or errored before we finished sending.
                     // Sending further requests won't error, but they will just be thrown away.
@@ -166,10 +160,8 @@ public class Operations {
                 sequence++;
             }
             requestObserver.onCompleted();
-
             //Wait for server to finish saving file to Database
             finishLatch.wait();
-
         } catch (FileNotFoundException e) {
             System.out.println(String.format("File with filename: %s not found.", filename));
         } catch (IOException | InterruptedException e) {
@@ -180,7 +172,6 @@ public class Operations {
             System.out.println(e.getStatus().getDescription());
             System.exit(1);
         }
-
     }
 
     public static void deleteFile(Client client, String filename) {
@@ -230,9 +221,9 @@ public class Operations {
     }
 
 
-    public static void downloadFile(Client client, String fileId, String filename) {
+    public static void downloadFile(Client client, String filename, String owner, String filepath) {
         try {
-            System.out.println(String.format("Download File with fileid %s into file %s", fileId, filename));
+            System.out.println(String.format("Download File with filename %s with owner %s. With file path: %s", filename, owner, filepath));
             Iterator<Tig.FileChunk> iterator = client.getStub().downloadFile(Tig.FileRequest.newBuilder()
                     .setSessionId(client.getSessionId())
                     .setFileName(fileId).build());
