@@ -4,19 +4,24 @@ import "google/protobuf/empty.proto";
 
 
 service TigService {
-  rpc register(LoginRequest) returns (StatusReply);
-  rpc login(LoginRequest) returns (LoginReply);
+  rpc register(AccountRequest) returns (google.protobuf.Empty);
+  rpc login(AccountRequest) returns (LoginReply);
   rpc logout(SessionRequest) returns (google.protobuf.Empty);
-  rpc uploadFile(stream FileChunk) returns (StatusReply);
-  rpc editFile(stream FileChunk) returns (StatusReply);
-  rpc deleteFile(FileRequest) returns (StatusReply);
-  rpc accessControlFile(OperationRequest) returns (StatusReply);
+  rpc uploadFile(stream FileChunk) returns (google.protobuf.Empty);
+  rpc editFile(stream FileChunk) returns (google.protobuf.Empty);
+  rpc deleteFile(DeleteFileRequest) returns (google.protobuf.Empty);
+  rpc accessControlFile(AccessControlRequest) returns (google.protobuf.Empty);
   rpc downloadFile(FileRequest) returns (stream FileChunk);
   rpc listFiles(SessionRequest) returns (ListFilesReply);
 }
 
+message DeleteFileRequest {
+  string sessionId = 1;
+  string filename = 2;
+}
+
 // LOGIN OPERATION
-message LoginRequest {
+message AccountRequest {
   string username = 1;
   string password = 2;
 }
@@ -56,26 +61,19 @@ message FileRequest {
   string sessionId = 1;
   string fileName = 2;
   string owner = 3;
-  PermissionEnum permission = 4;
 }
 
 //ACCESS CONTROL OPERATION
-message OperationRequest {
+message AccessControlRequest {
   string sessionId = 1;
   string fileName = 2;
-  string owner = 3;
-  int32 permission = 4;
-  OperationEnum operation = 5;
-}
+  string target = 3;
+  PermissionEnum permission = 4;
+  }
 enum PermissionEnum {
   READ = 0;
   WRITE = 1;
   NONE = 2;
-}
-
-enum OperationEnum {
-  PUBLIC = 0;
-  PRIVATE = 1;
 }
 
 //LIST FILES
