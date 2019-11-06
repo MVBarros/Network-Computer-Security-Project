@@ -42,7 +42,7 @@ public class AuthenticationDAO {
         }
     }
 
-    public static void createAuth(String filename, String owner, String username, int permission) {
+    /*public static void createAuth(String filename, String owner, String username, int permission) {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
         //FIXME se if auth already exists on intermediary version
         try {
@@ -56,7 +56,7 @@ public class AuthenticationDAO {
             //Auth already exists
             throw new IllegalArgumentException("Impossible to create auth.");
         }
-    }
+    }*/
 
     public static void updateAccessControl(String filename, String owner, String target, int permission) {
         //so o owner pode executar esta funcao
