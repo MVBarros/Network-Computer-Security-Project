@@ -89,7 +89,7 @@ public class FileDAO {
         }
     }
 
-    public static void deleteFile(String username, String fileid) {
+    public static void deleteFile(String username, String filename, String owner) {
 
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
         try {

@@ -10,19 +10,28 @@ import java.sql.SQLException;
 
 public class AuthenticationDAO {
 
-    public static void authenticateFileAccess(String username, String fileId) {
+    public static void authenticateFileAccess(String username, String filename, String owner) {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
 
         try {
-            PreparedStatement stmt = conn.prepareStatement("SELECT * FROM authorizations " +
-                    "WHERE username=(?) AND fileId=(?)");
+            PreparedStatement stmt = conn.prepareStatement("SELECT * FROM files " +
+                    "WHERE owner=(?) AND filename=(?)");
             stmt.setString(1, username);
-            stmt.setString(2, fileId);
+            stmt.setString(2, filename);
 
             ResultSet rs = stmt.executeQuery();
             if (!rs.next()) {
                 //Query was empty
-                throw new IllegalArgumentException("Cannot access given document");
+                PreparedStatement stmt2 = conn.prepareStatement("SELECT * FROM authorizations" +
+                        "WHERE owner=(?) AND filename=(?) AND user=(?)");
+                stmt2.setString(1, owner);
+                stmt2.setString(2, filename);
+                stmt2.setString(3, username);
+                ResultSet rs1 = stmt.executeQuery();
+                if (!rs.next()) {
+                    //Query was empty
+                    throw new IllegalArgumentException("Cannot access given document");
+                }
             }
         } catch (SQLException e) {
             //Should not happen
