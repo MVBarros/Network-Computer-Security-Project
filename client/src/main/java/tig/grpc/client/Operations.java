@@ -202,13 +202,14 @@ public class Operations {
         }
     }
 
-    public static void setAccessControl(Client client, String fileid, Tig.OperationEnum permissions) {
+    public static void setAccessControl(Client client, String filename, String target, Tig.PermissionEnum permission) {
         try {
-            System.out.println(String.format("Set access control File fileid %s with PUBLIC = %b ", fileid, permissions));
-            client.getStub().accessControlFile(Tig.OperationRequest.newBuilder()
-                    .setFileName(fileid)
+            System.out.println(String.format("Set access control File: %s to user: %s with %b ", filename, target, permission));
+            client.getStub().accessControlFile(Tig.AccessControlRequest.newBuilder()
+                    .setFileName(filename)
                     .setSessionId(client.getSessionId())
-                    .setOperation(permissions).build());
+                    .setTarget(target)
+                    .setPermission(permission).build());
         } catch (StatusRuntimeException e) {
             System.out.print("Error deleting file: ");
             System.out.println(e.getStatus().getDescription());
