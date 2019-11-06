@@ -36,7 +36,7 @@ public class OptionManager {
         register.setRequired(false);
         options.addOption(list);
 
-        Option access = new Option("c", "Use to change Access Options of a file");
+        Option access = new Option("c", "Use to change Access Control options of a file");
         access.setArgs(1);
         access.setArgName("fileId permission");
         register.setRequired(false);
