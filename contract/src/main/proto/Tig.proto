@@ -7,18 +7,14 @@ service TigService {
   rpc register(AccountRequest) returns (google.protobuf.Empty);
   rpc login(AccountRequest) returns (LoginReply);
   rpc logout(SessionRequest) returns (google.protobuf.Empty);
-  rpc uploadFile(stream FileChunk) returns (google.protobuf.Empty);
-  rpc editFile(stream FileChunk) returns (google.protobuf.Empty);
+  rpc uploadFile(stream FileChunkClientUpload) returns (google.protobuf.Empty);
+  rpc editFile(stream FileChunkClientEdit) returns (google.protobuf.Empty);
   rpc deleteFile(DeleteFileRequest) returns (google.protobuf.Empty);
   rpc accessControlFile(AccessControlRequest) returns (google.protobuf.Empty);
-  rpc downloadFile(FileRequest) returns (stream FileChunk);
+  rpc downloadFile(FileRequest) returns (stream FileChunkDownload);
   rpc listFiles(SessionRequest) returns (ListFilesReply);
 }
 
-message DeleteFileRequest {
-  string sessionId = 1;
-  string filename = 2;
-}
 
 // LOGIN OPERATION
 message AccountRequest {
@@ -31,19 +27,29 @@ message LoginReply {
   string sessionId = 2;
 }
 
-
 message SessionRequest {
   string sessionId = 1;
 }
 
 // FILE STREAM OPERATION
-message FileChunk {
+message FileChunkClientUpload {
+  bytes content = 1;
+  string sessionId = 2;
+  string fileName = 3;
+  int32 sequence = 4;
+}
+
+message FileChunkClientEdit {
   bytes content = 1;
   string sessionId = 2;
   string fileName = 3;
   string owner = 4;
-  int32 permission = 5;
-  int32 sequence = 6;
+  int32 sequence = 5;
+}
+
+message FileChunkDownload {
+  bytes content = 1;
+  int32 sequence = 2;
 }
 
 message StatusReply {
@@ -74,6 +80,12 @@ enum PermissionEnum {
   READ = 0;
   WRITE = 1;
   NONE = 2;
+}
+
+//DELETE FILE OPERATION
+message DeleteFileRequest {
+  string sessionId = 1;
+  string filename = 2;
 }
 
 //LIST FILES
