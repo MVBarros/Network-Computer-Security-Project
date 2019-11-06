@@ -56,7 +56,7 @@ message FileRequest {
   string sessionId = 1;
   string fileName = 2;
   string owner = 3;
-  int32 permission = 4;
+  PermissionEnum permission = 4;
 }
 
 //ACCESS CONTROL OPERATION
@@ -66,6 +66,11 @@ message OperationRequest {
   string owner = 3;
   int32 permission = 4;
   OperationEnum operation = 5;
+}
+enum PermissionEnum {
+  READ = 0;
+  WRITE = 1;
+  NONE = 2;
 }
 
 enum OperationEnum {
