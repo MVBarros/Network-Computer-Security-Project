@@ -77,7 +77,7 @@ public class FileDAO {
             SecretKeySpec key = EncryptionUtils.getAesKey(rs.getBytes("encryptionKey"));
 
             return EncryptionUtils.decryptFile(rs.getBytes("filecontent"), key);
-            
+
         } catch (SQLException e) {
             //Should never happen
             throw new RuntimeException();
@@ -108,7 +108,6 @@ public class FileDAO {
         PreparedStatement stmt = null;
         try {
             HashSet<String> ownedFiles = new HashSet<String>();
-            // TODO rever
             stmt = conn.prepareStatement("SELECT username,permission, filename, owner FROM files NATURAL JOIN authorizations WHERE owner = (?) or user = (?)");
             stmt.setString(1, username);
             stmt.setString(2, username);
@@ -116,21 +115,24 @@ public class FileDAO {
 
             List<String> result = new ArrayList<String>();
             while (rs.next()) {
-                if (rs.getString("username") == rs.getString("owner")) {
-                    if (!ownedFiles.contains(rs.getString("filename"))) {
-                        result.add(String.format("File: %s Owner: %s Permission: R/W", rs.getString("filename"), rs.getString("owner")));
-                        ownedFiles.add(rs.getString("filename"));
-                    }
-                } else {
-                    result.add(String.format("File: %s Owner: %s Permission: %s", rs.getString("filename"),
-                            rs.getString("owner"), rs.getInt("permission") == 1 ? "RW" : "R"));
+                if (rs.getString("username").equals(rs.getString("owner")) &&
+                            !ownedFiles.contains(rs.getString("filename"))) {
+                    result.add(String.format("File:%s\tOwner:%s\tPermission:R/W", rs.getString("filename"), rs.getString("owner")));
+                    ownedFiles.add(rs.getString("filename"));
 
+                } else {
+                    result.add(String.format("File:%s\tOwner:%s\tPermission:%s", rs.getString("filename"),
+                            rs.getString("owner"), rs.getInt("permission") == 1 ? "RW" : "R"));
                 }
+            }
+
+            if(result.size() == 0) {
+                result.add("User has no files");
             }
             return result;
 
         } catch (SQLException e) {
-            throw new IllegalArgumentException("User has no files");
+            throw new RuntimeException();
         }
     }
 }
