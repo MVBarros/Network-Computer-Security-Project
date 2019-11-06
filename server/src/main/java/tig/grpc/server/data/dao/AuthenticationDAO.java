@@ -22,16 +22,19 @@ public class AuthenticationDAO {
             ResultSet rs = stmt.executeQuery();
             if (!rs.next()) {
                 //Query was empty
-                PreparedStatement stmt2 = conn.prepareStatement("SELECT * FROM authorizations" +
+                stmt = conn.prepareStatement("SELECT * FROM authorizations" +
                         "WHERE owner=(?) AND filename=(?) AND user=(?)");
-                stmt2.setString(1, owner);
-                stmt2.setString(2, filename);
-                stmt2.setString(3, username);
-                ResultSet rs1 = stmt.executeQuery();
+                stmt.setString(1, owner);
+                stmt.setString(2, filename);
+                stmt.setString(3, username);
+                stmt.setString(4, username);
+                rs = stmt.executeQuery();
                 if (!rs.next()) {
                     //Query was empty
                     throw new IllegalArgumentException("Cannot access given document");
                 }
+
+
             }
         } catch (SQLException e) {
             //Should not happen

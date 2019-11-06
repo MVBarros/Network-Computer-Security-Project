@@ -8,12 +8,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class FileDAO {
 
-    public static String getFilename(String fileID) {
+    /*public static String getFilename(String fileID) {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
 
         try {
@@ -29,20 +30,21 @@ public class FileDAO {
             //Should never happen
             throw new RuntimeException();
         }
-    }
+    }*/
 
     public static void fileUpload(String filename, byte[] fileContent, String username) {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
 
         String fileID = StringGenerator.randomStringNoMetacharacters(256);
         try {
-            PreparedStatement stmt = conn.prepareStatement("INSERT INTO files VALUES (?,?,?)");
+            PreparedStatement stmt = conn.prepareStatement("INSERT INTO files VALUES (?,?,?,?)");
 
-            stmt.setString(1, fileID);
+            stmt.setString(1, filename);
 
-            stmt.setString(2, filename);
-
-            stmt.setBytes(3, fileContent);
+            stmt.setString(2, username);
+            // TODO rever!
+            stmt.setString(3, LocalDateTime.now().toString());
+            stmt.setBytes(4, fileContent);
 
             stmt.executeUpdate();
 

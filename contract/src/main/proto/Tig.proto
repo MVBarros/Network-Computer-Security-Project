@@ -72,6 +72,5 @@ enum OperationEnum {
 
 //LIST FILES
 message ListFilesReply {
-  repeated string fileNames = 1;
-  repeated string fileowners = 2;
+  repeated string fileInfo = 1;
 }

@@ -91,7 +91,7 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
         List<String> files = FileDAO.listFiles(username);
 
         Tig.ListFilesReply.Builder builder = Tig.ListFilesReply.newBuilder();
-        builder.addAllFileNames(files);
+        builder.addAllFileInfo(files);
         responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
 
@@ -150,8 +150,10 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
         return new StreamObserver<Tig.FileChunk>() {
             private int counter = 0;
             private ByteString file = ByteString.copyFrom(new byte[0]);
-            private String fileID;
+            //private String fileID;
             private String filename;
+            private String owner;
+            private String username;
             private final Object lock = new Object();
 
             @Override
@@ -166,12 +168,13 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
                         }
                     }
                     if (counter == 0) {
-                        SessionAuthenticator.authenticateSession(value.getSessionId());
-                        AuthenticationDAO.authenticateFileAccess(SessionAuthenticator.authenticateSession(value.getSessionId()), value.getFileName());
-                        filename = FileDAO.getFilename(fileID);
-                        fileID = value.getFileName();
+                        username = SessionAuthenticator.authenticateSession(value.getSessionId());
+                        AuthenticationDAO.(SessionAuthenticator.authenticateSession(value.getSessionId()), value.getFileName(), value.getOwner());
+                        filename = value.getFileName();
+                        owner = value.getOwner();
+
                     }
-                    logger.info(String.format("Edit file %s chunk %d", fileID, value.getSequence()));
+                    logger.info(String.format("Edit file %s chunk %d", filename, value.getSequence()));
                     file = file.concat(value.getContent());
                     counter++;
                     lock.notify();
