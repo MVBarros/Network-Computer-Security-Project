@@ -224,23 +224,23 @@ public class Operations {
     public static void downloadFile(Client client, String filename, String owner, String filepath) {
         try {
             System.out.println(String.format("Download File with filename %s with owner %s. With file path: %s", filename, owner, filepath));
-            Iterator<Tig.FileChunk> iterator = client.getStub().downloadFile(Tig.FileRequest.newBuilder()
+            Iterator<Tig.FileChunkDownload> iterator = client.getStub().downloadFile(Tig.FileRequest.newBuilder()
                     .setSessionId(client.getSessionId())
-                    .setFileName(fileId).build());
+                    .setFileName(filename)
+                    .setOwner(owner).build());
 
-            BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(filename));
+            BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(filepath));
 
             //Write bytes to file
             while(iterator.hasNext()) {
-                Tig.FileChunk chunk = iterator.next();
+                Tig.FileChunkDownload chunk = iterator.next();
                 System.out.println(Arrays.toString(chunk.getContent().toByteArray()));
                 byte[] fileBytes = chunk.getContent().toByteArray();
                 out.write(fileBytes);
             }
 
             out.close();
-            System.out.println(String.format("File %s successfully written with contents of fileId %s",
-                    fileId, filename));
+            System.out.println(String.format("File with filename %s with owner %s sucessfully downloaded into %s", filename, owner, filepath));
         } catch (StatusRuntimeException e) {
             System.out.print("Error downloading file: ");
             System.out.println(e.getStatus().getDescription());
