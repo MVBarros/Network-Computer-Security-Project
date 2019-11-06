@@ -42,22 +42,6 @@ public class AuthenticationDAO {
         }
     }
 
-    /*public static void createAuth(String filename, String owner, String username, int permission) {
-        Connection conn = PostgreSQLJDBC.getInstance().getConn();
-        //FIXME se if auth already exists on intermediary version
-        try {
-            PreparedStatement stmt = conn.prepareStatement("INSERT INTO authorizations VALUES (?,?,?,?)");
-            stmt.setString(1, filename);
-            stmt.setString(2, owner);
-            stmt.setString(3, username);
-            stmt.setInt(4, permission);
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            //Auth already exists
-            throw new IllegalArgumentException("Impossible to create auth.");
-        }
-    }*/
-
     public static void updateAccessControl(String filename, String owner, String target, int permission) {
         //so o owner pode executar esta funcao
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
@@ -72,9 +56,7 @@ public class AuthenticationDAO {
                 stmt.setString(1, filename);
                 stmt.setString(2, owner);
                 stmt.setString(3, target);
-            }
-
-            else {
+            } else {
                 // nao verificamos se user tem este file porque se nao tiver da SQL violation (neste caso foreign key violation)
                 stmt = conn.prepareStatement("REPLACE INTO authorizations (filename, owner, username, permission) VALUES (?,?,?,?");
                 stmt.setString(1, filename);
@@ -85,8 +67,7 @@ public class AuthenticationDAO {
 
             stmt.executeUpdate();
         } catch (SQLException e) {
-            // TODO rever
-            throw new IllegalArgumentException("No such file name.");
+            throw new IllegalArgumentException("No such file name owned");
         }
 
     }

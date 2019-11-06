@@ -25,7 +25,7 @@ public class PasswordUtils {
      * @param password the password to hash
      * @return Hash String of password
      */
-    public static byte[] generateStrongPasswordHash(String password, byte[] salt, int iterations){
+    public static byte[] generateStrongPasswordHash(String password, byte[] salt, int iterations) {
         try {
 
             char[] chars = password.toCharArray();

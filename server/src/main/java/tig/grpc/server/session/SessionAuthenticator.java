@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionAuthenticator {
 
-    private static final ConcurrentHashMap<String, UserToken> sessions = new ConcurrentHashMap<>();
+    public static final ConcurrentHashMap<String, UserToken> sessions = new ConcurrentHashMap<>();
 
     public static String createSession(String username) {
         String sessionId;

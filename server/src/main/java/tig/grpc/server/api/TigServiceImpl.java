@@ -11,9 +11,7 @@ import tig.grpc.server.data.dao.FileDAO;
 import tig.grpc.server.data.dao.UsersDAO;
 import tig.grpc.server.session.SessionAuthenticator;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
@@ -81,7 +79,7 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
     public void listFiles(Tig.SessionRequest request, StreamObserver<Tig.ListFilesReply> responseObserver) {
         String username = SessionAuthenticator.authenticateSession(request.getSessionId());
         List<String> files = FileDAO.listFiles(username);
-        logger.info("List files " +  username);
+        logger.info("List files " + username);
 
         Tig.ListFilesReply.Builder builder = Tig.ListFilesReply.newBuilder();
         builder.addAllFileInfo(files);
@@ -94,7 +92,7 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
     public StreamObserver<Tig.FileChunkClientUpload> uploadFile(StreamObserver<Empty> responseObserver) {
         return new StreamObserver<Tig.FileChunkClientUpload>() {
             private int counter = 0;
-            private ByteString file = ByteString.copyFrom(new byte[] {});
+            private ByteString file = ByteString.copyFrom(new byte[]{});
             private String filename;
             private String username;
             private final Object lock = new Object();
@@ -169,6 +167,7 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
                     lock.notify();
                 }
             }
+
             @Override
             public void onError(Throwable t) {
                 responseObserver.onError(t);
