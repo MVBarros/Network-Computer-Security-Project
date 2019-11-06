@@ -50,7 +50,7 @@ public class AuthenticationDAO {
             stmt.executeUpdate();
         } catch (SQLException e) {
             //Auth already exists
-            throw new IllegalArgumentException("Impossible.");
+            throw new IllegalArgumentException("Impossible to create auth.");
         }
     }
 

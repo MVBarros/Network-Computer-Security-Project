@@ -58,10 +58,9 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
     public void deleteFile(Tig.FileRequest request, StreamObserver<Tig.StatusReply> responseObserver) {
         logger.info(String.format("Delete filename: %s", request.getFileName()));
         String username = SessionAuthenticator.authenticateSession(request.getSessionId());
-        AuthenticationDAO.authenticateFileAccess(username, request.getFileName());
+        AuthenticationDAO.authenticateFileAccess(username, request.getFileName(), request.getOwner());
 
-        FileDAO.deleteFile(username, request.getFileName());
-
+        FileDAO.deleteFile(username, request.getFileName(), request.getOwner());
         // FIXME e assim?
         Tig.StatusReply.Builder builder = Tig.StatusReply.newBuilder();
         builder.setCode(Tig.StatusCode.OK);
@@ -71,14 +70,14 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
 
     @Override
     public void accessControlFile(Tig.OperationRequest request, StreamObserver<Tig.StatusReply> responseObserver) {
+        // FIXME !!! Da trabalhooo
         logger.info(String.format("Access Control from: %s and make it: %s", request.getFileName(), request.getOperation()));
         String username = SessionAuthenticator.authenticateSession(request.getSessionId());
-        AuthenticationDAO.authenticateFileAccess(username, request.getFileName());
+        AuthenticationDAO.authenticateFileAccess(username, request.getFileName(), request.getOwner());
 
         boolean flag = request.getOperation().equals("PUBLIC");
         AuthenticationDAO.updateAccessControl(username, request.getFileName(), flag);
 
-        // FIXME confirmar
         Tig.StatusReply.Builder builder = Tig.StatusReply.newBuilder();
         builder.setCode(Tig.StatusCode.OK);
         responseObserver.onNext(builder.build());

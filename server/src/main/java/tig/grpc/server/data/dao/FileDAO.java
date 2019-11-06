@@ -93,13 +93,15 @@ public class FileDAO {
 
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
         try {
-            PreparedStatement delete_stmt = conn.prepareStatement("DELETE FROM files WHERE fileid = (?)");
-            delete_stmt.setString(1, fileid);
+            // So o owner pode apagar um ficheiro
+            if (!username.equals(owner))
+                throw new IllegalArgumentException("Only the owner of the file can delete the file.");
+
+            PreparedStatement delete_stmt = conn.prepareStatement("DELETE FROM files WHERE filename=(?) AND owner=(?)");
+            delete_stmt.setString(1, filename);
+            delete_stmt.setString(2, username);
             delete_stmt.executeUpdate();
-
-
         } catch (SQLException e) {
-            // TODO rever
             throw new IllegalArgumentException("No such file name.");
         }
 
@@ -111,14 +113,23 @@ public class FileDAO {
         PreparedStatement stmt = null;
         try {
             // TODO rever
-            stmt = conn.prepareStatement("SELECT filename,fileid FROM authorizations NATURAL JOIN files WHERE username = (?) or public = TRUE");
+            stmt = conn.prepareStatement("SELECT filename,owner FROM files WHERE owner = (?)");
             stmt.setString(1, username);
             ResultSet rs = stmt.executeQuery();
 
             List<String> result = new ArrayList<String>();
             while (rs.next()) {
-                result.add(rs.getString("filename") + " " + rs.getString("fileid"));
+                result.add(rs.getString("filename") + " " + rs.getString("owner"));
             }
+
+            stmt = conn.prepareStatement("SELECT filename,owner,R,W FROM authorizations WHERE user = (?)");
+            stmt.setString(1, username);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                result.add(rs.getString("filename") + " " + rs.getString("owner") +
+                        " R:" +  rs.getString("R")  + " W:" + rs.getString("W"));
+            }
+
             return result;
 
         } catch (SQLException e) {
