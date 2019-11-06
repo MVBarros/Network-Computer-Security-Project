@@ -36,7 +36,8 @@ message FileChunk {
   bytes content = 1;
   string sessionId = 2;
   string fileName = 3;
-  int32 sequence = 4;
+  string owner = 4;
+  int32 sequence = 5;
 }
 
 message StatusReply {
@@ -53,13 +54,15 @@ enum StatusCode {
 message FileRequest {
   string sessionId = 1;
   string fileName = 2;
+  string owner = 3;
 }
 
 //ACCESS CONTROL OPERATION
 message OperationRequest {
   string sessionId = 1;
   string fileName = 2;
-  OperationEnum operation = 3;
+  string owner = 3;
+  OperationEnum operation = 4;
 }
 
 enum OperationEnum {
@@ -70,4 +73,5 @@ enum OperationEnum {
 //LIST FILES
 message ListFilesReply {
   repeated string fileNames = 1;
+  repeated string fileowners = 2;
 }
