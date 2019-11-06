@@ -10,19 +10,31 @@ import java.sql.SQLException;
 
 public class AuthenticationDAO {
 
-    public static void authenticateFileAccess(String username, String fileId) {
+    public static void authenticateFileAccess(String username, String filename, String owner, int type) {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
 
         try {
-            PreparedStatement stmt = conn.prepareStatement("SELECT * FROM authorizations " +
-                    "WHERE username=(?) AND fileId=(?)");
+            PreparedStatement stmt = conn.prepareStatement("SELECT * FROM files " +
+                    "WHERE owner=(?) AND filename=(?)");
             stmt.setString(1, username);
-            stmt.setString(2, fileId);
+            stmt.setString(2, filename);
 
             ResultSet rs = stmt.executeQuery();
             if (!rs.next()) {
                 //Query was empty
-                throw new IllegalArgumentException("Cannot access given document");
+                PreparedStatement stmt2 = conn.prepareStatement("SELECT * FROM authorizations" +
+                        "WHERE owner=(?) AND filename=(?) AND user=(?) AND permission >= (?)");
+                stmt2.setString(1, owner);
+                stmt2.setString(2, filename);
+                stmt2.setString(3, username);
+                stmt2.setInt(4, type);
+                rs = stmt2.executeQuery();
+                if (!rs.next()) {
+                    //Query was empty
+                    throw new IllegalArgumentException("Cannot access given document");
+                }
+
+
             }
         } catch (SQLException e) {
             //Should not happen
@@ -30,34 +42,32 @@ public class AuthenticationDAO {
         }
     }
 
-    public static void createAuth(String username, String fileId, Boolean auth) {
+    public static void updateAccessControl(String filename, String owner, String target, int permission) {
+        //so o owner pode executar esta funcao
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
-        //FIXME se if auth already exists on intermediary version
+
         try {
-            PreparedStatement stmt = conn.prepareStatement("INSERT INTO authorizations VALUES (?,?,?)");
-            stmt.setString(1, username);
-            stmt.setString(2, fileId);
-            stmt.setBoolean(3, auth);
+            PreparedStatement stmt;
+            // permission = 0 é READ
+            // permission = 1 é WRITE
+            // permission = 2 é NONE
+            if (permission == 2) {
+                stmt = conn.prepareStatement("DELETE FROM authorizations WHERE filename=(?) AND owner=(?) AND username=(?)");
+                stmt.setString(1, filename);
+                stmt.setString(2, owner);
+                stmt.setString(3, target);
+            } else {
+                // nao verificamos se user tem este file porque se nao tiver da SQL violation (neste caso foreign key violation)
+                stmt = conn.prepareStatement("REPLACE INTO authorizations (filename, owner, username, permission) VALUES (?,?,?,?");
+                stmt.setString(1, filename);
+                stmt.setString(2, owner);
+                stmt.setString(3, target);
+                stmt.setInt(4, permission);
+            }
+
             stmt.executeUpdate();
         } catch (SQLException e) {
-            //Auth already exists
-            throw new IllegalArgumentException("Impossible.");
-        }
-    }
-
-    public static void updateAccessControl(String username, String fileid, Boolean auth) {
-        Connection conn = PostgreSQLJDBC.getInstance().getConn();
-
-        PreparedStatement stmt = null;
-        try {
-                PreparedStatement update_stmt = conn.prepareStatement("UPDATE authorizations SET public =(?) WHERE fileid =(?)");
-                update_stmt.setBoolean(1, auth);
-                update_stmt.setString(2, fileid);
-                update_stmt.executeUpdate();
-
-        } catch (SQLException e) {
-            // TODO rever
-            throw new IllegalArgumentException("No such file name.");
+            throw new IllegalArgumentException("No such file name owned");
         }
 
     }

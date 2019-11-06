@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 import tig.grpc.server.api.TigServiceImpl;
 import tig.grpc.server.data.PostgreSQLJDBC;
 import tig.grpc.server.interceptor.ExceptionHandler;
+import tig.grpc.server.session.TokenCleanupThread;
 
 public class DocumentServer {
     private static final Logger logger = Logger.getLogger(DocumentServer.class);
@@ -47,8 +48,11 @@ public class DocumentServer {
                 server.shutdownNow();
             }
         });
-        // Do not exit the main thread. Wait until server is terminated.
 
+        //Cleanup hanging Session Tokens in the background
+        new Thread(new TokenCleanupThread()).start();
+
+        // Do not exit the main thread. Wait until server is terminated.
         server.awaitTermination();
     }
 

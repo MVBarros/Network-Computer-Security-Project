@@ -11,29 +11,24 @@ import tig.grpc.server.data.dao.FileDAO;
 import tig.grpc.server.data.dao.UsersDAO;
 import tig.grpc.server.session.SessionAuthenticator;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
     private final static Logger logger = Logger.getLogger(TigServiceImpl.class);
 
     @Override
-    public void register(Tig.LoginRequest request, StreamObserver<Tig.StatusReply> responseObserver) {
+    public void register(Tig.AccountRequest request, StreamObserver<Empty> responseObserver) {
         logger.info(String.format("Register username: %s", request.getUsername()));
 
         UsersDAO.insertUser(request.getUsername(), request.getPassword());
 
-        Tig.StatusReply.Builder builder = Tig.StatusReply.newBuilder();
-        builder.setCode(Tig.StatusCode.OK);
-
-        responseObserver.onNext(builder.build());
+        responseObserver.onNext(Empty.newBuilder().build());
         responseObserver.onCompleted();
     }
 
     @Override
-    public void login(Tig.LoginRequest request, StreamObserver<Tig.LoginReply> responseObserver) {
+    public void login(Tig.AccountRequest request, StreamObserver<Tig.LoginReply> responseObserver) {
         logger.info(String.format("Login username: %s", request.getUsername()));
 
         UsersDAO.authenticateUser(request.getUsername(), request.getPassword());
@@ -55,60 +50,55 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
     }
 
     @Override
-    public void deleteFile(Tig.FileRequest request, StreamObserver<Tig.StatusReply> responseObserver) {
-        logger.info(String.format("Delete filename: %s", request.getFileName()));
+    public void deleteFile(Tig.DeleteFileRequest request, StreamObserver<Empty> responseObserver) {
         String username = SessionAuthenticator.authenticateSession(request.getSessionId());
-        AuthenticationDAO.authenticateFileAccess(username, request.getFileName());
 
-        FileDAO.deleteFile(username, request.getFileName());
+        logger.info(String.format("Delete filename: %s of users %s", request.getFilename(), username));
 
-        // FIXME e assim?
-        Tig.StatusReply.Builder builder = Tig.StatusReply.newBuilder();
-        builder.setCode(Tig.StatusCode.OK);
-        responseObserver.onNext(builder.build());
+        FileDAO.deleteFile(username, request.getFilename());
+
+        responseObserver.onNext(Empty.newBuilder().build());
         responseObserver.onCompleted();
     }
 
     @Override
-    public void accessControlFile(Tig.OperationRequest request, StreamObserver<Tig.StatusReply> responseObserver) {
-        logger.info(String.format("Access Control from: %s and make it: %s", request.getFileName(), request.getOperation()));
+    public void accessControlFile(Tig.AccessControlRequest request, StreamObserver<Empty> responseObserver) {
         String username = SessionAuthenticator.authenticateSession(request.getSessionId());
-        AuthenticationDAO.authenticateFileAccess(username, request.getFileName());
 
-        boolean flag = request.getOperation().equals("PUBLIC");
-        AuthenticationDAO.updateAccessControl(username, request.getFileName(), flag);
+        logger.info(String.format("Access Control from file %s of user %s to user %s and make it: %s", request.getFileName(),
+                username, request.getTarget(), request.getPermission()));
 
-        // FIXME confirmar
-        Tig.StatusReply.Builder builder = Tig.StatusReply.newBuilder();
-        builder.setCode(Tig.StatusCode.OK);
-        responseObserver.onNext(builder.build());
+
+        AuthenticationDAO.updateAccessControl(request.getFileName(), username, request.getTarget(), request.getPermission().getNumber());
+
+        responseObserver.onNext(Empty.newBuilder().build());
         responseObserver.onCompleted();
     }
 
     @Override
     public void listFiles(Tig.SessionRequest request, StreamObserver<Tig.ListFilesReply> responseObserver) {
-        logger.info("List files");
         String username = SessionAuthenticator.authenticateSession(request.getSessionId());
         List<String> files = FileDAO.listFiles(username);
+        logger.info("List files " + username);
 
         Tig.ListFilesReply.Builder builder = Tig.ListFilesReply.newBuilder();
-        builder.addAllFileNames(files);
+        builder.addAllFileInfo(files);
         responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
 
     }
 
     @Override
-    public StreamObserver<Tig.FileChunk> uploadFile(StreamObserver<Tig.StatusReply> responseObserver) {
-        return new StreamObserver<Tig.FileChunk>() {
+    public StreamObserver<Tig.FileChunkClientUpload> uploadFile(StreamObserver<Empty> responseObserver) {
+        return new StreamObserver<Tig.FileChunkClientUpload>() {
             private int counter = 0;
-            private ByteString file = ByteString.copyFrom(new byte[] {});
+            private ByteString file = ByteString.copyFrom(new byte[]{});
             private String filename;
             private String username;
             private final Object lock = new Object();
 
             @Override
-            public void onNext(Tig.FileChunk value) {
+            public void onNext(Tig.FileChunkClientUpload value) {
                 //Synchronize onNext calls by sequence
                 synchronized (lock) {
                     while (counter != value.getSequence()) {
@@ -122,7 +112,6 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
                         username = SessionAuthenticator.authenticateSession(value.getSessionId());
                         filename = value.getFileName();
                     }
-                    logger.info(String.format("Upload file %s chunk %d", filename, value.getSequence()));
 
                     file = file.concat(value.getContent());
                     counter++;
@@ -137,7 +126,7 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
 
             @Override
             public void onCompleted() {
-                responseObserver.onNext(Tig.StatusReply.newBuilder().setCode(Tig.StatusCode.OK).build());
+                responseObserver.onNext(Empty.newBuilder().build());
                 FileDAO.fileUpload(filename, file.toByteArray(), username);
                 responseObserver.onCompleted();
             }
@@ -147,16 +136,16 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
     }
 
     @Override
-    public StreamObserver<Tig.FileChunk> editFile(StreamObserver<Tig.StatusReply> responseObserver) {
-        return new StreamObserver<Tig.FileChunk>() {
+    public StreamObserver<Tig.FileChunkClientEdit> editFile(StreamObserver<Empty> responseObserver) {
+        return new StreamObserver<Tig.FileChunkClientEdit>() {
             private int counter = 0;
             private ByteString file = ByteString.copyFrom(new byte[0]);
-            private String fileID;
             private String filename;
+            private String owner;
             private final Object lock = new Object();
 
             @Override
-            public void onNext(Tig.FileChunk value) {
+            public void onNext(Tig.FileChunkClientEdit value) {
                 //Synchronize onNext calls
                 synchronized (lock) {
                     while (counter != value.getSequence()) {
@@ -167,17 +156,18 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
                         }
                     }
                     if (counter == 0) {
-                        SessionAuthenticator.authenticateSession(value.getSessionId());
-                        AuthenticationDAO.authenticateFileAccess(SessionAuthenticator.authenticateSession(value.getSessionId()), value.getFileName());
-                        filename = FileDAO.getFilename(fileID);
-                        fileID = value.getFileName();
+                        String username = SessionAuthenticator.authenticateSession(value.getSessionId());
+                        AuthenticationDAO.authenticateFileAccess(username, value.getFileName(), value.getOwner(), 1);
                     }
-                    logger.info(String.format("Edit file %s chunk %d", fileID, value.getSequence()));
+
+                    filename = value.getFileName();
+                    owner = value.getOwner();
                     file = file.concat(value.getContent());
                     counter++;
                     lock.notify();
                 }
             }
+
             @Override
             public void onError(Throwable t) {
                 responseObserver.onError(t);
@@ -185,29 +175,28 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
 
             @Override
             public void onCompleted() {
-                responseObserver.onNext(Tig.StatusReply.newBuilder().setCode(Tig.StatusCode.OK).build());
-                FileDAO.fileEdit(fileID, filename, file.toByteArray());
+                responseObserver.onNext(Empty.newBuilder().build());
+                FileDAO.fileEdit(filename, file.toByteArray(), owner);
             }
 
         };
     }
 
     @Override
-    public void downloadFile(Tig.FileRequest request, StreamObserver<Tig.FileChunk> responseObserver) {
-        //FIXME Test this
+    public void downloadFile(Tig.FileRequest request, StreamObserver<Tig.FileChunkDownload> responseObserver) {
         logger.info(String.format("Download file: %s", request.getFileName()));
 
         String username = SessionAuthenticator.authenticateSession(request.getSessionId());
-        AuthenticationDAO.authenticateFileAccess(username, request.getFileName());
+        AuthenticationDAO.authenticateFileAccess(username, request.getFileName(), request.getOwner(), 0);
 
-        byte[] file = FileDAO.getFileContent(request.getFileName());
-
-        //Send file 1kb chunk at a time
-        for (int i = 0; i < file.length; i += 1024) {
-            int chunkSize = Math.min(1024, file.length - i);
-            Tig.FileChunk.Builder builder = Tig.FileChunk.newBuilder();
-            builder.setFileName(request.getFileName());
+        byte[] file = FileDAO.getFileContent(request.getFileName(), request.getOwner());
+        int sequence = 0;
+        //Send file 1MB chunk at a time
+        for (int i = 0; i < file.length; i += 1024 * 1024, sequence++) {
+            int chunkSize = Math.min(1024 * 1024, file.length - i);
+            Tig.FileChunkDownload.Builder builder = Tig.FileChunkDownload.newBuilder();
             builder.setContent(ByteString.copyFrom(Arrays.copyOfRange(file, i, i + chunkSize)));
+            builder.setSequence(sequence);
             responseObserver.onNext(builder.build());
         }
         responseObserver.onCompleted();
