@@ -2,7 +2,6 @@ package tig.grpc.server.data.dao;
 
 import tig.grpc.server.data.PostgreSQLJDBC;
 import tig.grpc.server.utils.EncryptionUtils;
-import tig.grpc.server.utils.StringGenerator;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -110,7 +109,7 @@ public class FileDAO {
             List<String> result = new ArrayList<String>();
             while (rs.next()) {
                 if (rs.getString("username").equals(rs.getString("owner")) &&
-                            !ownedFiles.contains(rs.getString("filename"))) {
+                        !ownedFiles.contains(rs.getString("filename"))) {
                     result.add(String.format("File:%s\tOwner:%s\tPermission:R/W", rs.getString("filename"), rs.getString("owner")));
                     ownedFiles.add(rs.getString("filename"));
 
@@ -120,7 +119,7 @@ public class FileDAO {
                 }
             }
 
-            if(result.size() == 0) {
+            if (result.size() == 0) {
                 result.add("User has no files");
             }
             return result;
