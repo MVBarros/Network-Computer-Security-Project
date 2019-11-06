@@ -188,13 +188,13 @@ public class Operations {
 
     }
 
-    public static void deleteFile(Client client, String fileId) {
+    public static void deleteFile(Client client, String filename) {
         try {
-            System.out.println(String.format("Delete File with fileid %s ", fileId));
-            client.getStub().deleteFile(Tig.FileRequest.newBuilder()
+            System.out.println(String.format("Delete File %s ", filename));
+            client.getStub().deleteFile(Tig.DeleteFileRequest.newBuilder()
                     .setSessionId(client.getSessionId())
-                    .setFileName(fileId).build());
-            System.out.println(String.format("File %s Successfully deleted", fileId));
+                    .setFilename(filename).build());
+            System.out.println(String.format("File %s Successfully deleted", filename));
         } catch (StatusRuntimeException e) {
             System.out.print("Error deleting file: ");
             System.out.println(e.getStatus().getDescription());
