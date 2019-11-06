@@ -38,11 +38,8 @@ public class FileDAO {
         String fileID = StringGenerator.randomStringNoMetacharacters(256);
         try {
             PreparedStatement stmt = conn.prepareStatement("INSERT INTO files VALUES (?,?,?,?)");
-
             stmt.setString(1, filename);
-
             stmt.setString(2, username);
-            // TODO rever!
             stmt.setString(3, LocalDateTime.now().toString());
             stmt.setBytes(4, fileContent);
 
