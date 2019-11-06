@@ -170,7 +170,6 @@ public class Operations {
                 }
                 sequence++;
             }
-
             requestObserver.onCompleted();
 
             //Wait for server to finish saving file to Database
