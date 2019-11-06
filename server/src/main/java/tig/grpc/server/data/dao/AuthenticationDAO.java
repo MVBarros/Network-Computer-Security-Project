@@ -10,7 +10,7 @@ import java.sql.SQLException;
 
 public class AuthenticationDAO {
 
-    public static void authenticateFileAccess(String username, String filename, String owner) {
+    public static void authenticateFileAccess(String username, String filename, String owner, int type) {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
 
         try {
@@ -22,13 +22,13 @@ public class AuthenticationDAO {
             ResultSet rs = stmt.executeQuery();
             if (!rs.next()) {
                 //Query was empty
-                stmt = conn.prepareStatement("SELECT * FROM authorizations" +
-                        "WHERE owner=(?) AND filename=(?) AND user=(?)");
-                stmt.setString(1, owner);
-                stmt.setString(2, filename);
-                stmt.setString(3, username);
-                stmt.setString(4, username);
-                rs = stmt.executeQuery();
+                PreparedStatement stmt2 = conn.prepareStatement("SELECT * FROM authorizations" +
+                        "WHERE owner=(?) AND filename=(?) AND user=(?) AND permission >= (?)");
+                stmt2.setString(1, owner);
+                stmt2.setString(2, filename);
+                stmt2.setString(3, username);
+                stmt2.setInt(4, type);
+                rs = stmt2.executeQuery();
                 if (!rs.next()) {
                     //Query was empty
                     throw new IllegalArgumentException("Cannot access given document");
@@ -42,14 +42,15 @@ public class AuthenticationDAO {
         }
     }
 
-    public static void createAuth(String username, String fileId, Boolean auth) {
+    public static void createAuth(String filename, String owner, String username, int permission) {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
         //FIXME se if auth already exists on intermediary version
         try {
-            PreparedStatement stmt = conn.prepareStatement("INSERT INTO authorizations VALUES (?,?,?)");
-            stmt.setString(1, username);
-            stmt.setString(2, fileId);
-            stmt.setBoolean(3, auth);
+            PreparedStatement stmt = conn.prepareStatement("INSERT INTO authorizations VALUES (?,?,?,?)");
+            stmt.setString(1, filename);
+            stmt.setString(2, owner);
+            stmt.setString(3, username);
+            stmt.setInt(4, permission);
             stmt.executeUpdate();
         } catch (SQLException e) {
             //Auth already exists
