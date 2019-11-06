@@ -1,6 +1,7 @@
 package tig.grpc.client;
 
 import com.google.protobuf.ByteString;
+import com.google.protobuf.Empty;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
@@ -16,7 +17,7 @@ public class Operations {
     public static void registerClient(Client client) {
         try {
             System.out.println(String.format("Register Client %s", client.getUsername()));
-            client.getStub().register(Tig.LoginRequest.newBuilder()
+            client.getStub().register(Tig.AccountRequest.newBuilder()
                     .setUsername(client.getUsername())
                     .setPassword(client.getPassword()).build());
             System.out.println(String.format("User %s Successfully registered", client.getUsername()));
@@ -31,7 +32,7 @@ public class Operations {
         try {
             System.out.println(String.format("Login Client %s", client.getUsername()
             ));
-            client.setSessionId(client.getStub().login(Tig.LoginRequest.newBuilder()
+            client.setSessionId(client.getStub().login(Tig.AccountRequest.newBuilder()
                     .setUsername(client.getUsername())
                     .setPassword(client.getPassword()).build()).getSessionId().toString());
             System.out.println(String.format("User %s Successfully logged in", client.getUsername()));
@@ -61,16 +62,14 @@ public class Operations {
         final CountDownLatch finishLatch = new CountDownLatch(1);
         int sequence = 0;
 
-        StreamObserver<Tig.StatusReply> responseObserver = new StreamObserver<Tig.StatusReply>() {
+        StreamObserver<Empty> responseObserver = new StreamObserver<Empty>() {
             @Override
-            public void onNext(Tig.StatusReply statusReply) {
+            public void onNext(Empty empty) {
             }
-
             @Override
             public void onError(Throwable throwable) {
                 finishLatch.countDown();
             }
-
             @Override
             public void onCompleted() {
                 finishLatch.countDown();
@@ -80,14 +79,14 @@ public class Operations {
         //Send file one megabyte at a time
         byte[] data = new byte[1024 * 1024];
 
-        StreamObserver<Tig.FileChunk> requestObserver = client.getAsyncStub().uploadFile(responseObserver);
+        StreamObserver<Tig.FileChunkClientUpload> requestObserver = client.getAsyncStub().uploadFile(responseObserver);
 
         try {
             BufferedInputStream in = new BufferedInputStream(new FileInputStream(filePath));
             int numRead;
             //Send file chunks to server
             while ((numRead =in.read(data)) >= 0) {
-                Tig.FileChunk.Builder fileChunk = Tig.FileChunk.newBuilder();
+                Tig.FileChunkClientUpload.Builder fileChunk = Tig.FileChunkClientUpload.newBuilder();
                 fileChunk.setContent(ByteString.copyFrom(Arrays.copyOfRange(data, 0, numRead)));
                 fileChunk.setFileName(filename);
                 fileChunk.setSessionId(client.getSessionId());
