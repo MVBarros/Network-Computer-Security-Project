@@ -4,91 +4,90 @@ import "google/protobuf/empty.proto";
 
 
 service TigService {
-  rpc register(AccountRequest) returns (google.protobuf.Empty);
-  rpc login(AccountRequest) returns (LoginReply);
-  rpc logout(SessionRequest) returns (google.protobuf.Empty);
-  rpc uploadFile(stream FileChunkClientUpload) returns (google.protobuf.Empty);
-  rpc editFile(stream FileChunkClientEdit) returns (google.protobuf.Empty);
-  rpc deleteFile(DeleteFileRequest) returns (google.protobuf.Empty);
-  rpc accessControlFile(AccessControlRequest) returns (google.protobuf.Empty);
-  rpc downloadFile(FileRequest) returns (stream FileChunkDownload);
-  rpc listFiles(SessionRequest) returns (ListFilesReply);
+    rpc register (AccountRequest) returns (google.protobuf.Empty);
+    rpc login (AccountRequest) returns (LoginReply);
+    rpc logout (SessionRequest) returns (google.protobuf.Empty);
+    rpc uploadFile (stream FileChunkClientUpload) returns (google.protobuf.Empty);
+    rpc editFile (stream FileChunkClientEdit) returns (google.protobuf.Empty);
+    rpc deleteFile (DeleteFileRequest) returns (google.protobuf.Empty);
+    rpc accessControlFile (AccessControlRequest) returns (google.protobuf.Empty);
+    rpc downloadFile (FileRequest) returns (stream FileChunkDownload);
+    rpc listFiles (SessionRequest) returns (ListFilesReply);
 }
-
 
 // LOGIN OPERATION
 message AccountRequest {
-  string username = 1;
-  string password = 2;
+    string username = 1;
+    string password = 2;
 }
 
 message LoginReply {
-  StatusCode code = 1;
-  string sessionId = 2;
+    StatusCode code = 1;
+    string sessionId = 2;
 }
 
 message SessionRequest {
-  string sessionId = 1;
+    string sessionId = 1;
 }
 
 // FILE STREAM OPERATION
 message FileChunkClientUpload {
-  bytes content = 1;
-  string sessionId = 2;
-  string fileName = 3;
-  int32 sequence = 4;
+    bytes content = 1;
+    string sessionId = 2;
+    string fileName = 3;
+    int32 sequence = 4;
 }
 
 message FileChunkClientEdit {
-  bytes content = 1;
-  string sessionId = 2;
-  string fileName = 3;
-  string owner = 4;
-  int32 sequence = 5;
+    bytes content = 1;
+    string sessionId = 2;
+    string fileName = 3;
+    string owner = 4;
+    int32 sequence = 5;
 }
 
 message FileChunkDownload {
-  bytes content = 1;
-  int32 sequence = 2;
+    bytes content = 1;
+    int32 sequence = 2;
 }
 
 message StatusReply {
-  StatusCode code = 1;
+    StatusCode code = 1;
 }
 
 enum StatusCode {
-  UNKNOWN = 0;
-  OK = 1;
-  FAILED = 2;
+    UNKNOWN = 0;
+    OK = 1;
+    FAILED = 2;
 }
 
 //FILE OPERATION
 message FileRequest {
-  string sessionId = 1;
-  string fileName = 2;
-  string owner = 3;
+    string sessionId = 1;
+    string fileName = 2;
+    string owner = 3;
 }
 
 //ACCESS CONTROL OPERATION
 message AccessControlRequest {
-  string sessionId = 1;
-  string fileName = 2;
-  string target = 3;
-  PermissionEnum permission = 4;
-  }
+    string sessionId = 1;
+    string fileName = 2;
+    string target = 3;
+    PermissionEnum permission = 4;
+}
 enum PermissionEnum {
-  READ = 0;
-  WRITE = 1;
-  NONE = 2;
+    READ = 0;
+    WRITE = 1;
+    NONE = 2;
 }
 
 //DELETE FILE OPERATION
 message DeleteFileRequest {
-  string sessionId = 1;
-  string filename = 2;
+    string sessionId = 1;
+    string filename = 2;
 }
 
 //LIST FILES
 message ListFilesReply {
-  repeated string fileInfo = 1;
+    repeated string fileInfo = 1;
 }

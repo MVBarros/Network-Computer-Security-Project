@@ -90,14 +90,13 @@ public class FileDAO {
             delete_stmt.setString(1, filename);
             delete_stmt.setString(2, username);
             int result = delete_stmt.executeUpdate();
-            if(result == 0) {
+            if (result == 0) {
                 throw new IllegalArgumentException("No such file name owned.");
             }
         } catch (SQLException e) {
             //Should never happen
             throw new RuntimeException();
         }
-
     }
 
     public static List<String> listFiles(String username) {

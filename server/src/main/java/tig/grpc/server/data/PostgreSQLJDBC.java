@@ -49,6 +49,5 @@ public class PostgreSQLJDBC {
             instance = new PostgreSQLJDBC();
         }
         return instance;
-
     }
 }

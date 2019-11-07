@@ -3,6 +3,7 @@ package tig.grpc.server.utils.encryption;
 public class EncryptedFile {
     private byte[] content;
     private byte[] iv;
+
     public byte[] getContent() {
         return content;
     }

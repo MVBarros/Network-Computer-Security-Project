@@ -14,7 +14,6 @@ public class TokenCleanupThread implements Runnable {
                 Thread.sleep(5 * 60 * 1000);
             } catch (InterruptedException e) {
             }
-
         }
     }
 }

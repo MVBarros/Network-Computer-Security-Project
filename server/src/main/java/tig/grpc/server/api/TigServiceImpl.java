@@ -68,7 +68,6 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
         logger.info(String.format("Access Control from file %s of user %s to user %s and make it: %s", request.getFileName(),
                 username, request.getTarget(), request.getPermission()));
 
-
         AuthenticationDAO.updateAccessControl(request.getFileName(), username, request.getTarget(), request.getPermission().getNumber());
 
         responseObserver.onNext(Empty.newBuilder().build());
@@ -85,7 +84,6 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
         builder.addAllFileInfo(files);
         responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
-
     }
 
     @Override
@@ -131,9 +129,7 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
                 FileDAO.fileUpload(filename, file.toByteArray(), username);
                 responseObserver.onCompleted();
             }
-
         };
-
     }
 
     @Override
@@ -170,7 +166,6 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
                 }
             }
 
-
             @Override
             public void onError(Throwable t) {
                 responseObserver.onError(t);
@@ -182,7 +177,6 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
                 FileDAO.fileEdit(filename, file.toByteArray(), owner);
                 responseObserver.onCompleted();
             }
-
         };
     }
 
@@ -205,5 +199,4 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
         }
         responseObserver.onCompleted();
     }
-
 }

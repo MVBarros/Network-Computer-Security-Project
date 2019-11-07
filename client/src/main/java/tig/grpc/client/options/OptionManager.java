@@ -1,6 +1,5 @@
 package tig.grpc.client.options;
 
-import jdk.nashorn.internal.runtime.regexp.joni.constants.OPCode;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
@@ -65,7 +64,7 @@ public class OptionManager {
         Operations.loginClient(client);
 
         if (cmd.hasOption('d')) {
-            Operations.downloadFile(client, cmd.getOptionValues('d')[0], cmd.getOptionValues('d')[1], cmd.getOptionValues('d')[2]) ;
+            Operations.downloadFile(client, cmd.getOptionValues('d')[0], cmd.getOptionValues('d')[1], cmd.getOptionValues('d')[2]);
             return;
         }
         if (cmd.hasOption('u')) {
@@ -98,7 +97,6 @@ public class OptionManager {
                 default:
                     System.out.println("Invalid permission value, can only be READ, WRITE or NONE");
             }
-
         }
     }
 }

@@ -11,7 +11,6 @@ public class EncryptionUtils {
 
     public static SecretKey generateAESKey() {
         try {
-            //FIXME java doesn't allow AES encryption with keys bigger than 16 bytes
             KeyGenerator keyGen = KeyGenerator.getInstance("AES");
             keyGen.init(128);
             SecretKey secretKey = keyGen.generateKey();

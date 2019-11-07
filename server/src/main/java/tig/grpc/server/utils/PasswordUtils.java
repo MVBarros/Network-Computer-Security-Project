@@ -19,12 +19,6 @@ public class PasswordUtils {
         return salt;
     }
 
-    /**
-     * Generates a Password Hash for a given password
-     *
-     * @param password the password to hash
-     * @return Hash String of password
-     */
     public static byte[] generateStrongPasswordHash(String password, byte[] salt, int iterations) {
         try {
 
@@ -38,9 +32,7 @@ public class PasswordUtils {
             e.printStackTrace();
             throw new RuntimeException();
         }
-
     }
-
 
     public static boolean validatePassword(byte[] originalPassword, byte[] hashedPassword) {
         if (originalPassword.length != hashedPassword.length) {
@@ -52,7 +44,5 @@ public class PasswordUtils {
             }
         }
         return true;
-
     }
-
 }

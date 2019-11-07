@@ -1,109 +1,109 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<!-- http://maven.apache.org/pom.html#Quick_Overview -->
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <!-- http://maven.apache.org/pom.html#Quick_Overview -->
 
-	<groupId>T17.SIRS</groupId>
-	<artifactId>tig-client</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
-	<packaging>jar</packaging>
+    <groupId>T17.SIRS</groupId>
+    <artifactId>tig-client</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
 
-	<name>${project.artifactId}</name>
-	
-	<parent>
-		<groupId>T17.SIRS</groupId>
-		<artifactId>tig</artifactId>
-		<version>1.0.0.RELEASE</version>
-	</parent>
-		
-	<properties>
-		<!-- compiler properties -->
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <name>${project.artifactId}</name>
 
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
+    <parent>
+        <groupId>T17.SIRS</groupId>
+        <artifactId>tig</artifactId>
+        <version>1.0.0.RELEASE</version>
+    </parent>
 
-		<exec-maven-plugin.version>1.6.0</exec-maven-plugin.version>
+    <properties>
+        <!-- compiler properties -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-		<!-- application properties -->
-		<mainclass>tig.grpc.client.app.App</mainclass>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
 
-		<server.host>localhost</server.host>
-		<server.port>8080</server.port>
-	</properties>
+        <exec-maven-plugin.version>1.6.0</exec-maven-plugin.version>
 
-	<dependencies>
-		<!-- contract brings gRPC dependencies with it -->
-		<dependency>
-			<groupId>T17.SIRS</groupId>
-			<artifactId>tig-contract</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
-		</dependency>
-		<!-- JUnit -->
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.12</version>
-			<scope>test</scope>
-		</dependency>
-		<!-- https://mvnrepository.com/artifact/commons-cli/commons-cli -->
-		<dependency>
-			<groupId>commons-cli</groupId>
-			<artifactId>commons-cli</artifactId>
-			<version>1.3.1</version>
-		</dependency>
+        <!-- application properties -->
+        <mainclass>tig.grpc.client.app.App</mainclass>
 
-	</dependencies>
+        <server.host>localhost</server.host>
+        <server.port>8080</server.port>
+    </properties>
 
-	<build>
-		<plugins>
-			<!-- Plugin that provides two goals to execute system and Java programs --> 
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
-				<version>${exec-maven-plugin.version}</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>java</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<!-- to prevent deprecation warning: -->
-					<killAfter>-1</killAfter>
-					<mainClass>${mainclass}</mainClass>
-					<cleanupDaemonThreads>false</cleanupDaemonThreads>
-					<arguments>
-						<argument>${server.host}</argument>
-						<argument>${server.port}</argument>
-					</arguments>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>single</goal>
-						</goals>
-						<configuration>
-							<archive>
-								<manifest>
-									<mainClass>${mainclass}</mainClass>
-								</manifest>
-							</archive>
-							<descriptorRefs>
-								<descriptorRef>jar-with-dependencies</descriptorRef>
-							</descriptorRefs>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
+    <dependencies>
+        <!-- contract brings gRPC dependencies with it -->
+        <dependency>
+            <groupId>T17.SIRS</groupId>
+            <artifactId>tig-contract</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+        <!-- JUnit -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/commons-cli/commons-cli -->
+        <dependency>
+            <groupId>commons-cli</groupId>
+            <artifactId>commons-cli</artifactId>
+            <version>1.3.1</version>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Plugin that provides two goals to execute system and Java programs -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>${exec-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <!-- to prevent deprecation warning: -->
+                    <killAfter>-1</killAfter>
+                    <mainClass>${mainclass}</mainClass>
+                    <cleanupDaemonThreads>false</cleanupDaemonThreads>
+                    <arguments>
+                        <argument>${server.host}</argument>
+                        <argument>${server.port}</argument>
+                    </arguments>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <archive>
+                                <manifest>
+                                    <mainClass>${mainclass}</mainClass>
+                                </manifest>
+                            </archive>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

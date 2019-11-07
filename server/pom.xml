@@ -1,89 +1,89 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>T17.SIRS</groupId>
-	<artifactId>tig-server</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
-	<packaging>jar</packaging>
-
-	<name>${project.artifactId}</name>
-
-
-  <parent>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
     <groupId>T17.SIRS</groupId>
-    <artifactId>tig</artifactId>
-    <version>1.0.0.RELEASE</version>
-  </parent>
+    <artifactId>tig-server</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
 
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <name>${project.artifactId}</name>
 
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
 
-		<exec-maven-plugin.version>1.6.0</exec-maven-plugin.version>
+    <parent>
+        <groupId>T17.SIRS</groupId>
+        <artifactId>tig</artifactId>
+        <version>1.0.0.RELEASE</version>
+    </parent>
 
-		<!-- application properties -->
-		<mainclass>tig.grpc.server.service.DocumentServer</mainclass>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-		<server.port>8080</server.port>
-		<db.port>5432</db.port>
-		<db.password>root</db.password>
-	</properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
 
-	<dependencies>
-		<!-- contract brings gRPC dependencies with it -->
-		<dependency>
-			<groupId>T17.SIRS</groupId>
-			<artifactId>tig-contract</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
-		</dependency>
-		<!-- JUnit -->
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.12</version>
-			<scope>test</scope>
-		</dependency>
-		<!--Postgres-->
-		<dependency>
-			<groupId>postgresql</groupId>
-			<artifactId>postgresql</artifactId>
-			<version>9.0-801.jdbc4</version>
-		</dependency>
-		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>1.2.17</version>
-		</dependency>
-	</dependencies>
+        <exec-maven-plugin.version>1.6.0</exec-maven-plugin.version>
 
-	<build>
-		<plugins>
-			<!-- Plugin that provides two goals to execute system and Java programs -->
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
-				<version>${exec-maven-plugin.version}</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>java</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<!-- to prevent deprecation warning: -->
-					<killAfter>-1</killAfter>
-					<mainClass>${mainclass}</mainClass>
-					<arguments>
-						<argument>${server.port}</argument>
-						<argument>${db.port}</argument>
-						<argument>${db.password}</argument>
-					</arguments>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+        <!-- application properties -->
+        <mainclass>tig.grpc.server.service.DocumentServer</mainclass>
+
+        <server.port>8080</server.port>
+        <db.port>5432</db.port>
+        <db.password>root</db.password>
+    </properties>
+
+    <dependencies>
+        <!-- contract brings gRPC dependencies with it -->
+        <dependency>
+            <groupId>T17.SIRS</groupId>
+            <artifactId>tig-contract</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+        <!-- JUnit -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+        <!--Postgres-->
+        <dependency>
+            <groupId>postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>9.0-801.jdbc4</version>
+        </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.17</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Plugin that provides two goals to execute system and Java programs -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>${exec-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <!-- to prevent deprecation warning: -->
+                    <killAfter>-1</killAfter>
+                    <mainClass>${mainclass}</mainClass>
+                    <arguments>
+                        <argument>${server.port}</argument>
+                        <argument>${db.port}</argument>
+                        <argument>${db.password}</argument>
+                    </arguments>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

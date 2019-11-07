@@ -30,5 +30,4 @@ public class StringGenerator {
             buf[idx] = noMetaSymbols.charAt(random.nextInt(noMetaSymbols.length()));
         return new String(buf);
     }
-
 }

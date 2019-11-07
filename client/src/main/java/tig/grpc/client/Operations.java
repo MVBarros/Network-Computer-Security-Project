@@ -61,7 +61,6 @@ public class Operations {
         final CountDownLatch finishLatch = new CountDownLatch(1);
         int sequence = 0;
 
-
         StreamObserver<Empty> responseObserver = new StreamObserver<Empty>() {
             @Override
             public void onNext(Empty empty) {
@@ -206,7 +205,6 @@ public class Operations {
             System.exit(1);
         }
     }
-
 
     public static void downloadFile(Client client, String filename, String owner, String filepath) {
         try {

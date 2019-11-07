@@ -40,5 +40,4 @@ public class Client {
         this.password = password;
         this.asyncStub = asyncStub;
     }
-
 }

@@ -1,11 +1,11 @@
 package tig.grpc.server.data.dao;
 
 import tig.grpc.server.data.PostgreSQLJDBC;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
 
 public class AuthenticationDAO {
 
@@ -32,8 +32,6 @@ public class AuthenticationDAO {
                     //Query was empty
                     throw new IllegalArgumentException("Cannot access given document, it doesn't exist or you don't have permissions for it");
                 }
-
-
             }
         } catch (SQLException e) {
             //Should not happen
@@ -41,13 +39,13 @@ public class AuthenticationDAO {
         }
     }
 
-
     public static void updateAccessControl(String filename, String owner, String target, int permission) {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
 
         if (owner.equals(target)) {
             throw new IllegalArgumentException("Cannot grant permission onto yourself");
         }
+
         try {
             PreparedStatement stmt;
             /*
@@ -74,6 +72,5 @@ public class AuthenticationDAO {
         } catch (SQLException e) {
             throw new IllegalArgumentException("Invalid username or file");
         }
-
     }
 }

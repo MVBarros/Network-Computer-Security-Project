@@ -40,7 +40,6 @@ public class App {
         TigServiceGrpc.TigServiceBlockingStub stub = TigServiceGrpc.newBlockingStub(channel);
         TigServiceGrpc.TigServiceStub asyncStub = TigServiceGrpc.newStub(channel);
 
-
         //Always Safely terminate connection and logout user
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
