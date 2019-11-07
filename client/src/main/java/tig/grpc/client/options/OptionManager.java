@@ -98,7 +98,7 @@ public class OptionManager {
                 default:
                     System.out.println("Invalid permission value, can only be READ, WRITE or NONE");
             }
-            return;
+            
         }
     }
 }

@@ -2,7 +2,6 @@ package tig.grpc.client;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Empty;
-import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import tig.grpc.contract.Tig;
@@ -65,7 +64,9 @@ public class Operations {
 
         StreamObserver<Empty> responseObserver = new StreamObserver<Empty>() {
             @Override
-            public void onNext(Empty empty) { }
+            public void onNext(Empty empty) {
+            }
+
             @Override
             public void onError(Throwable throwable) {
                 System.out.println("Error uploading file, does that file already exist?");
@@ -116,7 +117,9 @@ public class Operations {
         int sequence = 0;
         StreamObserver<Empty> responseObserver = new StreamObserver<Empty>() {
             @Override
-            public void onNext(Empty empty) { }
+            public void onNext(Empty empty) {
+            }
+
             @Override
             public void onError(Throwable throwable) {
                 System.out.println("Error editing file, do you have the right permissions to do this?");
@@ -133,7 +136,7 @@ public class Operations {
         //Send file one megabyte at a time
         byte[] data = new byte[1024 * 1024];
         StreamObserver<Tig.FileChunkClientEdit> requestObserver = client.getAsyncStub().editFile(responseObserver);
-        try (BufferedInputStream in = new BufferedInputStream(new FileInputStream(filepath))){
+        try (BufferedInputStream in = new BufferedInputStream(new FileInputStream(filepath))) {
             int numRead;
             //Send file chunks to server
             while ((numRead = in.read(data)) >= 0) {
@@ -173,7 +176,7 @@ public class Operations {
 
     public static void setAccessControl(Client client, String filename, String target, Tig.PermissionEnum permission) {
         try {
-            System.out.println(String.format("Set access control File: %s to user: %s with %b ", filename, target, permission));
+            System.out.println(String.format("Set access control File: %s to user: %s set permission to  %s ", filename, target, permission.toString()));
             client.getStub().accessControlFile(Tig.AccessControlRequest.newBuilder()
                     .setFileName(filename)
                     .setSessionId(client.getSessionId())
@@ -215,7 +218,7 @@ public class Operations {
             BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(filepath));
 
             //Write bytes to file
-            while(iterator.hasNext()) {
+            while (iterator.hasNext()) {
                 Tig.FileChunkDownload chunk = iterator.next();
                 byte[] fileBytes = chunk.getContent().toByteArray();
                 out.write(fileBytes);
