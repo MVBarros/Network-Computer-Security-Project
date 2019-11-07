@@ -30,11 +30,12 @@ public class PasswordUtils {
 
             char[] chars = password.toCharArray();
             PBEKeySpec spec = new PBEKeySpec(chars, salt, iterations, 64 * 8);
-            SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA2");
+            SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
             return skf.generateSecret(spec).getEncoded();
 
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
             //Should never Happen
+            e.printStackTrace();
             throw new RuntimeException();
         }
 

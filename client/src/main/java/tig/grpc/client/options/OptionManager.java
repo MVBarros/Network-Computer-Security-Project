@@ -20,14 +20,14 @@ public class OptionManager {
         options.addOption(register);
 
         Option download = new Option("d", "Use to download a file");
-        download.setArgs(2);
-        download.setArgName("fileId filename");
+        download.setArgs(3);
+        download.setArgName("filename owner filepath");
         register.setRequired(false);
         options.addOption(download);
 
         Option delete = new Option("r", "Use to remove (delete) a file");
         delete.setArgs(1);
-        delete.setArgName("fileId");
+        delete.setArgName("filename");
         register.setRequired(false);
         options.addOption(delete);
 
@@ -37,20 +37,20 @@ public class OptionManager {
         options.addOption(list);
 
         Option access = new Option("c", "Use to change Access Control options of a file");
-        access.setArgs(1);
-        access.setArgName("fileId permission");
+        access.setArgs(3);
+        access.setArgName("filename permission target");
         register.setRequired(false);
         options.addOption(access);
 
         Option upload = new Option("u", "Use to upload a new file");
         upload.setArgs(2);
-        upload.setArgName("filepath filename");
+        upload.setArgName("filename filepath");
         register.setRequired(false);
         options.addOption(upload);
 
         Option edit = new Option("e", "Use to edit a file");
-        edit.setArgs(2);
-        edit.setArgName("fileId filename");
+        edit.setArgs(3);
+        edit.setArgName("filename owner filepath");
         register.setRequired(false);
         options.addOption(edit);
 

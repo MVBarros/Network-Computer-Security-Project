@@ -62,15 +62,25 @@ public class Operations {
         final CountDownLatch finishLatch = new CountDownLatch(1);
         int sequence = 0;
 
+
         StreamObserver<Empty> responseObserver = new StreamObserver<Empty>() {
             @Override
             public void onNext(Empty empty) { }
             @Override
             public void onError(Throwable throwable) {
+                System.out.print("Error uploading file: ");
+                if(throwable instanceof StatusRuntimeException) {
+                    System.out.println(((StatusRuntimeException) throwable).getStatus().getDescription());
+                }
+                else {
+                    System.out.println("Unknown error");
+                }
                 finishLatch.countDown();
             }
+
             @Override
             public void onCompleted() {
+                System.out.println("File uploaded successfully");
                 finishLatch.countDown();
             }
         };
@@ -80,24 +90,16 @@ public class Operations {
 
         StreamObserver<Tig.FileChunkClientUpload> requestObserver = client.getAsyncStub().uploadFile(responseObserver);
 
-        try {
-            BufferedInputStream in = new BufferedInputStream(new FileInputStream(filePath));
+        try (BufferedInputStream in = new BufferedInputStream(new FileInputStream(filePath))) {
             int numRead;
             //Send file chunks to server
-            while ((numRead =in.read(data)) >= 0) {
+            while ((numRead = in.read(data)) >= 0) {
                 Tig.FileChunkClientUpload.Builder fileChunk = Tig.FileChunkClientUpload.newBuilder();
                 fileChunk.setContent(ByteString.copyFrom(Arrays.copyOfRange(data, 0, numRead)));
                 fileChunk.setFileName(filename);
                 fileChunk.setSessionId(client.getSessionId());
                 fileChunk.setSequence(sequence);
                 requestObserver.onNext(fileChunk.build());
-
-                if (finishLatch.getCount() == 0) {
-                    // RPC completed or errored before we finished sending.
-                    // Sending further requests won't error, but they will just be thrown away.
-                    //This should never happen
-                    return;
-                }
                 sequence++;
             }
 
@@ -111,12 +113,7 @@ public class Operations {
         } catch (IOException | InterruptedException e) {
             //Should Never Happen
             System.exit(1);
-        } catch (StatusRuntimeException e) {
-            System.out.print("Error uploading file: ");
-            System.out.println(e.getStatus().getDescription());
-            System.exit(1);
         }
-
     }
 
     public static void editFile(Client client, String filename, String owner, String filepath) {
@@ -128,14 +125,23 @@ public class Operations {
             public void onNext(Empty empty) { }
             @Override
             public void onError(Throwable throwable) {
-                Status status = Status.fromThrowable(throwable);
+                System.out.print("Error editing file: ");
+                if(throwable instanceof StatusRuntimeException) {
+                    System.out.println(((StatusRuntimeException) throwable).getStatus().getDescription());
+                }
+                else {
+                    System.out.println("Unknown error");
+                }
                 finishLatch.countDown();
             }
+
             @Override
             public void onCompleted() {
+                System.out.println("File edited successfully");
                 finishLatch.countDown();
             }
         };
+
         //Send file one megabyte at a time
         byte[] data = new byte[1024 * 1024];
         StreamObserver<Tig.FileChunkClientEdit> requestObserver = client.getAsyncStub().editFile(responseObserver);
@@ -152,9 +158,8 @@ public class Operations {
                 fileChunk.setSequence(sequence);
                 requestObserver.onNext(fileChunk.build());
                 if (finishLatch.getCount() == 0) {
-                    // RPC completed or errored before we finished sending.
+                    // RPC errored before we finished sending.
                     // Sending further requests won't error, but they will just be thrown away.
-                    //This should never happen
                     return;
                 }
                 sequence++;
@@ -167,11 +172,8 @@ public class Operations {
         } catch (IOException | InterruptedException e) {
             //Should Never Happen
             System.exit(1);
-        } catch (StatusRuntimeException e) {
-            System.out.print("Error editing file: ");
-            System.out.println(e.getStatus().getDescription());
-            System.exit(1);
         }
+
     }
 
     public static void deleteFile(Client client, String filename) {

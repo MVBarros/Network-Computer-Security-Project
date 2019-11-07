@@ -13,6 +13,7 @@ create table files(filename varchar  not null,
 				   t_created varchar not null, 
 				   content bytea not null,
 				   encryption_key bytea not null,
+				   iv bytea not null,
 				  primary key (filename, fileowner),
 				  foreign key(fileowner) references users(username) on delete cascade) ;
 

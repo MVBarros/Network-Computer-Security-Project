@@ -1,7 +1,8 @@
 package tig.grpc.server.data.dao;
 
 import tig.grpc.server.data.PostgreSQLJDBC;
-import tig.grpc.server.utils.EncryptionUtils;
+import tig.grpc.server.utils.encryption.EncryptedFile;
+import tig.grpc.server.utils.encryption.EncryptionUtils;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -20,17 +21,17 @@ public class FileDAO {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
 
         try {
-            PreparedStatement stmt = conn.prepareStatement("INSERT INTO files VALUES (?,?,?,?,?)");
+            PreparedStatement stmt = conn.prepareStatement("INSERT INTO files VALUES (?,?,?,?,?,?)");
 
             SecretKey secretKey = EncryptionUtils.generateAESKey();
-            byte[] encryptedContent = EncryptionUtils.encryptFile(fileContent, secretKey);
+            EncryptedFile encryptedContent = EncryptionUtils.encryptFile(fileContent, secretKey);
 
             stmt.setString(1, filename);
             stmt.setString(2, owner);
             stmt.setString(3, LocalDateTime.now().toString());
-            stmt.setBytes(4, encryptedContent);
+            stmt.setBytes(4, encryptedContent.getContent());
             stmt.setBytes(5, secretKey.getEncoded());
-
+            stmt.setBytes(6, encryptedContent.getIv());
             stmt.executeUpdate();
 
         } catch (SQLException e) {
@@ -43,15 +44,16 @@ public class FileDAO {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
 
         try {
-            PreparedStatement stmt = conn.prepareStatement("UPDATE files SET filecontent=(?), encryption_key=(?) WHERE filename=(?) AND fileowner=(?)");
+            PreparedStatement stmt = conn.prepareStatement("UPDATE files SET content=(?), encryption_key=(?), iv=(?) WHERE filename=(?) AND fileowner=(?)");
 
             SecretKey secretKey = EncryptionUtils.generateAESKey();
-            byte[] encryptedContent = EncryptionUtils.encryptFile(fileContent, secretKey);
+            EncryptedFile encryptedFile = EncryptionUtils.encryptFile(fileContent, secretKey);
 
-            stmt.setBytes(1, encryptedContent);
+            stmt.setBytes(1, encryptedFile.getContent());
             stmt.setBytes(2, secretKey.getEncoded());
-            stmt.setString(3, filename);
-            stmt.setString(4, owner);
+            stmt.setBytes(3, encryptedFile.getIv());
+            stmt.setString(4, filename);
+            stmt.setString(5, owner);
             stmt.executeUpdate();
 
         } catch (SQLException e) {
@@ -63,7 +65,7 @@ public class FileDAO {
     public static byte[] getFileContent(String filename, String owner) {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
         try {
-            PreparedStatement stmt = conn.prepareStatement("SELECT filecontent, encrytionKey FROM files " +
+            PreparedStatement stmt = conn.prepareStatement("SELECT content, encryption_key, iv FROM files " +
                     "WHERE filename = (?) AND fileowner = (?)");
 
             stmt.setString(1, filename);
@@ -71,9 +73,9 @@ public class FileDAO {
             ResultSet rs = stmt.executeQuery();
             rs.next();
 
-            SecretKeySpec key = EncryptionUtils.getAesKey(rs.getBytes("encryptionKey"));
+            SecretKeySpec key = EncryptionUtils.getAesKey(rs.getBytes("encryption_key"));
 
-            return EncryptionUtils.decryptFile(rs.getBytes("filecontent"), key);
+            return EncryptionUtils.decryptFile(new EncryptedFile(rs.getBytes("content"), rs.getBytes("iv")), key);
 
         } catch (SQLException e) {
             //Should never happen
