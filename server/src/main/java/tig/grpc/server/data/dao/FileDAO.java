@@ -12,7 +12,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 public class FileDAO {
@@ -102,23 +101,22 @@ public class FileDAO {
 
         PreparedStatement stmt = null;
         try {
-            HashSet<String> ownedFiles = new HashSet<String>();
-            stmt = conn.prepareStatement("SELECT username,permission, filename, owner FROM files NATURAL JOIN authorizations WHERE fileowner = (?) or user = (?)");
+            stmt = conn.prepareStatement("SELECT  filename, fileowner FROM files WHERE fileowner = (?)");
             stmt.setString(1, username);
-            stmt.setString(2, username);
             ResultSet rs = stmt.executeQuery();
 
-            List<String> result = new ArrayList<String>();
+            List<String> result = new ArrayList<>();
             while (rs.next()) {
-                if (rs.getString("username").equals(rs.getString("owner")) &&
-                        !ownedFiles.contains(rs.getString("filename"))) {
-                    result.add(String.format("File:%s\tOwner:%s\tPermission:R/W", rs.getString("filename"), rs.getString("owner")));
-                    ownedFiles.add(rs.getString("filename"));
+                result.add(String.format("File:%s\tOwner:%s\tPermission:R/W", rs.getString("filename"), rs.getString("fileowner")));
+            }
 
-                } else {
-                    result.add(String.format("File:%s\tOwner:%s\tPermission:%s", rs.getString("filename"),
-                            rs.getString("owner"), rs.getInt("permission") == 1 ? "RW" : "R"));
-                }
+            stmt = conn.prepareStatement("SELECT  filename, fileowner, permission FROM authorizations WHERE username = (?)");
+            stmt.setString(1, username);
+            rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                result.add(String.format("File:%s\tOwner:%s\tPermission:%s", rs.getString("filename"),
+                        rs.getString("fileowner"), rs.getInt("permission") == 1 ? "RW" : "R"));
             }
 
             if (result.size() == 0) {
@@ -127,6 +125,7 @@ public class FileDAO {
             return result;
 
         } catch (SQLException e) {
+            //Should never happen
             throw new RuntimeException();
         }
     }

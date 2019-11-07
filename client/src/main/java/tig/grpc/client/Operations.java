@@ -68,13 +68,7 @@ public class Operations {
             public void onNext(Empty empty) { }
             @Override
             public void onError(Throwable throwable) {
-                System.out.print("Error uploading file: ");
-                if(throwable instanceof StatusRuntimeException) {
-                    System.out.println(((StatusRuntimeException) throwable).getStatus().getDescription());
-                }
-                else {
-                    System.out.println("Unknown error");
-                }
+                System.out.println("Error uploading file, does that file already exist?");
                 finishLatch.countDown();
             }
 
@@ -125,13 +119,7 @@ public class Operations {
             public void onNext(Empty empty) { }
             @Override
             public void onError(Throwable throwable) {
-                System.out.print("Error editing file: ");
-                if(throwable instanceof StatusRuntimeException) {
-                    System.out.println(((StatusRuntimeException) throwable).getStatus().getDescription());
-                }
-                else {
-                    System.out.println("Unknown error");
-                }
+                System.out.println("Error editing file, do you have the right permissions to do this?");
                 finishLatch.countDown();
             }
 
@@ -145,35 +133,28 @@ public class Operations {
         //Send file one megabyte at a time
         byte[] data = new byte[1024 * 1024];
         StreamObserver<Tig.FileChunkClientEdit> requestObserver = client.getAsyncStub().editFile(responseObserver);
-        try {
-            BufferedInputStream in = new BufferedInputStream(new FileInputStream(filepath));
-
+        try (BufferedInputStream in = new BufferedInputStream(new FileInputStream(filepath))){
+            int numRead;
             //Send file chunks to server
-            while ((in.read(data)) != -1) {
+            while ((numRead = in.read(data)) >= 0) {
                 Tig.FileChunkClientEdit.Builder fileChunk = Tig.FileChunkClientEdit.newBuilder();
-                fileChunk.setContent(ByteString.copyFrom(data));
+                fileChunk.setContent(ByteString.copyFrom(Arrays.copyOfRange(data, 0, numRead)));
                 fileChunk.setFileName(filename);
                 fileChunk.setOwner(owner);
                 fileChunk.setSessionId(client.getSessionId());
                 fileChunk.setSequence(sequence);
                 requestObserver.onNext(fileChunk.build());
-                if (finishLatch.getCount() == 0) {
-                    // RPC errored before we finished sending.
-                    // Sending further requests won't error, but they will just be thrown away.
-                    return;
-                }
                 sequence++;
             }
             requestObserver.onCompleted();
             //Wait for server to finish saving file to Database
-            finishLatch.wait();
+            finishLatch.await();
         } catch (FileNotFoundException e) {
             System.out.println(String.format("File with filename: %s not found.", filename));
         } catch (IOException | InterruptedException e) {
             //Should Never Happen
             System.exit(1);
         }
-
     }
 
     public static void deleteFile(Client client, String filename) {

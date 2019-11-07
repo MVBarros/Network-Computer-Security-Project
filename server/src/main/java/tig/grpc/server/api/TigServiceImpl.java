@@ -108,8 +108,9 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
                             //Should never happen
                         }
                     }
+                    //Renew Lease
+                    username = SessionAuthenticator.authenticateSession(value.getSessionId());
                     if (counter == 0) {
-                        username = SessionAuthenticator.authenticateSession(value.getSessionId());
                         filename = value.getFileName();
                     }
 
@@ -155,18 +156,20 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
                             //Should never happen
                         }
                     }
+                    //Renew lease
+                    String username = SessionAuthenticator.authenticateSession(value.getSessionId());
                     if (counter == 0) {
-                        String username = SessionAuthenticator.authenticateSession(value.getSessionId());
                         AuthenticationDAO.authenticateFileAccess(username, value.getFileName(), value.getOwner(), 1);
+                        filename = value.getFileName();
+                        owner = value.getOwner();
                     }
 
-                    filename = value.getFileName();
-                    owner = value.getOwner();
                     file = file.concat(value.getContent());
                     counter++;
                     lock.notify();
                 }
             }
+
 
             @Override
             public void onError(Throwable t) {
@@ -177,6 +180,7 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
             public void onCompleted() {
                 responseObserver.onNext(Empty.newBuilder().build());
                 FileDAO.fileEdit(filename, file.toByteArray(), owner);
+                responseObserver.onCompleted();
             }
 
         };

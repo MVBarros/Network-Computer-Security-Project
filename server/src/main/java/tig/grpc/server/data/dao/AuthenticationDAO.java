@@ -1,7 +1,6 @@
 package tig.grpc.server.data.dao;
 
 import tig.grpc.server.data.PostgreSQLJDBC;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -31,7 +30,7 @@ public class AuthenticationDAO {
                 rs = stmt2.executeQuery();
                 if (!rs.next()) {
                     //Query was empty
-                    throw new IllegalArgumentException("Cannot access given document");
+                    throw new IllegalArgumentException("Cannot access given document, it doesn't exist or you don't have permissions for it");
                 }
 
 
@@ -42,33 +41,38 @@ public class AuthenticationDAO {
         }
     }
 
+
     public static void updateAccessControl(String filename, String owner, String target, int permission) {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
 
+        if (owner.equals(target)) {
+            throw new IllegalArgumentException("Cannot grant permission onto yourself");
+        }
         try {
             PreparedStatement stmt;
             /*
-               * permission = 0 is READ
-               * permission = 1 is WRITE
-               * permission = 2 is NONE
-            */
-            if (permission == 2) {
-                stmt = conn.prepareStatement("DELETE FROM authorizations WHERE filename=(?) AND fileowner=(?) AND username=(?)");
-                stmt.setString(1, filename);
-                stmt.setString(2, owner);
-                stmt.setString(3, target);
-            } else {
-                //TODO If this doesn't work DELETE before INSERT
-                stmt = conn.prepareStatement("REPLACE INTO authorizations (filename, fileowner, username, permission) VALUES (?,?,?,?");
+             * permission = 0 is READ
+             * permission = 1 is WRITE
+             * permission = 2 is NONE
+             */
+
+            //Delete old permission
+            stmt = conn.prepareStatement("DELETE FROM authorizations WHERE filename=(?) AND fileowner=(?) AND username=(?)");
+            stmt.setString(1, filename);
+            stmt.setString(2, owner);
+            stmt.setString(3, target);
+            stmt.executeUpdate();
+            //If permission is not NONE, set new Permission
+            if (permission != 2) {
+                stmt = conn.prepareStatement("INSERT INTO authorizations (filename, fileowner, username, permission) VALUES (?,?,?,?)");
                 stmt.setString(1, filename);
                 stmt.setString(2, owner);
                 stmt.setString(3, target);
                 stmt.setInt(4, permission);
+                stmt.executeUpdate();
             }
-
-            stmt.executeUpdate();
         } catch (SQLException e) {
-            throw new IllegalArgumentException("No such file name owned");
+            throw new IllegalArgumentException("Invalid username or file");
         }
 
     }

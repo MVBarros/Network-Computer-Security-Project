@@ -87,14 +87,16 @@ public class OptionManager {
         if (cmd.hasOption('c')) {
             switch (cmd.getOptionValues("c")[1]) {
                 case "READ":
-                    Operations.setAccessControl(client, cmd.getOptionValues('c')[0], cmd.getOptionValues('c')[1], Tig.PermissionEnum.READ);
+                    Operations.setAccessControl(client, cmd.getOptionValues('c')[0], cmd.getOptionValues('c')[2], Tig.PermissionEnum.READ);
                     break;
                 case "WRITE":
-                    Operations.setAccessControl(client, cmd.getOptionValues('c')[0], cmd.getOptionValues('c')[1], Tig.PermissionEnum.WRITE);
+                    Operations.setAccessControl(client, cmd.getOptionValues('c')[0], cmd.getOptionValues('c')[2], Tig.PermissionEnum.WRITE);
                     break;
                 case "NONE":
-                    Operations.setAccessControl(client, cmd.getOptionValues('c')[0], cmd.getOptionValues('c')[1], Tig.PermissionEnum.NONE);
+                    Operations.setAccessControl(client, cmd.getOptionValues('c')[0], cmd.getOptionValues('c')[2], Tig.PermissionEnum.NONE);
                     break;
+                default:
+                    System.out.println("Invalid permission value, can only be READ, WRITE or NONE");
             }
             return;
         }
