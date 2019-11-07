@@ -22,7 +22,6 @@ message AccountRequest {
 }
 
 message LoginReply {
-    StatusCode code = 1;
     string sessionId = 2;
 }
 
@@ -34,7 +33,7 @@ message SessionRequest {
 message FileChunkClientUpload {
     bytes content = 1;
     string sessionId = 2;
-    string fileName = 3;
+    string   fileName = 3;
     int32 sequence = 4;
 }
 
@@ -49,16 +48,6 @@ message FileChunkClientEdit {
 message FileChunkDownload {
     bytes content = 1;
     int32 sequence = 2;
-}
-
-message StatusReply {
-    StatusCode code = 1;
-}
-
-enum StatusCode {
-    UNKNOWN = 0;
-    OK = 1;
-    FAILED = 2;
 }
 
 //FILE OPERATION
