@@ -22,8 +22,8 @@ public class AuthenticationDAO {
             ResultSet rs = stmt.executeQuery();
             if (!rs.next()) {
                 //Query was empty
-                PreparedStatement stmt2 = conn.prepareStatement("SELECT * FROM authorizations" +
-                        "WHERE fileowner=(?) AND filename=(?) AND user=(?) AND permission >= (?)");
+                PreparedStatement stmt2 = conn.prepareStatement("SELECT * FROM authorizations " +
+                        "WHERE fileowner=(?) AND filename=(?) AND username=(?) AND permission >= (?)");
                 stmt2.setString(1, owner);
                 stmt2.setString(2, filename);
                 stmt2.setString(3, username);

@@ -236,7 +236,6 @@ public class Operations {
             //Write bytes to file
             while(iterator.hasNext()) {
                 Tig.FileChunkDownload chunk = iterator.next();
-                System.out.println(Arrays.toString(chunk.getContent().toByteArray()));
                 byte[] fileBytes = chunk.getContent().toByteArray();
                 out.write(fileBytes);
             }
