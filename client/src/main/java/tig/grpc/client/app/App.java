@@ -46,10 +46,8 @@ public class App {
             @Override
             public void run() {
                 if (client != null && client.getSessionId() != null) {
-                    System.out.println("Shutdown detected, logging out");
                     Operations.logoutClient(client);
                 }
-                System.out.println("Closing channel before exiting");
                 channel.shutdownNow();
             }
         });

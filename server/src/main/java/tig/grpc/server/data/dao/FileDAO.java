@@ -89,9 +89,13 @@ public class FileDAO {
             PreparedStatement delete_stmt = conn.prepareStatement("DELETE FROM files WHERE filename=(?) AND fileowner=(?)");
             delete_stmt.setString(1, filename);
             delete_stmt.setString(2, username);
-            delete_stmt.executeUpdate();
+            int result = delete_stmt.executeUpdate();
+            if(result == 0) {
+                throw new IllegalArgumentException("No such file name owned.");
+            }
         } catch (SQLException e) {
-            throw new IllegalArgumentException("No such file name.");
+            //Should never happen
+            throw new RuntimeException();
         }
 
     }

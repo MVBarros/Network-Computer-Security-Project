@@ -187,6 +187,7 @@ public class Operations {
             System.out.println(e.getStatus().getDescription());
             System.exit(1);
         }
+        System.out.println("Access control set successfully");
     }
 
     public static void listFiles(Client client) {
@@ -234,7 +235,6 @@ public class Operations {
             System.out.println("Error writing to file");
             System.out.println(String.format("Cause: %s", e.getMessage()));
             System.out.println("Aborting download");
-
         }
     }
 }
