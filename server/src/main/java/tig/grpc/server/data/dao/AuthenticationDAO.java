@@ -15,7 +15,7 @@ public class AuthenticationDAO {
 
         try {
             PreparedStatement stmt = conn.prepareStatement("SELECT * FROM files " +
-                    "WHERE owner=(?) AND filename=(?)");
+                    "WHERE fileowner=(?) AND filename=(?)");
             stmt.setString(1, username);
             stmt.setString(2, filename);
 
@@ -23,7 +23,7 @@ public class AuthenticationDAO {
             if (!rs.next()) {
                 //Query was empty
                 PreparedStatement stmt2 = conn.prepareStatement("SELECT * FROM authorizations" +
-                        "WHERE owner=(?) AND filename=(?) AND user=(?) AND permission >= (?)");
+                        "WHERE fileowner=(?) AND filename=(?) AND user=(?) AND permission >= (?)");
                 stmt2.setString(1, owner);
                 stmt2.setString(2, filename);
                 stmt2.setString(3, username);
@@ -43,22 +43,23 @@ public class AuthenticationDAO {
     }
 
     public static void updateAccessControl(String filename, String owner, String target, int permission) {
-        //so o owner pode executar esta funcao
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
 
         try {
             PreparedStatement stmt;
-            // permission = 0 é READ
-            // permission = 1 é WRITE
-            // permission = 2 é NONE
+            /*
+               * permission = 0 is READ
+               * permission = 1 is WRITE
+               * permission = 2 is NONE
+            */
             if (permission == 2) {
-                stmt = conn.prepareStatement("DELETE FROM authorizations WHERE filename=(?) AND owner=(?) AND username=(?)");
+                stmt = conn.prepareStatement("DELETE FROM authorizations WHERE filename=(?) AND fileowner=(?) AND username=(?)");
                 stmt.setString(1, filename);
                 stmt.setString(2, owner);
                 stmt.setString(3, target);
             } else {
-                // nao verificamos se user tem este file porque se nao tiver da SQL violation (neste caso foreign key violation)
-                stmt = conn.prepareStatement("REPLACE INTO authorizations (filename, owner, username, permission) VALUES (?,?,?,?");
+                //TODO If this doesn't work DELETE before INSERT
+                stmt = conn.prepareStatement("REPLACE INTO authorizations (filename, fileowner, username, permission) VALUES (?,?,?,?");
                 stmt.setString(1, filename);
                 stmt.setString(2, owner);
                 stmt.setString(3, target);

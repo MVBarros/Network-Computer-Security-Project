@@ -43,7 +43,7 @@ public class FileDAO {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
 
         try {
-            PreparedStatement stmt = conn.prepareStatement("UPDATE files SET filecontent=(?), encryption_key=(?) WHERE filename=(?) AND owner=(?)");
+            PreparedStatement stmt = conn.prepareStatement("UPDATE files SET filecontent=(?), encryption_key=(?) WHERE filename=(?) AND fileowner=(?)");
 
             SecretKey secretKey = EncryptionUtils.generateAESKey();
             byte[] encryptedContent = EncryptionUtils.encryptFile(fileContent, secretKey);
@@ -64,7 +64,7 @@ public class FileDAO {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
         try {
             PreparedStatement stmt = conn.prepareStatement("SELECT filecontent, encrytionKey FROM files " +
-                    "WHERE filename = (?) AND owner = (?)");
+                    "WHERE filename = (?) AND fileowner = (?)");
 
             stmt.setString(1, filename);
             stmt.setString(2, owner);
@@ -85,7 +85,7 @@ public class FileDAO {
 
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
         try {
-            PreparedStatement delete_stmt = conn.prepareStatement("DELETE FROM files WHERE filename=(?) AND owner=(?)");
+            PreparedStatement delete_stmt = conn.prepareStatement("DELETE FROM files WHERE filename=(?) AND fileowner=(?)");
             delete_stmt.setString(1, filename);
             delete_stmt.setString(2, username);
             delete_stmt.executeUpdate();
@@ -101,7 +101,7 @@ public class FileDAO {
         PreparedStatement stmt = null;
         try {
             HashSet<String> ownedFiles = new HashSet<String>();
-            stmt = conn.prepareStatement("SELECT username,permission, filename, owner FROM files NATURAL JOIN authorizations WHERE owner = (?) or user = (?)");
+            stmt = conn.prepareStatement("SELECT username,permission, filename, owner FROM files NATURAL JOIN authorizations WHERE fileowner = (?) or user = (?)");
             stmt.setString(1, username);
             stmt.setString(2, username);
             ResultSet rs = stmt.executeQuery();
