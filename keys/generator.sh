@@ -1,5 +1,5 @@
 #cleanup
-rm ca.key ca.cert server.key certificate.conf server.pem
+rm ca.key ca.cert server.key server.pem
 
 #generate ca key
 openssl genrsa -out ca.key 4096
