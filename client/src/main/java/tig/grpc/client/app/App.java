@@ -2,12 +2,15 @@ package tig.grpc.client.app;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.netty.GrpcSslContexts;
+import io.grpc.netty.NettyChannelBuilder;
 import org.apache.commons.cli.*;
 import tig.grpc.client.Client;
 import tig.grpc.client.Operations;
 import tig.grpc.client.options.OptionManager;
 import tig.grpc.contract.TigServiceGrpc;
 
+import java.io.File;
 import java.util.Arrays;
 
 
@@ -24,7 +27,7 @@ public class App {
         CommandLine cmd = null;
 
         try {
-            cmd = parser.parse(options, args);
+            cmd = parser.parse(options, Arrays.copyOfRange(args, 2,args.length));
         } catch (ParseException e) {
             System.out.println(e.getMessage());
             formatter.printHelp("utility-name", options);
@@ -35,7 +38,10 @@ public class App {
         final int port = 8080;//Integer.parseInt(args[1]);
         final String target = host + ":" + port;
 
-        final ManagedChannel channel = ManagedChannelBuilder.forTarget(target).usePlaintext().build();
+        final ManagedChannel channel = NettyChannelBuilder.forTarget(target)
+                                                        .usePlaintext()
+                                                        .sslContext(GrpcSslContexts.forClient().trustManager(new File(args[0])).build())
+                                                        .build();
 
         TigServiceGrpc.TigServiceBlockingStub stub = TigServiceGrpc.newBlockingStub(channel);
         TigServiceGrpc.TigServiceStub asyncStub = TigServiceGrpc.newStub(channel);
