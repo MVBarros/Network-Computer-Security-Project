@@ -8,6 +8,15 @@ import tig.grpc.server.api.TigServiceImpl;
 import tig.grpc.server.data.PostgreSQLJDBC;
 import tig.grpc.server.interceptor.ExceptionHandler;
 import tig.grpc.server.session.TokenCleanupThread;
+import io.grpc.netty.GrpcSslContexts;
+import io.grpc.netty.NettyServerBuilder;
+import io.grpc.stub.StreamObserver;
+import io.netty.handler.ssl.ClientAuth;
+import io.netty.handler.ssl.SslContextBuilder;
+import io.netty.handler.ssl.SslProvider;
+import io.grpc.netty.GrpcSslContexts;
+import javax.net.ssl.SSLContext;
+import java.io.File;
 
 public class DocumentServer {
     private static final Logger logger = Logger.getLogger(DocumentServer.class);
@@ -16,22 +25,29 @@ public class DocumentServer {
         System.out.println(DocumentServer.class.getSimpleName());
 
         // check arguments
-        if (args.length < 3) {
+        if (args.length < 5) {
             System.err.println("Argument(s) missing!");
-            System.err.printf("<Usage> java %s port dbport dbpassword%n", DocumentServer.class.getName());
+            System.err.printf("<Usage> java %s port dbport dbpassword certChainFile privateKeyFile%n", DocumentServer.class.getName());
             return;
         }
 
         final int port = Integer.parseInt(args[0]);
         final BindableService impl = new TigServiceImpl();
 
+
         //Initialize Postgres Connection
         PostgreSQLJDBC.setPort(Integer.parseInt(args[1]));
         PostgreSQLJDBC.setPassword(args[2]);
         PostgreSQLJDBC.getInstance();
 
-        Server server = ServerBuilder
+        File certChainFile = new File(args[3]);
+        File privateKeyFile = new File(args[4]);
+
+
+        Server server = NettyServerBuilder
                 .forPort(port)
+                .useTransportSecurity(certChainFile, privateKeyFile)
+                .sslContext(SslContextBuilder.forServer(certChainFile, privateKeyFile).build())
                 .intercept(new ExceptionHandler())
                 .addService(impl)
                 .build();
