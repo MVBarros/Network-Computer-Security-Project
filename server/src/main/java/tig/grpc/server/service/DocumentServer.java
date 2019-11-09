@@ -46,7 +46,6 @@ public class DocumentServer {
 
         Server server = NettyServerBuilder
                 .forPort(port)
-                .useTransportSecurity(certChainFile, privateKeyFile)
                 .sslContext(sslContext)
                 .intercept(new ExceptionHandler())
                 .addService(impl)
