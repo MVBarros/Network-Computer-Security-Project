@@ -3,19 +3,16 @@ package tig.grpc.server.service;
 import io.grpc.BindableService;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
+import io.netty.handler.ssl.SslContext;
 import org.apache.log4j.Logger;
 import tig.grpc.server.api.TigServiceImpl;
 import tig.grpc.server.data.PostgreSQLJDBC;
 import tig.grpc.server.interceptor.ExceptionHandler;
 import tig.grpc.server.session.TokenCleanupThread;
-import io.grpc.netty.GrpcSslContexts;
 import io.grpc.netty.NettyServerBuilder;
-import io.grpc.stub.StreamObserver;
-import io.netty.handler.ssl.ClientAuth;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.SslProvider;
-import io.grpc.netty.GrpcSslContexts;
-import javax.net.ssl.SSLContext;
+
 import java.io.File;
 
 public class DocumentServer {
@@ -44,10 +41,13 @@ public class DocumentServer {
         File privateKeyFile = new File(args[4]);
 
 
+        SslContext sslContext = SslContextBuilder.forServer(certChainFile, privateKeyFile).
+                build();
+
         Server server = NettyServerBuilder
                 .forPort(port)
                 .useTransportSecurity(certChainFile, privateKeyFile)
-                .sslContext(SslContextBuilder.forServer(certChainFile, privateKeyFile).build())
+                .sslContext(sslContext)
                 .intercept(new ExceptionHandler())
                 .addService(impl)
                 .build();
