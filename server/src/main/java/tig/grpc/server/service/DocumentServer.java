@@ -40,12 +40,12 @@ public class DocumentServer {
         File certChainFile = new File(args[3]);
         File privateKeyFile = new File(args[4]);
 
-        SslContext sslContext = GrpcSslContexts.configure(SslContextBuilder.forServer(certChainFile, privateKeyFile)).
-                build();
+        /*SslContext sslContext = GrpcSslContexts.configure(SslContextBuilder.forServer(certChainFile, privateKeyFile)).
+                build();*/
 
         final Server server = NettyServerBuilder
                 .forPort(port)
-                .sslContext(sslContext)
+                .useTransportSecurity(certChainFile, privateKeyFile)
                 .intercept(new ExceptionHandler())
                 .addService(impl)
                 .build();
