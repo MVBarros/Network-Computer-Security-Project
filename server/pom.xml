@@ -28,15 +28,16 @@
         <mainclass>tig.grpc.server.service.DocumentServer</mainclass>
 
         <server.port>8080</server.port>
-        <db.port>5432</db.port>
+        <db.port>5433</db.port>
         <db.password>root</db.password>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>io.netty</groupId>
-            <artifactId>netty-tcnative-boringssl-static</artifactId>
-            <version>2.0.25.Final</version> <!-- See table for correct version -->
+            <artifactId>netty-tcnative</artifactId>
+            <version>2.0.20.Final</version> <!-- see table for correct version -->
+           <!-- <classifier>${tcnative.classifier}</classifier> -->
             <scope>runtime</scope>
         </dependency>
         <dependency>
@@ -72,6 +73,7 @@
 
     <build>
         <extensions>
+            <!-- Use os-maven-plugin to initialize the "os.detected" properties -->
             <extension>
                 <groupId>kr.motd.maven</groupId>
                 <artifactId>os-maven-plugin</artifactId>
@@ -99,46 +101,10 @@
                         <argument>${server.port}</argument>
                         <argument>${db.port}</argument>
                         <argument>${db.password}</argument>
-                        <argument>$={project.basedir}/src/main/resources/server.crt</argument>
-                        <argument>$={project.basedir}/src/main/resources/server.key</argument>
+                        <argument>${basedir}/src/main/resources/server.pem</argument>
+                        <argument>${basedir}/src/main/resources/server.key</argument>
                     </arguments>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.xolstice.maven.plugins</groupId>
-                <artifactId>protobuf-maven-plugin</artifactId>
-                <version>0.6.1</version>
-                <configuration>
-                    <protocArtifact>com.google.protobuf:protoc:${protoc.version}:exe:${os.detected.classifier}</protocArtifact>
-                    <pluginId>grpc-java</pluginId>
-                    <pluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc.version}:exe:${os.detected.classifier}</pluginArtifact>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>compile</goal>
-                            <goal>compile-custom</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-enforcer-plugin</artifactId>
-                <version>1.4.1</version>
-                <executions>
-                    <execution>
-                        <id>enforce</id>
-                        <goals>
-                            <goal>enforce</goal>
-                        </goals>
-                        <configuration>
-                            <rules>
-                                <requireUpperBoundDeps/>
-                            </rules>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>
