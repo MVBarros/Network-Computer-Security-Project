@@ -3,6 +3,7 @@ package tig.grpc.server.service;
 import io.grpc.BindableService;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
+import io.grpc.netty.GrpcSslContexts;
 import io.netty.handler.ssl.SslContext;
 import org.apache.log4j.Logger;
 import tig.grpc.server.api.TigServiceImpl;
@@ -41,7 +42,7 @@ public class DocumentServer {
         File privateKeyFile = new File(args[4]);
 
 
-        SslContext sslContext = SslContextBuilder.forServer(certChainFile, privateKeyFile).
+        SslContext sslContext = GrpcSslContexts.configure(SslContextBuilder.forServer(certChainFile, privateKeyFile)).
                 build();
 
         Server server = NettyServerBuilder
