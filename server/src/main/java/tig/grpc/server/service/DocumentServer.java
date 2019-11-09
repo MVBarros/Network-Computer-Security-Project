@@ -42,7 +42,7 @@ public class DocumentServer {
         File privateKeyFile = new File(args[4]);
 
 
-        SslContext sslContext = GrpcSslContexts.configure(SslContextBuilder.forServer(certChainFile, privateKeyFile)).
+        SslContext sslContext = GrpcSslContexts.forServer(certChainFile, privateKeyFile).
                 build();
 
         Server server = NettyServerBuilder
