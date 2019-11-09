@@ -38,6 +38,7 @@ public class Operations {
         } catch (StatusRuntimeException e) {
             System.out.print("Error logging in: ");
             System.out.println(e.getStatus().getDescription());
+            System.out.println(e);
             System.exit(1);
         }
     }
