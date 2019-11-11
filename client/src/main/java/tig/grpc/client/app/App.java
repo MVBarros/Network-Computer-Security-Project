@@ -41,7 +41,6 @@ public class App {
                                                         .sslContext(GrpcSslContexts.forClient().trustManager(new File(args[0])).build())
                                                         .build();
 
-
         TigServiceGrpc.TigServiceBlockingStub stub = TigServiceGrpc.newBlockingStub(channel);
         TigServiceGrpc.TigServiceStub asyncStub = TigServiceGrpc.newStub(channel);
 

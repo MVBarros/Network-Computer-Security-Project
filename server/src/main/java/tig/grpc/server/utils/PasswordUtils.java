@@ -9,7 +9,7 @@ import java.security.spec.InvalidKeySpecException;
 public class PasswordUtils {
 
     public static final int iterations = 1000;
-    private static final int saltSize = 1000;
+    private static final int saltSize = 128;
 
     public static byte[] generateRandomSalt() {
         //Beter to let JVM decide which SecureRandom it wants to use
