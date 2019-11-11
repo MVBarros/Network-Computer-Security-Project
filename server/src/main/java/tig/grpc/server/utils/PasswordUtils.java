@@ -19,7 +19,7 @@ public class PasswordUtils {
         return salt;
     }
 
-    public static byte[] generateStrongPasswordHash(String password, byte[] salt, int iterations) {
+    public static byte[] generateStrongPasswordHash(String password, byte[] salt) {
         try {
 
             char[] chars = password.toCharArray();
