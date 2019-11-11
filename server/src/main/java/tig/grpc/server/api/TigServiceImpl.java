@@ -10,6 +10,7 @@ import tig.grpc.server.data.dao.AuthenticationDAO;
 import tig.grpc.server.data.dao.FileDAO;
 import tig.grpc.server.data.dao.UsersDAO;
 import tig.grpc.server.session.SessionAuthenticator;
+import tig.grpc.server.utils.PasswordUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -20,7 +21,7 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
     @Override
     public void register(Tig.AccountRequest request, StreamObserver<Empty> responseObserver) {
         logger.info(String.format("Register username: %s", request.getUsername()));
-
+        PasswordUtils.validateNewPassword(request.getPassword());
         UsersDAO.insertUser(request.getUsername(), request.getPassword());
 
         responseObserver.onNext(Empty.newBuilder().build());

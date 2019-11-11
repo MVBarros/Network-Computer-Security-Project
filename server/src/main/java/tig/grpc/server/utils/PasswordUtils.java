@@ -8,8 +8,9 @@ import java.security.spec.InvalidKeySpecException;
 
 public class PasswordUtils {
 
-    public static final int iterations = 1000;
+    private static final int iterations = 1000;
     private static final int saltSize = 128;
+    private static final String passwordRegex = "\"^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$\"";
 
     public static byte[] generateRandomSalt() {
         //Beter to let JVM decide which SecureRandom it wants to use
@@ -44,5 +45,12 @@ public class PasswordUtils {
             }
         }
         return true;
+    }
+
+    public static void validateNewPassword(String password) {
+        if(!password.matches(passwordRegex)) {
+            throw new IllegalArgumentException("Password must meet: Minimum eight characters, " +
+                    "at least one uppercase letter, one lowercase letter, one number and one special character:");
+        }
     }
 }
