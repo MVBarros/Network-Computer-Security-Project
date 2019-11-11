@@ -56,9 +56,9 @@ public class App {
         });
 
         String username = System.console().readLine("Username:");
-        String password = Arrays.toString(System.console().readPassword("Password:"));
+        char[] password = System.console().readPassword("Password:");
 
-        client = new Client(stub, asyncStub, username, password);
+        client = new Client(stub, asyncStub, username,new String(password));
 
         OptionManager.executeOptions(cmd, client);
     }

@@ -80,7 +80,7 @@
                         <argument>${server.port}</argument>
                         <argument>${db.port}</argument>
                         <argument>${db.password}</argument>
-                        <argument>${basedir}/src/main/resources/certs/cert.pem</argument>
+                        <argument>${basedir}/src/main/resources/certs/server.pem</argument>
                         <argument>${basedir}/src/main/resources/certs/server.key</argument>
                     </arguments>
                 </configuration>
