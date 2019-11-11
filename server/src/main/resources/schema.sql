@@ -4,8 +4,7 @@ drop table if exists users;
 
 create table users(username varchar  primary key not null,
 				   passwordhash bytea not null, 
-				   passwordsalt bytea not null, 
-				   iterations integer not null);
+				   passwordsalt bytea not null);
 				   
 
 create table files(filename varchar  not null,
