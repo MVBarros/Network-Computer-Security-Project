@@ -157,12 +157,14 @@ public class CustomProtocolOperations {
         try {
             System.out.println(String.format("Set access control File: %s to user: %s set permission to  %s ", filename, target, permission.toString()));
 
+            //request
             Tig.AccessControlRequest request = Tig.AccessControlRequest.newBuilder()
                     .setFileName(filename)
                     .setSessionId(client.getSessionId())
                     .setTarget(target)
                     .setPermission(permission).build();
 
+            //serialize request
             byte[] message = ObjectSerializer.Serialize(request);
 
             String nonce = StringGenerator.randomString(256);
@@ -173,13 +175,17 @@ public class CustomProtocolOperations {
 
             message = ObjectSerializer.Serialize(content);
 
+            //hash
             byte[] signature = HashUtils.hashBytes(message);
+
+            //encrypt hash
             signature = EncryptionUtils.encryptBytesRSAPub(signature, client.getServerKey());
             message = EncryptionUtils.encryptBytesAES(message, (SecretKeySpec) client.getSessionKey());
 
             Tig.Signature sign = Tig.Signature.newBuilder()
                     .setValue(ByteString.copyFrom(signature)).build();
 
+            //server
             client.getCustomProtocolStub().setAccessControl(
                     Tig.CustomProtocolMessage.newBuilder()
                     .setMessage(ByteString.copyFrom(message))
@@ -187,21 +193,68 @@ public class CustomProtocolOperations {
                     .build()
             );
 
-
-
         } catch (StatusRuntimeException e) {
-            System.out.print("Error deleting file: ");
+            System.out.print("Error setting access control: ");
             System.out.println(e.getStatus().getDescription());
             System.exit(1);
         }
+
         System.out.println("Access control set successfully");
     }
-}
-    /*public static void listFiles(Client client) {
+
+    public static void listFiles(Client client) {
         try {
             System.out.println("List all Files");
-            Tig.ListFilesReply reply = client.getStub().listFiles(Tig.SessionRequest.newBuilder()
-                    .setSessionId(client.getSessionId()).build());
+
+            //request
+            Tig.SessionRequest request = Tig.SessionRequest.newBuilder()
+                    .setSessionId(client.getSessionId())
+                    .build();
+
+            //serialize request
+            byte[] message = ObjectSerializer.Serialize(request);
+
+            String nonce = StringGenerator.randomString(256);
+
+            Tig.Content content = Tig.Content.newBuilder()
+                    .setRequest(ByteString.copyFrom(message))
+                    .setNonce(nonce).build();
+
+            message = ObjectSerializer.Serialize(content);
+
+            //hash
+            byte[] signature = HashUtils.hashBytes(message);
+
+            //encrypt hash
+            signature = EncryptionUtils.encryptBytesRSAPub(signature, client.getServerKey());
+            message = EncryptionUtils.encryptBytesAES(message, (SecretKeySpec) client.getSessionKey());
+
+            Tig.Signature sign = Tig.Signature.newBuilder()
+                    .setValue(ByteString.copyFrom(signature)).build();
+
+            //server
+            Tig.CustomProtocolMessage response = client.getCustomProtocolStub().listFiles(
+                    Tig.CustomProtocolMessage.newBuilder()
+                            .setMessage(ByteString.copyFrom(message))
+                            .setSignature(sign)
+                            .build()
+            );
+
+            //Decrypt response
+            message = EncryptionUtils.decryptbytesAES(response.getMessage().toByteArray(), (SecretKeySpec) client.getSessionKey());
+
+            byte[] hash = response.getSignature().getValue().toByteArray();
+            hash = EncryptionUtils.decryptbytesRSAPub(hash, client.getServerKey());
+
+            if (!HashUtils.verifyMessageSignature(message, hash)) {
+                throw new IllegalArgumentException("Invalid Signature");
+            }
+
+            content = (Tig.Content) ObjectSerializer.Deserialize(message);
+
+            //TODO verify nonces
+            Tig.ListFilesReply reply = (Tig.ListFilesReply) ObjectSerializer.Deserialize(content.getRequest().toByteArray());
+
             Object[] names = reply.getFileInfoList().toArray();
             for (Object name : names) {
                 System.out.println(name.toString() + "\n");
@@ -212,7 +265,7 @@ public class CustomProtocolOperations {
             System.out.println(e.getStatus().getDescription());
             System.exit(1);
         }
-    }*/
+    }
 
-
+}
 
