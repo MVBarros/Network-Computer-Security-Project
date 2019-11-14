@@ -90,7 +90,7 @@ message ListFilesReply {
 service CustomProtocolTigService {
     rpc login (CustomProtocolMessage) returns (CustomProtocolMessage);
     rpc logout (CustomProtocolMessage) returns (CustomProtocolMessage);
-    rpc setAccessControl (CustomProtocolMessage) returns (CustomProtocolMessage);
+    rpc setAccessControl (CustomProtocolMessage) returns (google.protobuf.Empty);
 }
 
 //login must have custom types because it envolves the exchange of keys, the rest of the messages don't

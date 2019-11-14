@@ -1,6 +1,7 @@
 package tig.grpc.server.api;
 
 import com.google.protobuf.ByteString;
+import com.google.protobuf.Empty;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import tig.grpc.contract.CustomProtocolTigServiceGrpc;
@@ -75,9 +76,29 @@ public class CustomProtocolTigServiceImpl extends CustomProtocolTigServiceGrpc.C
     }
 
     @Override
-    public void setAccessControl (Tig.CustomProtocolMessage request, StreamObserver<Tig.CustomProtocolMessage> responseObserver) {
+    public void setAccessControl (Tig.CustomProtocolMessage request, StreamObserver<Empty> responseObserver) {
         byte[] hash = request.getSignature().getValue().toByteArray();
         String signerId = request.getSignature().getSignerId();
+
+        Key sessionKey = SessionAuthenticator.authenticateSession(signerId).getSessionKey();
+
+        byte[] message = EncryptionUtils.decryptbytesAES(request.getMessage().toByteArray(), (SecretKeySpec) sessionKey);
+        hash = EncryptionUtils.decryptbytesRSAPriv(hash, privateKey);
+
+        if (!HashUtils.verifyMessageSignature(message, hash)) {
+            throw new IllegalArgumentException("Invalid Signature");
+        }
+
+        Tig.Content content = (Tig.Content) ObjectSerializer.Deserialize(message);
+
+        //TODO verify nonces
+        Tig.AccessControlRequest accessRequest = (Tig.AccessControlRequest) ObjectSerializer.Deserialize(content.getRequest().toByteArray());
+        try {
+            responseObserver.onNext(keyStub.accessControlFileTigKey(accessRequest));
+            responseObserver.onCompleted();
+        }catch (StatusRuntimeException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        }
 
 
 
