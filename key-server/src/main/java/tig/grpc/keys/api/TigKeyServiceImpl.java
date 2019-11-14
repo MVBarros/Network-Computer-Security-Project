@@ -10,6 +10,8 @@ import tig.grpc.keys.dao.AuthenticationDAO;
 import tig.grpc.keys.dao.FileDAO;
 import tig.grpc.keys.dao.UsersDAO;
 import tig.grpc.keys.session.SessionAuthenticator;
+import tig.grpc.keys.session.UserToken;
+import tig.utils.encryption.FileKey;
 import tig.utils.encryption.EncryptionUtils;
 
 import javax.crypto.SecretKey;
@@ -41,13 +43,13 @@ public class TigKeyServiceImpl extends TigKeyServiceGrpc.TigKeyServiceImplBase {
 
 
     @Override
-    public void loginTigKey(Tig.LoginTigKeyRequest request, StreamObserver<Tig.TigKeySessionIdMessage> reply) {
+    public void loginTigKey(Tig.AccountRequest request, StreamObserver<Tig.LoginReply> reply) {
         logger.info(String.format("Login username: %s", request.getUsername()));
 
         UsersDAO.authenticateUser(request.getUsername(), request.getPassword());
         String sessionId = SessionAuthenticator.createSession(request.getUsername());
 
-        Tig.TigKeySessionIdMessage.Builder builder = Tig.TigKeySessionIdMessage.newBuilder().setSessionId(sessionId);
+        Tig.LoginReply.Builder builder = Tig.LoginReply.newBuilder().setSessionId(sessionId);
 
         reply.onNext(builder.build());
         reply.onCompleted();
@@ -63,7 +65,24 @@ public class TigKeyServiceImpl extends TigKeyServiceGrpc.TigKeyServiceImplBase {
 
     @Override
     public void keyFileTigKey(Tig.KeyFileTigKeyRequest request, StreamObserver<Tig.KeyFileTigKeyReply> reply) {
-        logger.info(String.format("file with name: %s of owner: %s", request.getFilename(), request.getOwner()));
+        logger.info(String.format("get key of file with name: %s of owner: %s", request.getFilename(), request.getOwner()));
+        String sessionId = request.getSessionId().getSessionId();
+        String filename = request.getFilename();
+        String owner = request.getOwner();
+
+        UserToken userToken = SessionAuthenticator.authenticateSession(sessionId);
+        String username = userToken.getUsername();
+
+        AuthenticationDAO.authenticateFileAccess(username, filename, owner, 0);
+
+        FileKey fileKey = FileDAO.getFileEncryptionKey(filename, owner);
+        Tig.KeyFileTigKeyReply replyMessage = Tig.KeyFileTigKeyReply.newBuilder()
+                                              .setIv(ByteString.copyFrom(fileKey.getIv()))
+                                              .setKey(ByteString.copyFrom(fileKey.getKey()))
+                                              .build();
+
+        reply.onNext(replyMessage);
+        reply.onCompleted();
     }
 
     @Override
@@ -87,6 +106,15 @@ public class TigKeyServiceImpl extends TigKeyServiceGrpc.TigKeyServiceImplBase {
     }
 
     @Override
+    public void deleteFileTigKey(Tig.DeleteFileRequest request, StreamObserver<Empty> responseObserver) {
+        String username = SessionAuthenticator.authenticateSession(request.getSessionId()).getUsername();
+        logger.info(String.format("Delete filename: %s of users %s", request.getFilename(), username));
+        FileDAO.deleteFile(username, request.getFilename());
+        responseObserver.onNext(Empty.newBuilder().build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
     public void listFileTigKey(Tig.TigKeySessionIdMessage request, StreamObserver<Tig.ListFilesReply> responseObserver) {
         String username = SessionAuthenticator.authenticateSession(request.getSessionId()).getUsername();
         List<String> files = FileDAO.listFiles(username);
@@ -97,6 +125,19 @@ public class TigKeyServiceImpl extends TigKeyServiceGrpc.TigKeyServiceImplBase {
         responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
 
+    }
+
+    @Override
+    public void accessControlFileTigKey(Tig.AccessControlRequest request, StreamObserver<Empty> responseObserver) {
+        String username = SessionAuthenticator.authenticateSession(request.getSessionId()).getUsername();
+
+        logger.info(String.format("Access Control from file %s of user %s to user %s and make it: %s", request.getFileName(),
+                username, request.getTarget(), request.getPermission()));
+
+        AuthenticationDAO.updateAccessControl(request.getFileName(), username, request.getTarget(), request.getPermission().getNumber());
+
+        responseObserver.onNext(Empty.newBuilder().build());
+        responseObserver.onCompleted();
     }
 
 }
