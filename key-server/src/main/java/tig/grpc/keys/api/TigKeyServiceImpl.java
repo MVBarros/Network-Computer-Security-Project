@@ -6,14 +6,29 @@ import org.apache.log4j.Logger;
 import tig.grpc.contract.Tig;
 import tig.grpc.contract.TigKeyServiceGrpc;
 import tig.grpc.keys.dao.AuthenticationDAO;
+import tig.grpc.keys.dao.FileDAO;
 import tig.grpc.keys.dao.UsersDAO;
 import tig.grpc.keys.session.SessionAuthenticator;
 import tig.utils.encryption.EncryptionUtils;
 
 import javax.crypto.SecretKey;
+import tig.utils.PasswordUtils;
+
+import java.util.List;
 
 public class TigKeyServiceImpl extends TigKeyServiceGrpc.TigKeyServiceImplBase {
     private final static Logger logger = Logger.getLogger(TigKeyServiceImpl.class);
+
+    @Override
+    public void registerTigKey(Tig.AccountRequest request, StreamObserver<Empty> responseObserver) {
+        logger.info(String.format("Register username: %s", request.getUsername()));
+        PasswordUtils.validateNewPassword(request.getPassword());
+        UsersDAO.insertUser(request.getUsername(), request.getPassword());
+
+        responseObserver.onNext(Empty.newBuilder().build());
+        responseObserver.onCompleted();
+
+    }
 
     @Override
     public void helloTigKey(Tig.HelloTigKeyRequest request, StreamObserver<Tig.HelloTigKeyReply> reply) {
@@ -22,6 +37,7 @@ public class TigKeyServiceImpl extends TigKeyServiceGrpc.TigKeyServiceImplBase {
         reply.onNext(keyReply);
         reply.onCompleted();
     }
+
 
     @Override
     public void loginTigKey(Tig.LoginTigKeyRequest request, StreamObserver<Tig.TigKeySessionIdMessage> reply) {
@@ -61,7 +77,15 @@ public class TigKeyServiceImpl extends TigKeyServiceGrpc.TigKeyServiceImplBase {
     }
 
     @Override
-    public void listFileTigKey(Tig.TigKeySessionIdMessage request, StreamObserver<Tig.ListFilesReply> reply) {
+    public void listFileTigKey(Tig.TigKeySessionIdMessage request, StreamObserver<Tig.ListFilesReply> responseObserver) {
+        String username = SessionAuthenticator.authenticateSession(request.getSessionId()).getUsername();
+        List<String> files = FileDAO.listFiles(username);
+        logger.info("List files " + username);
+
+        Tig.ListFilesReply.Builder builder = Tig.ListFilesReply.newBuilder();
+        builder.addAllFileInfo(files);
+        responseObserver.onNext(builder.build());
+        responseObserver.onCompleted();
 
     }
 
