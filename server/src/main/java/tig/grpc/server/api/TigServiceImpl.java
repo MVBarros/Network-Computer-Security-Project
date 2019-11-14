@@ -15,6 +15,7 @@ import tig.utils.encryption.EncryptionUtils;
 
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Arrays;
+import java.util.Iterator;
 
 public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
     private final static Logger logger = Logger.getLogger(TigServiceImpl.class);
@@ -100,6 +101,29 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
             responseObserver.onNext(files);
             responseObserver.onCompleted();
         }catch (StatusRuntimeException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        }
+    }
+
+    @Override
+    public void recoverFile(Tig.RecoverFileRequest request, StreamObserver<Tig.FileChunkDownload> reply) {
+        logger.info("Recover file");
+        try {
+            Iterator<Tig.FileChunkDownload> recover = backupStub.recoverFile(Tig.RecoverFileRequest.newBuilder()
+                                                                                                    .setSessionId(request.getSessionId())
+                                                                                                    .setFilename(request.getFilename())
+                                                                                                    .setTCreated(request.getTCreated())
+                                                                                                    .build());
+            while (recover.hasNext()) {
+                Tig.FileChunkDownload.Builder builder = Tig.FileChunkDownload.newBuilder();
+                Tig.FileChunkDownload chunk = recover.next();
+                builder.setContent(ByteString.copyFrom(chunk.getContent().toByteArray()));
+                builder.setSequence(chunk.getSequence());
+                reply.onNext(builder.build());
+            }
+            reply.onCompleted();
+
+        } catch (StatusRuntimeException e) {
             throw new IllegalArgumentException(e.getMessage());
         }
     }
