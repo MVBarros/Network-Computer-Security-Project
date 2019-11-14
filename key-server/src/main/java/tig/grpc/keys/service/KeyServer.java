@@ -74,6 +74,7 @@ public class KeyServer {
             public void run() {
                 logger.info("Shutdown Signal: Shutting down server");
                 server.shutdownNow();
+                PostgreSQLJDBC.getInstance().deleteConn();
             }
         });
 

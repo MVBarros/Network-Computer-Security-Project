@@ -77,10 +77,9 @@ public class DocumentServer {
                 .build();
         TigServiceImpl.backupStub = TigBackupServiceGrpc.newBlockingStub(bdChannel);
 
-        BackupThread.backupStub = TigBackupServiceGrpc.newStub(channel);
+        BackupThread.backupStub = TigBackupServiceGrpc.newStub(bdChannel);
 
 
-        //Test Purposes only
         System.out.println("Connected and authenticated to backup server successfully");
 
         //Start server
@@ -102,6 +101,7 @@ public class DocumentServer {
             public void run() {
                 logger.info("Shutdown Signal: Shutting down server");
                 server.shutdownNow();
+                PostgreSQLJDBC.getInstance().deleteConn();
             }
         });
 
