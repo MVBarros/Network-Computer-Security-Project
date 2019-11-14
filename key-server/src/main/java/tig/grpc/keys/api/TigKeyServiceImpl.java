@@ -1,5 +1,6 @@
 package tig.grpc.keys.api;
 
+import com.google.protobuf.ByteString;
 import com.google.protobuf.Empty;
 import io.grpc.stub.StreamObserver;
 import org.apache.log4j.Logger;
@@ -72,7 +73,16 @@ public class TigKeyServiceImpl extends TigKeyServiceGrpc.TigKeyServiceImplBase {
         String username = SessionAuthenticator.authenticateSession(request.getSessionId().toString()).getUsername();
         AuthenticationDAO.authenticateFileAccess(username, request.getFilename(), request.getOwner(), 1);
 
-        SecretKey key = EncryptionUtils.generateAESKey();
+        byte[] key = EncryptionUtils.generateAESKey().getEncoded();
+        byte[] iv = EncryptionUtils.generateIv();
+
+        Tig.CanEditTigKeyReply.Builder builder = Tig.CanEditTigKeyReply.newBuilder();
+
+        builder.setNewKeyFile(ByteString.copyFrom(key));
+        builder.setIv(ByteString.copyFrom(iv));
+
+        reply.onNext(builder.build());
+        reply.onCompleted();
 
     }
 

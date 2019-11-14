@@ -155,6 +155,7 @@ message KeyFileTigKeyReply {
 
 message CanEditTigKeyReply {
     bytes newKeyFile = 1;
+    bytes iv = 2;
 }
 
 message HelloTigKeyRequest {
