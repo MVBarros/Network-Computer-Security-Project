@@ -119,4 +119,13 @@ public class CustomProtocolTigServiceImpl extends CustomProtocolTigServiceGrpc.C
          */
     }
 
+    @Override
+    public void setAccessControl (Tig.CustomProtocolMessage request, StreamObserver<Tig.CustomProtocolMessage> responseObserver) {
+        byte[] hash = request.getSignature().getValue().toByteArray();
+        String signerId = request.getSignature().getSignerId();
+
+
+
+    }
+
 }
