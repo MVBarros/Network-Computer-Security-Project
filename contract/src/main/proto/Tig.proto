@@ -187,5 +187,13 @@ message HelloTigKeyReply {
 
 
 service TigBackupService {
+    rpc helloTigBackup (HelloTigBackupRequest) returns (HelloTigBackupReply);
+}
 
+message HelloTigBackupRequest {
+    string request = 1;
+}
+
+message HelloTigBackupReply {
+    string request = 1;
 }

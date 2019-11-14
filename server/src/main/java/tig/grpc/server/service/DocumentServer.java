@@ -9,6 +9,7 @@ import io.grpc.netty.NettyServerBuilder;
 import io.netty.handler.ssl.SslContext;
 import org.apache.log4j.Logger;
 import tig.grpc.contract.Tig;
+import tig.grpc.contract.TigBackupServiceGrpc;
 import tig.grpc.contract.TigKeyServiceGrpc;
 import tig.grpc.server.api.CustomProtocolTigServiceImpl;
 import tig.grpc.server.api.TigServiceImpl;
@@ -69,6 +70,18 @@ public class DocumentServer {
         System.out.println("Connected and authenticated to key server successfully");
         Tig.HelloTigKeyRequest request = Tig.HelloTigKeyRequest.newBuilder().setRequest("Hello from tig server").build();
         System.out.println(keyStub.helloTigKey(request).getRequest());
+
+        //Connect to backup server
+        ManagedChannel bdChannel = NettyChannelBuilder.forTarget(args[6])
+                .sslContext(context)
+                .build();
+        TigBackupServiceGrpc.TigBackupServiceBlockingStub backupStub = TigBackupServiceGrpc.newBlockingStub(bdChannel);
+        TigServiceImpl.backupStub = backupStub;
+
+        //Test Purposes only
+        System.out.println("Connected and authenticated to backup server successfully");
+        Tig.HelloTigBackupRequest bdRequest = Tig.HelloTigBackupRequest.newBuilder().setRequest("Hello from tig server").build();
+        System.out.println(backupStub.helloTigBackup(bdRequest).getRequest());
 
         //Start server
         final Server server = NettyServerBuilder

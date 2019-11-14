@@ -22,8 +22,8 @@
         <exec-maven-plugin.version>1.6.0</exec-maven-plugin.version>
 
         <!-- application properties -->
-        <mainclass>tig.grpc.keys.service.BackupServer</mainclass>
-        <server.port>8090</server.port>
+        <mainclass>tig.grpc.backup.service.BackupServer</mainclass>
+        <server.port>8091</server.port>
         <db.name>src/main/resources/db/backupbd</db.name>
 
         <tig.server.url>localhost:8081</tig.server.url>

@@ -6,6 +6,7 @@ import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import org.apache.log4j.Logger;
 import tig.grpc.contract.Tig;
+import tig.grpc.contract.TigBackupServiceGrpc;
 import tig.grpc.contract.TigKeyServiceGrpc;
 import tig.grpc.contract.TigServiceGrpc;
 import tig.grpc.server.data.dao.FileDAO;
@@ -17,6 +18,7 @@ import java.util.Arrays;
 public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
     private final static Logger logger = Logger.getLogger(TigServiceImpl.class);
     public static TigKeyServiceGrpc.TigKeyServiceBlockingStub keyStub;
+    public static TigBackupServiceGrpc.TigBackupServiceBlockingStub backupStub;
 
     @Override
     public void register(Tig.AccountRequest request, StreamObserver<Empty> responseObserver) {
