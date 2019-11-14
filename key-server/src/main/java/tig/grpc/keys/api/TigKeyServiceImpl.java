@@ -5,8 +5,12 @@ import io.grpc.stub.StreamObserver;
 import org.apache.log4j.Logger;
 import tig.grpc.contract.Tig;
 import tig.grpc.contract.TigKeyServiceGrpc;
+import tig.grpc.keys.dao.AuthenticationDAO;
 import tig.grpc.keys.dao.UsersDAO;
 import tig.grpc.keys.session.SessionAuthenticator;
+import tig.utils.encryption.EncryptionUtils;
+
+import javax.crypto.SecretKey;
 
 public class TigKeyServiceImpl extends TigKeyServiceGrpc.TigKeyServiceImplBase {
     private final static Logger logger = Logger.getLogger(TigKeyServiceImpl.class);
@@ -46,8 +50,14 @@ public class TigKeyServiceImpl extends TigKeyServiceGrpc.TigKeyServiceImplBase {
     }
 
     @Override
-    public void canSaveTigKey(Tig.KeyFileTigKeyRequest request, StreamObserver<Tig.CanEditTigKeyReply> reply) {
-        logger.info(String.format("session id: %s", request.getSessionId()));
+    public void canEditTigKey(Tig.KeyFileTigKeyRequest request, StreamObserver<Tig.CanEditTigKeyReply> reply) {
+        logger.info(String.format("filename: %s, owner: %s, session id: %s", request.getFilename(), request.getOwner(), request.getSessionId()));
+
+        String username = SessionAuthenticator.authenticateSession(request.getSessionId().toString()).getUsername();
+        AuthenticationDAO.authenticateFileAccess(username, request.getFilename(), request.getOwner(), 1);
+
+        SecretKey key = EncryptionUtils.generateAESKey();
+
     }
 
     @Override

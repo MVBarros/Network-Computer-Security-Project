@@ -127,7 +127,7 @@ service TigKeyService {
     rpc logoutTigKey (TigKeySessionIdMessage) returns (google.protobuf.Empty);
     rpc keyFileTigKey (KeyFileTigKeyRequest) returns (KeyFileTigKeyReply);
     //rpc keyFileRecoverTigKey (keyFileRecoverTigKeyRequest) returns (keyFileRecoverTigKeyReply);
-    rpc canSaveTigKey (KeyFileTigKeyRequest) returns (CanEditTigKeyReply);
+    rpc canEditTigKey (KeyFileTigKeyRequest) returns (CanEditTigKeyReply);
     rpc listFileTigKey (TigKeySessionIdMessage) returns (ListFilesReply);
 }
 
