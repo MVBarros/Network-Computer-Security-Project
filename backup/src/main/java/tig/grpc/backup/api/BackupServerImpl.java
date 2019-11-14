@@ -1,12 +1,15 @@
 package tig.grpc.backup.api;
 
 import com.google.protobuf.ByteString;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import org.apache.log4j.Logger;
 import tig.grpc.backup.dao.FileDAO;
 import tig.grpc.contract.Tig;
 import tig.grpc.contract.TigBackupServiceGrpc;
 import com.google.protobuf.Empty;
+import tig.grpc.contract.TigKeyServiceGrpc;
+
 import java.util.List;
 
 import java.util.Arrays;
@@ -14,12 +17,13 @@ import java.util.Arrays;
 public class BackupServerImpl extends TigBackupServiceGrpc.TigBackupServiceImplBase {
     private final static Logger logger = Logger.getLogger(BackupServerImpl.class);
 
-    public static TigBackupServiceGrpc.TigBackupServiceBlockingStub keystub;
+    public static TigKeyServiceGrpc.TigKeyServiceBlockingStub keyStub;
+
 
     @Override
     public void listBackupFiles (Tig.ListBackupFilesRequest request, StreamObserver<Tig.ListFilesReply> reply) {
-        String username = SessionAuthenticator.authenticateSession(request.getSessionId()).getUsername();
-
+        String username = "ol";
+   //     String username = keystub.listBackupFiles(Tig.ListBackupFilesRequest.newBuilder(Tig.ListBackupFilesRequest.newBuilder().setSessionId(request.getSessionId()).build()).build());
         logger.info("List files that can be recovered " + username);
         List<String> files = FileDAO.listFiles(username);
         Tig.ListFilesReply.Builder builder = Tig.ListFilesReply.newBuilder();
@@ -57,7 +61,7 @@ public class BackupServerImpl extends TigBackupServiceGrpc.TigBackupServiceImplB
             private int counter = 0;
             private ByteString file = ByteString.copyFrom(new byte[]{});
             private String filename;
-            private String owner;
+            private String sessionId;
             private String t_created;
             private final Object lock = new Object();
 
@@ -75,7 +79,7 @@ public class BackupServerImpl extends TigBackupServiceGrpc.TigBackupServiceImplB
                     //Renew Lease
                     if (counter == 0) {
                         filename = backupFileUpload.getFileName();
-                        owner = backupFileUpload.getFileowner();
+                        sessionId = backupFileUpload.getSessionId();
                         t_created = backupFileUpload.getTCreated();
                     }
                     file = file.concat(backupFileUpload.getContent());
@@ -91,9 +95,18 @@ public class BackupServerImpl extends TigBackupServiceGrpc.TigBackupServiceImplB
 
             @Override
             public void onCompleted() {
-                FileDAO.uploadFile(filename, owner, t_created, file.toByteArray());
-                responseObserver.onNext(Empty.newBuilder().build());
-                responseObserver.onCompleted();
+                try {
+                    String owner = keyStub.getUsernameForSession(
+                            Tig.TigKeySessionIdMessage.newBuilder()
+                                    .setSessionId(sessionId)
+                                    .build()).getUsername();
+
+                    FileDAO.uploadFile(filename, owner, t_created, file.toByteArray());
+                    responseObserver.onNext(Empty.newBuilder().build());
+                    responseObserver.onCompleted();
+                }catch (StatusRuntimeException e) {
+                    throw new IllegalArgumentException(e.getMessage());
+                }
             }
         };
     }
