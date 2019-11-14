@@ -1,9 +1,20 @@
 package tig.grpc.server.api;
 
+import com.google.protobuf.ByteString;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import tig.grpc.contract.CustomProtocolTigServiceGrpc;
 import tig.grpc.contract.Tig;
+import tig.grpc.contract.TigBackupServiceGrpc;
+import tig.grpc.contract.TigKeyServiceGrpc;
+import tig.grpc.server.session.SessionAuthenticator;
+import tig.grpc.server.throttle.Throttler;
+import tig.utils.encryption.EncryptionUtils;
+import tig.utils.encryption.HashUtils;
+import tig.utils.keys.KeyGen;
+import tig.utils.serialization.ObjectSerializer;
 
+import javax.crypto.spec.SecretKeySpec;
 import java.security.*;
 
 public class CustomProtocolTigServiceImpl extends CustomProtocolTigServiceGrpc.CustomProtocolTigServiceImplBase {
@@ -12,68 +23,12 @@ public class CustomProtocolTigServiceImpl extends CustomProtocolTigServiceGrpc.C
     public static PublicKey publicKey;
 
 
+    public static TigKeyServiceGrpc.TigKeyServiceBlockingStub keyStub;
+    public static TigBackupServiceGrpc.TigBackupServiceBlockingStub backupStub;
+
+
     @Override
-    public void login(Tig.CustomProtocolMessage request, StreamObserver<Tig.CustomProtocolMessage> reply) {
-        /*try {
-
-            //Verify signature
-            byte[] message = request.getMessage().toByteArray();
-            byte[] encryptedSignature = request.getSignature().toByteArray();
-            byte[] signature = EncryptionUtils.decryptbytesRSAPriv(encryptedSignature, privateKey);
-            if (!HashUtils.verifyMessageSignature(message, signature)) {
-                throw new IllegalArgumentException("Invalid Signature");
-            }
-
-            //Get Message Key
-            Tig.CustomLoginRequest loginRequest = (Tig.CustomLoginRequest)ObjectSerializer.Deserialize(request.getMessage().toByteArray());
-            byte[] encryptionKey = loginRequest.getEncryptionKey().toByteArray();
-            encryptionKey = EncryptionUtils.decryptbytesRSAPriv(encryptionKey, privateKey);
-            SecretKeySpec secretKey = new SecretKeySpec(encryptionKey, "AES");
-
-            //get Account Request
-            byte[] accountMessage = EncryptionUtils.decryptbytesAES(loginRequest.getMessage().toByteArray(), secretKey);
-            Tig.AccountRequest accountRequest = (Tig.AccountRequest) ObjectSerializer.Deserialize(accountMessage);
-
-            //login user
-            UsersDAO.authenticateUser(accountRequest.getUsername(), accountRequest.getPassword());
-
-            //generate session Key
-            Key sessionKey = KeyGen.generateSessionKey();
-            String sessionId = SessionAuthenticator.createCustomSession(accountRequest.getUsername(), sessionKey);
-
-            //generate response
-            Tig.CustomProtocolLoginReply loginReply = Tig.CustomProtocolLoginReply.newBuilder()
-                    .setSecretKey(ByteString.copyFrom(sessionKey.getEncoded()))
-                    .setSessionId(sessionId)
-                    .build();
-
-            //generate response
-            byte[] replyMessage = ObjectSerializer.Serialize(loginReply);
-
-
-            //get client public key
-            byte[] clientKey = loginRequest.getClientPubKey().toByteArray();
-            PublicKey clientPubKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(clientKey));
-
-            //sign with client public key
-            byte[] replySignature = HashUtils.hashBytes(replyMessage);
-            replySignature = EncryptionUtils.encryptBytesRSAPub(replySignature, clientPubKey);
-
-            //encrypt response
-            replyMessage = EncryptionUtils.encryptBytesAES(replyMessage, secretKey);
-
-            Tig.CustomProtocolMessage actualReply = Tig.CustomProtocolMessage.newBuilder()
-                    .setSignature(ByteString.copyFrom(replySignature))
-                    .setMessage(ByteString.copyFrom(replyMessage))
-                    .build();
-
-
-            reply.onNext(actualReply);
-            reply.onCompleted();
-        }catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-            //Should never happen
-            throw new RuntimeException();
-        }*/
+    public void login(Tig.CustomProtocolMessage request, StreamObserver<Tig.CustomProtocolMessage> responseObserver) {
     }
 
     @Override
