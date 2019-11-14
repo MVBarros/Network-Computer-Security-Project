@@ -93,7 +93,7 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
     }
 
     @Override
-    public void listBackupFiles(Tig.SessionRequest request, StreamObserver<Tig.ListFilesReply> responseObserver) {
+    public void listBackupFiles(Tig.ListBackupFilesRequest request, StreamObserver<Tig.ListFilesReply> responseObserver) {
         logger.info("List Backup files");
         try {
             Tig.ListFilesReply files = backupStub.listBackupFiles(Tig.ListBackupFilesRequest.newBuilder(Tig.ListBackupFilesRequest.newBuilder().setSessionId(request.getSessionId()).build()).build());
