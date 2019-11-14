@@ -1,5 +1,3 @@
-PRAGMA foreign_keys=1;
-
 drop table if exists users;
 drop table if exists files;
 drop table if exists authorizations;

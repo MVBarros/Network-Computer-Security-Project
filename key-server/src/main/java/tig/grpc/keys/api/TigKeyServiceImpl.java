@@ -107,11 +107,11 @@ public class TigKeyServiceImpl extends TigKeyServiceGrpc.TigKeyServiceImplBase {
     }
 
     @Override
-    public void deleteFileTigKey(Tig.DeleteFileRequest request, StreamObserver<Empty> responseObserver) {
+    public void deleteFileTigKey(Tig.DeleteFileRequest request, StreamObserver<Tig.DeleteFileReply> responseObserver) {
         String username = SessionAuthenticator.authenticateSession(request.getSessionId()).getUsername();
         logger.info(String.format("Delete filename: %s of users %s", request.getFilename(), username));
         FileDAO.deleteFile(username, request.getFilename());
-        responseObserver.onNext(Empty.newBuilder().build());
+        responseObserver.onNext(Tig.DeleteFileReply.newBuilder().setOwner(username).build());
         responseObserver.onCompleted();
     }
 

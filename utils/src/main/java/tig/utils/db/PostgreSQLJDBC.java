@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.Statement;
 
 public class PostgreSQLJDBC {
 
@@ -28,6 +29,9 @@ public class PostgreSQLJDBC {
             Class.forName("org.sqlite.JDBC");
             conn = DriverManager
                     .getConnection("jdbc:sqlite:" + dbName + ".db");
+
+            Statement s = conn.createStatement();
+            s.executeUpdate("PRAGMA foreign_keys = ON; ");
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
