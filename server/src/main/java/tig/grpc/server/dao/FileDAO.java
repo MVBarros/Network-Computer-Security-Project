@@ -75,7 +75,6 @@ public class FileDAO {
     }
 
     public static void deleteFile(String fileId) {
-
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
         try {
             PreparedStatement delete_stmt = conn.prepareStatement("DELETE FROM files WHERE fileId=(?)");
