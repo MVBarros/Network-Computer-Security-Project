@@ -4,6 +4,7 @@ import com.google.protobuf.ByteString;
 import io.grpc.StatusRuntimeException;
 import tig.grpc.client.Client;
 import tig.grpc.contract.Tig;
+import tig.utils.StringGenerator;
 import tig.utils.encryption.EncryptionUtils;
 import tig.utils.encryption.HashUtils;
 import tig.utils.serialization.ObjectSerializer;
@@ -28,7 +29,7 @@ public class CustomProtocolOperations {
     }*/
 
     public static void loginClient(Client client) {
-        try {
+        /*try {
             System.out.println(String.format("Login Client Custom Protocol %s", client.getUsername()
             ));
 
@@ -84,11 +85,11 @@ public class CustomProtocolOperations {
             System.out.println(e.getStatus().getDescription());
             System.out.println(e);
             System.exit(1);
-        }
+        }*/
     }
 
     public static void logoutClient(Client client) {
-        try {
+        /*try {
             System.out.println(String.format("Login Client Custom Protocol %s", client.getUsername()
             ));
 
@@ -133,10 +134,10 @@ public class CustomProtocolOperations {
             System.out.println(e.getStatus().getDescription());
             System.out.println(e);
             System.exit(1);
-        }
+        }*/
     }
 
-}
+
 
     /*public static void deleteFile(Client client, String filename) {
         try {
@@ -150,16 +151,44 @@ public class CustomProtocolOperations {
             System.out.println(e.getStatus().getDescription());
             System.exit(1);
         }
-    }
+    }*/
 
     public static void setAccessControl(Client client, String filename, String target, Tig.PermissionEnum permission) {
         try {
             System.out.println(String.format("Set access control File: %s to user: %s set permission to  %s ", filename, target, permission.toString()));
-            client.getStub().accessControlFile(Tig.AccessControlRequest.newBuilder()
+
+            Tig.AccessControlRequest request = Tig.AccessControlRequest.newBuilder()
                     .setFileName(filename)
                     .setSessionId(client.getSessionId())
                     .setTarget(target)
-                    .setPermission(permission).build());
+                    .setPermission(permission).build();
+
+            byte[] message = ObjectSerializer.Serialize(request);
+
+            String nonce = StringGenerator.randomString(256);
+
+            Tig.Content content = Tig.Content.newBuilder()
+                    .setRequest(ByteString.copyFrom(message))
+                    .setNonce(nonce).build();
+
+            message = ObjectSerializer.Serialize(content);
+
+            byte[] signature = HashUtils.hashBytes(message);
+            signature = EncryptionUtils.encryptBytesRSAPub(signature, client.getServerKey());
+            message = EncryptionUtils.encryptBytesAES(message, (SecretKeySpec) client.getSessionKey());
+
+            Tig.Signature sign = Tig.Signature.newBuilder()
+                    .setValue(ByteString.copyFrom(signature)).build();
+
+            client.getCustomProtocolStub().setAccessControl(
+                    Tig.CustomProtocolMessage.newBuilder()
+                    .setMessage(ByteString.copyFrom(message))
+                    .setSignature(sign)
+                    .build()
+            );
+
+
+
         } catch (StatusRuntimeException e) {
             System.out.print("Error deleting file: ");
             System.out.println(e.getStatus().getDescription());
@@ -167,8 +196,8 @@ public class CustomProtocolOperations {
         }
         System.out.println("Access control set successfully");
     }
-
-    public static void listFiles(Client client) {
+}
+    /*public static void listFiles(Client client) {
         try {
             System.out.println("List all Files");
             Tig.ListFilesReply reply = client.getStub().listFiles(Tig.SessionRequest.newBuilder()

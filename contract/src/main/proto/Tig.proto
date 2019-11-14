@@ -90,6 +90,7 @@ message ListFilesReply {
 service CustomProtocolTigService {
     rpc login (CustomProtocolMessage) returns (CustomProtocolMessage);
     rpc logout (CustomProtocolMessage) returns (CustomProtocolMessage);
+    rpc setAccessControl (CustomProtocolMessage) returns (CustomProtocolMessage);
 }
 
 //login must have custom types because it envolves the exchange of keys, the rest of the messages don't
@@ -104,16 +105,20 @@ message CustomProtocolLoginReply {
     string sessionId = 2;
 }
 
+message Content {
+    bytes request = 1;
+    string nonce = 2;
+}
+
 
 message Signature {
     string signerId = 1;
     bytes value = 2; // hash of the message that is encrypted with the receiver public key
-    bytes nonce = 3; // to avoid replay attacks
 }
 
 message CustomProtocolMessage {
     bytes message = 1; //message is a serialized message encrypted with the sessionKey
-    bytes signature = 2; //Signature is the hash
+    Signature signature = 2; //Signature is the hash
 }
 
 
