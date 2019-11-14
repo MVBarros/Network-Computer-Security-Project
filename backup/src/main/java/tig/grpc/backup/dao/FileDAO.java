@@ -53,7 +53,7 @@ public class FileDAO {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
         try {
             PreparedStatement stmt = conn.prepareStatement("SELECT content FROM files " +
-                    "WHERE filename = (?) and owner = (?) and t_created = (?)");
+                    "WHERE filename = (?) and fileowner = (?) and t_created = (?)");
 
             stmt.setString(1, filename);
             stmt.setString(2, owner);

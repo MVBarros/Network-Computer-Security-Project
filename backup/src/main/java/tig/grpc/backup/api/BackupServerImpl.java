@@ -37,7 +37,9 @@ public class BackupServerImpl extends TigBackupServiceGrpc.TigBackupServiceImplB
         logger.info(String.format("Recover file: %s", request.getFilename()));
 
         String filename = request.getFilename();
-        String owner = SessionAuthenticator.authenticateSession(request.getSessionId()).getUsername();
+        String owner = keyStub.getUsernameForSession(Tig.TigKeySessionIdMessage.newBuilder()
+                                                                                .setSessionId(request.getSessionId())
+                                                                                .build()).getUsername();
         String time_created = request.getTCreated();
 
         byte[] file = FileDAO.getFileContent(filename, owner, time_created);
