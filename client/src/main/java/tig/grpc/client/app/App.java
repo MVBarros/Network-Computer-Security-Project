@@ -11,6 +11,7 @@ import tig.grpc.contract.TigServiceGrpc;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Objects;
 
 
 public class App {
@@ -26,7 +27,7 @@ public class App {
         CommandLine cmd = null;
 
         try {
-            cmd = parser.parse(options, Arrays.copyOfRange(args, 1,args.length));
+            cmd = parser.parse(options, Arrays.copyOfRange(args, 0,args.length));
         } catch (ParseException e) {
             System.out.println(e.getMessage());
             formatter.printHelp("utility-name", options);
@@ -38,7 +39,9 @@ public class App {
         final String target = host + ":" + port;
 
         final ManagedChannel channel = NettyChannelBuilder.forAddress(host, port)
-                                                        .sslContext(GrpcSslContexts.forClient().trustManager(new File(args[0])).build())
+                                                        .sslContext(GrpcSslContexts.forClient().trustManager(
+                                                                new File("certs/ca.cert"))
+                                                                .build())
                                                         .build();
 
         TigServiceGrpc.TigServiceBlockingStub stub = TigServiceGrpc.newBlockingStub(channel);
