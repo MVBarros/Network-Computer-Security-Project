@@ -2,10 +2,7 @@ package tig.grpc.server.service;
 
 import io.grpc.BindableService;
 import io.grpc.Server;
-import io.grpc.netty.GrpcSslContexts;
 import io.grpc.netty.NettyServerBuilder;
-import io.netty.handler.ssl.SslContext;
-import io.netty.handler.ssl.SslContextBuilder;
 import org.apache.log4j.Logger;
 import tig.grpc.server.api.TigServiceImpl;
 import tig.grpc.server.data.PostgreSQLJDBC;
@@ -37,11 +34,12 @@ public class DocumentServer {
         PostgreSQLJDBC.setPassword(args[2]);
         PostgreSQLJDBC.getInstance();
 
+        //Server Public Key Certificate
         File certChainFile = new File(args[3]);
+
+        //Server Private Key
         File privateKeyFile = new File(args[4]);
 
-        /*SslContext sslContext = GrpcSslContexts.configure(SslContextBuilder.forServer(certChainFile, privateKeyFile)).
-                build();*/
 
         final Server server = NettyServerBuilder
                 .forPort(port)

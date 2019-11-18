@@ -34,6 +34,11 @@
             <artifactId>tig-contract</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>T17.SIRS</groupId>
+            <artifactId>tig-utils</artifactId>
+            <version>1.0.0-RELEASE</version>
+        </dependency>
         <!--Postgres-->
         <dependency>
             <groupId>postgresql</groupId>

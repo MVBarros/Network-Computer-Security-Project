@@ -1,4 +1,4 @@
-package tig.grpc.server.utils;
+package tig.utils;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;

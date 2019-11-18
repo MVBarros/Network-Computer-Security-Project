@@ -1,4 +1,4 @@
-package tig.grpc.server.utils.encryption;
+package tig.utils.encryption;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;

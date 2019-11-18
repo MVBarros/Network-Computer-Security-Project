@@ -1,4 +1,4 @@
-package tig.grpc.server.utils;
+package tig.utils;
 
 import java.security.SecureRandom;
 import java.util.Random;

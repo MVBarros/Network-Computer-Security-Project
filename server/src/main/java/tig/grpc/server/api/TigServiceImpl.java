@@ -10,7 +10,7 @@ import tig.grpc.server.data.dao.AuthenticationDAO;
 import tig.grpc.server.data.dao.FileDAO;
 import tig.grpc.server.data.dao.UsersDAO;
 import tig.grpc.server.session.SessionAuthenticator;
-import tig.grpc.server.utils.PasswordUtils;
+import tig.utils.PasswordUtils;
 
 import java.util.Arrays;
 import java.util.List;

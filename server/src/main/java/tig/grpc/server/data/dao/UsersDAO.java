@@ -1,7 +1,7 @@
 package tig.grpc.server.data.dao;
 
 import tig.grpc.server.data.PostgreSQLJDBC;
-import tig.grpc.server.utils.PasswordUtils;
+import tig.utils.PasswordUtils;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

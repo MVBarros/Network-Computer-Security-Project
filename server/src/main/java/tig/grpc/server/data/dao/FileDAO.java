@@ -1,8 +1,9 @@
 package tig.grpc.server.data.dao;
 
 import tig.grpc.server.data.PostgreSQLJDBC;
-import tig.grpc.server.utils.encryption.EncryptedFile;
-import tig.grpc.server.utils.encryption.EncryptionUtils;
+
+import tig.utils.encryption.EncryptedFile;
+import tig.utils.encryption.EncryptionUtils;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;

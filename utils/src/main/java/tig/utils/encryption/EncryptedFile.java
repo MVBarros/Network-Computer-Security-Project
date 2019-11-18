@@ -1,4 +1,4 @@
-package tig.grpc.server.utils.encryption;
+package tig.utils.encryption;
 
 public class EncryptedFile {
     private byte[] content;

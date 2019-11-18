@@ -1,6 +1,6 @@
 package tig.grpc.server.session;
 
-import tig.grpc.server.utils.StringGenerator;
+import tig.utils.StringGenerator;
 
 import java.time.LocalDateTime;
 import java.util.concurrent.ConcurrentHashMap;
