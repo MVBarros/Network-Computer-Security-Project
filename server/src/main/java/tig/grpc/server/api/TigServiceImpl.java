@@ -12,11 +12,16 @@ import tig.grpc.server.data.dao.UsersDAO;
 import tig.grpc.server.session.SessionAuthenticator;
 import tig.utils.PasswordUtils;
 
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.Arrays;
 import java.util.List;
 
 public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
     private final static Logger logger = Logger.getLogger(TigServiceImpl.class);
+
+    public static PrivateKey privateKey;
+    public static PublicKey publicKey;
 
     @Override
     public void register(Tig.AccountRequest request, StreamObserver<Empty> responseObserver) {

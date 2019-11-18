@@ -8,6 +8,7 @@ import tig.grpc.server.api.TigServiceImpl;
 import tig.grpc.server.data.PostgreSQLJDBC;
 import tig.grpc.server.interceptor.ExceptionHandler;
 import tig.grpc.server.session.TokenCleanupThread;
+import tig.utils.keys.KeyFileLoader;
 
 
 import java.io.File;
@@ -19,9 +20,9 @@ public class DocumentServer {
         System.out.println(DocumentServer.class.getSimpleName());
 
         // check arguments
-        if (args.length < 5) {
+        if (args.length < 6) {
             System.err.println("Argument(s) missing!");
-            System.err.printf("<Usage> java %s port dbport dbpassword certChainFile privateKeyFile%n", DocumentServer.class.getName());
+            System.err.printf("<Usage> java %s port dbport dbpassword certChainFile privateKeyFile privateKeyFilePCKS8%n", DocumentServer.class.getName());
             return;
         }
 
@@ -39,6 +40,8 @@ public class DocumentServer {
 
         //Server Private Key
         File privateKeyFile = new File(args[4]);
+        TigServiceImpl.privateKey = KeyFileLoader.loadPrivateKey(new File(args[5]));
+        TigServiceImpl.publicKey = KeyFileLoader.loadPublicKey(certChainFile);
 
 
         final Server server = NettyServerBuilder
