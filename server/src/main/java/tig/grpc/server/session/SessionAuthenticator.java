@@ -1,7 +1,9 @@
 package tig.grpc.server.session;
 
 import tig.utils.StringGenerator;
+import tig.utils.keys.KeyGen;
 
+import java.security.Key;
 import java.time.LocalDateTime;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -19,8 +21,18 @@ public class SessionAuthenticator {
         return sessionId;
     }
 
+    public static String createCustomSession(String username, Key sessionKey) {
+        String sessionId;
+        do {
+            sessionId = StringGenerator.randomString(256);
+        } while (sessions.containsKey(sessionId));
+        //Session Id valid for 5 minutes
+        sessions.put(sessionId, new CustomUserToken(LocalDateTime.now().plusMinutes(5), username, sessionKey));
+        return sessionId;
+    }
 
-    public static String authenticateSession(String sessionId) {
+
+    public static UserToken authenticateSession(String sessionId) {
 
         if (!sessions.containsKey(sessionId)) {
             throw new IllegalArgumentException("Invalid SessionId");
@@ -28,7 +40,7 @@ public class SessionAuthenticator {
 
         UserToken token = sessions.get(sessionId);
 
-        if (token.getExpiration().isBefore(LocalDateTime.now())) {
+        if (!token.authenticateToken()) {
             sessions.remove(sessionId);
             throw new IllegalArgumentException("Session has expired");
         }
@@ -36,7 +48,7 @@ public class SessionAuthenticator {
         //Update expiration if user authenticates successfully
         token.setExpiration(LocalDateTime.now().plusMinutes(5));
 
-        return token.getUsername();
+        return token;
     }
 
     public static void clearSession(String sessionId) {

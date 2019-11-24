@@ -4,6 +4,7 @@ import io.grpc.BindableService;
 import io.grpc.Server;
 import io.grpc.netty.NettyServerBuilder;
 import org.apache.log4j.Logger;
+import tig.grpc.server.api.CustomProtocolTigServiceImpl;
 import tig.grpc.server.api.TigServiceImpl;
 import tig.grpc.server.data.PostgreSQLJDBC;
 import tig.grpc.server.interceptor.ExceptionHandler;
@@ -28,6 +29,7 @@ public class DocumentServer {
 
         final int port = Integer.parseInt(args[0]);
         final BindableService impl = new TigServiceImpl();
+        final BindableService customImpl = new CustomProtocolTigServiceImpl();
 
 
         //Initialize Postgres Connection
@@ -40,8 +42,8 @@ public class DocumentServer {
 
         //Server Private Key
         File privateKeyFile = new File(args[4]);
-        TigServiceImpl.privateKey = KeyFileLoader.loadPrivateKey(new File(args[5]));
-        TigServiceImpl.publicKey = KeyFileLoader.loadPublicKey(certChainFile);
+        CustomProtocolTigServiceImpl.privateKey = KeyFileLoader.loadPrivateKey(new File(args[5]));
+        CustomProtocolTigServiceImpl.publicKey = KeyFileLoader.loadPublicKey(certChainFile);
 
 
         final Server server = NettyServerBuilder
@@ -49,6 +51,7 @@ public class DocumentServer {
                 .useTransportSecurity(certChainFile, privateKeyFile)
                 .intercept(new ExceptionHandler())
                 .addService(impl)
+                .addService(customImpl)
                 .build();
 
         server.start();

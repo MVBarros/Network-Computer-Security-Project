@@ -12,6 +12,10 @@ public class UserToken {
         this.username = username;
     }
 
+    public boolean authenticateToken() {
+      return !expiration.isBefore(LocalDateTime.now());
+    }
+
     public LocalDateTime getExpiration() {
         return expiration;
     }
