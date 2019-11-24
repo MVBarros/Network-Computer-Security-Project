@@ -34,6 +34,7 @@
             <artifactId>tig-contract</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
+        <!-- Shared tig utils -->
         <dependency>
             <groupId>T17.SIRS</groupId>
             <artifactId>tig-utils</artifactId>

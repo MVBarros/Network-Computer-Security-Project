@@ -46,6 +46,12 @@
             <artifactId>commons-cli</artifactId>
             <version>1.3.1</version>
         </dependency>
+        <!-- Shared tig utils -->
+        <dependency>
+            <groupId>T17.SIRS</groupId>
+            <artifactId>tig-utils</artifactId>
+            <version>1.0.0-RELEASE</version>
+        </dependency>
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-netty</artifactId>

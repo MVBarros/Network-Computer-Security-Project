@@ -2,6 +2,8 @@ package tig.grpc.client;
 
 import tig.grpc.contract.TigServiceGrpc;
 
+import java.security.Key;
+
 public class Client {
 
     private String username;
@@ -9,6 +11,8 @@ public class Client {
     private TigServiceGrpc.TigServiceBlockingStub stub;
     private TigServiceGrpc.TigServiceStub asyncStub;
     private String sessionId;
+    private Key pubKey;
+    private Key privKey;
 
     public TigServiceGrpc.TigServiceStub getAsyncStub() {
         return asyncStub;
@@ -33,6 +37,14 @@ public class Client {
     public TigServiceGrpc.TigServiceBlockingStub getStub() {
         return stub;
     }
+
+    public Key getPubKey() { return this.pubKey; }
+
+    public Key getPrivKey() { return this.privKey; }
+
+    public void setPubKey(Key pubKey) { this.pubKey = pubKey; }
+
+    public void setPrivKey(Key privKey) { this.privKey = privKey; }
 
     public Client(TigServiceGrpc.TigServiceBlockingStub stub, TigServiceGrpc.TigServiceStub asyncStub, String username, String password) {
         this.stub = stub;

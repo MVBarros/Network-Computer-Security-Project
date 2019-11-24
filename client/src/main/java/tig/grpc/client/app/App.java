@@ -8,6 +8,7 @@ import tig.grpc.client.Client;
 import tig.grpc.client.Operations;
 import tig.grpc.client.options.OptionManager;
 import tig.grpc.contract.TigServiceGrpc;
+import tig.utils.keys.KeyFileLoader;
 
 import java.io.File;
 import java.util.Arrays;
@@ -62,6 +63,9 @@ public class App {
         char[] password = System.console().readPassword("Password:");
 
         client = new Client(stub, asyncStub, username,new String(password));
+
+        client.setPrivKey(KeyFileLoader.loadPrivateKey(new File("certs/client.key")));
+        client.setPubKey(KeyFileLoader.loadPublicKey(new File("certs/client.pem")));
 
         OptionManager.executeOptions(cmd, client);
     }
