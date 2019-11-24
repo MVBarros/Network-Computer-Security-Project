@@ -86,7 +86,7 @@ message ListFilesReply {
 
 
 service CustomProtocolTigService {
-    rpc login (CustomLoginMessage) returns (CustomProtocolMessage);
+    rpc login (CustomProtocolMessage) returns (CustomProtocolMessage);
     rpc logout (CustomProtocolMessage) returns (CustomProtocolMessage);
 }
 
@@ -95,16 +95,9 @@ message Signature {
     bytes value = 2;
 }
 
-message CustomLoginMessage {
-    bytes message = 1;
-    bytes encryptionKey = 2;
-    bytes clientPubKey = 3;
-    bytes signature = 4;
-}
-
-message CustomProtocolLoginRequest {
-    string usename = 1;
-    string password = 2;
+message CustomLoginRequest {
+    bytes message = 1; //message is a serialized AccountRequest
+    bytes encryptionKey = 2; //encrypted with the server public key
     bytes clientPubKey = 3;
 }
 
@@ -116,9 +109,8 @@ message CustomProtocolLogoutReply {
 }
 
 message CustomProtocolMessage {
-    bytes message = 1;
-    bytes signature = 2;
-    bytes iv = 3;
+    bytes message = 1; //message is a serialized message encrypted with the sessionKey
+    bytes signature = 2; //Signature is the hash
 }
 
 message CustomProtocolLoginReply {
