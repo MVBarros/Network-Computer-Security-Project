@@ -61,19 +61,23 @@
 
     <build>
         <resources>
-            <!-- regular resource processsing for everything except certs.xml -->
+            <!-- regular resource processsing for everything except certs -->
             <resource>
                 <directory>src/main/resources</directory>
                 <excludes>
                     <exclude>certs/ca.cert</exclude>
+                    <exclude>certs/client.key</exclude>
+                    <exclude>certs/client.pem</exclude>
                 </excludes>
             </resource>
             <!-- resource processsing with a different output directory
-                 for logback.xml -->
+                 for certs -->
             <resource>
                 <directory>src/main/resources</directory>
                 <includes>
                     <include>certs/ca.cert</include>
+                    <include>certs/client.key</include>
+                    <include>certs/client.pem</include>
                 </includes>
                 <!-- relative to target/classes
                      i.e. ${project.build.outputDirectory} -->
