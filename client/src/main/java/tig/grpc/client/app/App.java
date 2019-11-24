@@ -8,6 +8,7 @@ import tig.grpc.client.Client;
 import tig.grpc.client.Operations;
 import tig.grpc.client.options.OptionManager;
 import tig.grpc.contract.TigServiceGrpc;
+import tig.grpc.contract.CustomProtocolTigServiceGrpc;
 import tig.utils.keys.KeyFileLoader;
 
 import java.io.File;
@@ -48,6 +49,8 @@ public class App {
         TigServiceGrpc.TigServiceBlockingStub stub = TigServiceGrpc.newBlockingStub(channel);
         TigServiceGrpc.TigServiceStub asyncStub = TigServiceGrpc.newStub(channel);
 
+        CustomProtocolTigServiceGrpc.CustomProtocolTigServiceBlockingStub customProtocolStub = CustomProtocolTigServiceGrpc.newBlockingStub(channel);
+
         //Always Safely terminate connection and logout user
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
@@ -62,10 +65,11 @@ public class App {
         String username = System.console().readLine("Username:");
         char[] password = System.console().readPassword("Password:");
 
-        client = new Client(stub, asyncStub, username,new String(password));
+        client = new Client(stub, asyncStub, customProtocolStub, username,new String(password));
 
         client.setPrivKey(KeyFileLoader.loadPrivateKey(new File("certs/client.key")));
         client.setPubKey(KeyFileLoader.loadPublicKey(new File("certs/client.pem")));
+        client.setServerKey(KeyFileLoader.loadPublicKey(new File("certs/server.pem")));
 
         OptionManager.executeOptions(cmd, client);
     }

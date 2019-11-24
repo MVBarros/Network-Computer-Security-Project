@@ -116,4 +116,5 @@ message CustomProtocolMessage {
 
 message CustomProtocolLoginReply {
     bytes secretKey = 1;
+    string sessionId = 2;
 }

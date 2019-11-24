@@ -45,6 +45,7 @@ public class CustomProtocolTigServiceImpl extends CustomProtocolTigServiceGrpc.C
         //generate response
         Tig.CustomProtocolLoginReply loginReply = Tig.CustomProtocolLoginReply.newBuilder()
                 .setSecretKey(ByteString.copyFrom(sessionKey.getEncoded()))
+                .setSessionId(sessionId)
                 .build();
 
         byte[] replyMessage = ObjectSerializer.Serialize(loginReply);
