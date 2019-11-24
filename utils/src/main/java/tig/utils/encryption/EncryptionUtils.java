@@ -53,10 +53,10 @@ public class EncryptionUtils {
         }
     }
 
-    public static byte[] decryptbytesAES(byte[] encryptedBytes, SecretKeySpec key, byte[] iv) {
+    public static byte[] decryptbytesAES(byte[] encryptedBytes, SecretKeySpec key) {
         try {
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-            cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(iv));
+            Cipher cipher = Cipher.getInstance("AES");
+            cipher.init(Cipher.DECRYPT_MODE, key);
             return cipher.doFinal(encryptedBytes);
         } catch (Exception e) {
             //Should never happen
@@ -65,10 +65,10 @@ public class EncryptionUtils {
         }
     }
 
-    public static byte[] encryptBytesAES(byte[] bytes, SecretKeySpec key, byte[] iv) {
+    public static byte[] encryptBytesAES(byte[] bytes, SecretKeySpec key) {
         try {
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-            cipher.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(iv));
+            Cipher cipher = Cipher.getInstance("AES");
+            cipher.init(Cipher.ENCRYPT_MODE, key);
             return cipher.doFinal(bytes);
         } catch (Exception e) {
             //Should never happen

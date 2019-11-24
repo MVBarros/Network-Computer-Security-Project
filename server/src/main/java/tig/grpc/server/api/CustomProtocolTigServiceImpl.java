@@ -24,48 +24,48 @@ public class CustomProtocolTigServiceImpl extends CustomProtocolTigServiceGrpc.C
 
 
     @Override
-    public void login(Tig.CustomProtocolMessage request, StreamObserver<Tig.CustomProtocolMessage> reply) {
+    public void login(Tig.CustomLoginMessage request, StreamObserver<Tig.CustomProtocolMessage> reply) {
         try {
-            //validate message
+            //Get Message Key
+            byte[] encryptionKey = request.getEncryptionKey().toByteArray();
+            byte[] clientKey = request.getClientPubKey().toByteArray();
+            PublicKey clientPubKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(clientKey));
+            encryptionKey = EncryptionUtils.decryptbytesRSAPriv(encryptionKey, privateKey);
+            SecretKeySpec secretKey = new SecretKeySpec(encryptionKey, "AES");
+
+            //Verify signature
             byte[] encryptedMessage = request.getMessage().toByteArray();
             byte[] encryptedSignature = request.getSignature().toByteArray();
-            byte[] iv = request.getIv().toByteArray();
-            byte[] message = EncryptionUtils.decryptbytesRSAPriv(encryptedMessage, privateKey);
-            Tig.CustomProtocolLoginRequest loginRequest = (Tig.CustomProtocolLoginRequest) ObjectSerializer.Deserialize(message);
-
-            byte[] clientPubKey = loginRequest.getClientPubKey().toByteArray();
-            PublicKey pubKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(clientPubKey));
-            byte[] serializedSignature = EncryptionUtils.decryptbytesRSAPub(encryptedSignature, pubKey);
-
-            Tig.Signature signature = (Tig.Signature) ObjectSerializer.Deserialize(serializedSignature);
-
-            if (!HashUtils.verifyMessageSignature(message, signature.getValue().toByteArray())) {
+            byte[] message = EncryptionUtils.decryptbytesAES(encryptedMessage, secretKey);
+            byte[] signature = EncryptionUtils.decryptbytesRSAPriv(encryptedSignature, privateKey);
+            if (!HashUtils.verifyMessageSignature(message, signature)) {
                 throw new IllegalArgumentException("Invalid Signature");
             }
 
-            //login user
-            UsersDAO.authenticateUser(loginRequest.getUsename(), loginRequest.getPassword());
+            Tig.AccountRequest loginRequest = (Tig.AccountRequest) ObjectSerializer.Deserialize(message);
 
+            //login user
+            UsersDAO.authenticateUser(loginRequest.getUsername(), loginRequest.getPassword());
+
+            //generate session Key
             Key sessionKey = KeyGen.generateSessionKey();
-            String sessionId = SessionAuthenticator.createCustomSession(loginRequest.getUsename(), sessionKey);
+            String sessionId = SessionAuthenticator.createCustomSession(loginRequest.getUsername(), sessionKey);
 
             //generate response
             Tig.CustomProtocolLoginReply loginReply = Tig.CustomProtocolLoginReply.newBuilder()
                     .setSecretKey(ByteString.copyFrom(sessionKey.getEncoded()))
                     .setSessionId(sessionId)
                     .build();
-
             byte[] replyMessage = ObjectSerializer.Serialize(loginReply);
             byte[] replySignature = HashUtils.hashBytes(replyMessage);
-            byte[] replyIv = EncryptionUtils.generateIv();
+            replyMessage = EncryptionUtils.encryptBytesAES(replyMessage, secretKey);
+            replySignature = EncryptionUtils.encryptBytesRSAPub(replySignature, clientPubKey);
 
-            replyMessage = EncryptionUtils.encryptBytesRSAPub(replyMessage, pubKey);
-            replySignature = EncryptionUtils.encryptBytesRSAPriv(replySignature, privateKey);
             Tig.CustomProtocolMessage actualReply = Tig.CustomProtocolMessage.newBuilder()
-                    .setIv(ByteString.copyFrom(replyIv))
                     .setSignature(ByteString.copyFrom(replySignature))
                     .setMessage(ByteString.copyFrom(replyMessage))
                     .build();
+
 
             reply.onNext(actualReply);
             reply.onCompleted();
@@ -78,7 +78,7 @@ public class CustomProtocolTigServiceImpl extends CustomProtocolTigServiceGrpc.C
     @Override
     public void logout(Tig.CustomProtocolMessage request, StreamObserver<Tig.CustomProtocolMessage> reply) {
         //validate message
-        byte[] encryptedMessage = request.getMessage().toByteArray();
+        /*byte[] encryptedMessage = request.getMessage().toByteArray();
         byte[] encryptedSignature = request.getSignature().toByteArray();
         byte[] iv = request.getIv().toByteArray();
 
@@ -112,7 +112,7 @@ public class CustomProtocolTigServiceImpl extends CustomProtocolTigServiceGrpc.C
                 .build();
 
         reply.onNext(actualReply);
-        reply.onCompleted();
+        reply.onCompleted();*/
     }
 
 }
