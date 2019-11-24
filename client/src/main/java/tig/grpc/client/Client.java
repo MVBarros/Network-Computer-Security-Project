@@ -3,7 +3,9 @@ package tig.grpc.client;
 import tig.grpc.contract.CustomProtocolTigServiceGrpc;
 import tig.grpc.contract.TigServiceGrpc;
 
-import java.security.Key;
+import javax.crypto.SecretKey;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 
 public class Client {
 
@@ -13,10 +15,10 @@ public class Client {
     private TigServiceGrpc.TigServiceStub asyncStub;
     private CustomProtocolTigServiceGrpc.CustomProtocolTigServiceBlockingStub customProtocolStub;
     private String sessionId;
-    private Key pubKey;
-    private Key privKey;
-    private Key serverKey;
-    private Key sessionKey;
+    private PublicKey pubKey;
+    private PrivateKey privKey;
+    private PublicKey serverKey;
+    private SecretKey sessionKey;
 
     public TigServiceGrpc.TigServiceStub getAsyncStub() {
         return asyncStub;
@@ -34,43 +36,39 @@ public class Client {
         return username;
     }
 
-    public String getPassword() {
-        return password;
-    }
+    public String getPassword() { return password; }
 
     public TigServiceGrpc.TigServiceBlockingStub getStub() {
         return stub;
     }
 
-    public Key getPubKey() {
+    public PublicKey getPubKey() {
         return this.pubKey;
     }
 
-    public Key getPrivKey() {
+    public PrivateKey getPrivKey() {
         return this.privKey;
     }
 
-    public void setPubKey(Key pubKey) {
-        this.pubKey = pubKey;
-    }
+    public void setPubKey(PublicKey pubKey) { this.pubKey = pubKey; }
 
-    public void setPrivKey(Key privKey) {
+    public void setPrivKey(PrivateKey privKey) {
         this.privKey = privKey;
     }
 
-    public Key getServerKey() {
+    public PublicKey getServerKey() {
         return serverKey;
     }
 
-    public void setServerKey(Key serverKey) {
+    public void setServerKey(PublicKey serverKey) {
         this.serverKey = serverKey;
     }
 
-    public Key getSessionKey() {
+    public SecretKey getSessionKey() {
         return sessionKey;
     }
 
-    public void setSessionKey(Key sessionKey) {
+    public void setSessionKey(SecretKey sessionKey) {
         this.sessionKey = sessionKey;
     }
 

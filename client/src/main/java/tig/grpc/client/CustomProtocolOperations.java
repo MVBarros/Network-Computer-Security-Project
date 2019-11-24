@@ -8,7 +8,6 @@ import tig.utils.encryption.HashUtils;
 import tig.utils.serialization.ObjectSerializer;
 
 import javax.crypto.spec.SecretKeySpec;
-import java.security.spec.RSAPublicKeySpec;
 
 public class CustomProtocolOperations {
 
@@ -40,8 +39,8 @@ public class CustomProtocolOperations {
             byte[] iv = EncryptionUtils.generateIv();
             Tig.Signature signatureContent = Tig.Signature.newBuilder().setValue(ByteString.copyFrom(signatureValue)).build();
             byte[] signature = ObjectSerializer.Serialize(signatureContent);
-            signature = EncryptionUtils.encryptBytes(signature, new SecretKeySpec(client.getPrivKey().getEncoded(), "RSA"), iv);
-            message = EncryptionUtils.encryptBytes(message, new SecretKeySpec(client.getServerKey().getEncoded(), "RSA"), iv);
+            signature = EncryptionUtils.encryptBytesRSAPriv(signature, client.getPrivKey());
+            message = EncryptionUtils.encryptBytesRSAPub(message, client.getServerKey());
 
             Tig.CustomProtocolMessage response = client.getCustomProtocolStub().login(Tig.CustomProtocolMessage.newBuilder()
                     .setMessage(ByteString.copyFrom(message))
@@ -53,10 +52,10 @@ public class CustomProtocolOperations {
             byte[] responseSignature = response.getSignature().toByteArray();
             byte[] responseIv = response.getIv().toByteArray();
 
-            responseBytes = EncryptionUtils.decryptbytes(responseBytes, new SecretKeySpec(client.getPrivKey().getEncoded(), "RSA"), iv);
+            responseBytes = EncryptionUtils.decryptbytesRSAPriv(responseBytes, client.getPrivKey());
             Tig.CustomProtocolLoginReply loginReply = (Tig.CustomProtocolLoginReply)ObjectSerializer.Deserialize(responseBytes);
 
-            responseSignature = EncryptionUtils.decryptbytes(responseSignature, new SecretKeySpec(client.getServerKey().getEncoded(), "RSA"), iv);
+            responseSignature = EncryptionUtils.decryptbytesRSAPub(responseSignature, client.getServerKey());
             Tig.Signature loginReplySignature = (Tig.Signature)ObjectSerializer.Deserialize(responseSignature);
 
             HashUtils.verifyMessageSignature(responseBytes, loginReplySignature.getValue().toByteArray());

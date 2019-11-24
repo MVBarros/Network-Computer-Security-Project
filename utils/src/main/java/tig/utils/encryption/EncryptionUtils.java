@@ -5,7 +5,10 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.SecureRandom;
 
 public class EncryptionUtils {
@@ -50,7 +53,7 @@ public class EncryptionUtils {
         }
     }
 
-    public static byte[] decryptbytes(byte[] encryptedBytes, SecretKeySpec key, byte[] iv) {
+    public static byte[] decryptbytesAES(byte[] encryptedBytes, SecretKeySpec key, byte[] iv) {
         try {
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
             cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(iv));
@@ -62,7 +65,7 @@ public class EncryptionUtils {
         }
     }
 
-    public static byte[] encryptBytes(byte[] bytes, SecretKeySpec key, byte[] iv) {
+    public static byte[] encryptBytesAES(byte[] bytes, SecretKeySpec key, byte[] iv) {
         try {
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
             cipher.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(iv));
@@ -74,9 +77,57 @@ public class EncryptionUtils {
         }
     }
 
+    public static byte[] decryptbytesRSAPub(byte[] encryptedBytes, PublicKey key) {
+        try {
+            Cipher cipher = Cipher.getInstance("RSA");
+            cipher.init(Cipher.DECRYPT_MODE, key);
+            return cipher.doFinal(encryptedBytes);
+        } catch (Exception e) {
+            //Should never happen
+            e.printStackTrace();
+            throw new RuntimeException();
+        }
+    }
+
+    public static byte[] encryptBytesRSAPub(byte[] bytes, PublicKey key) {
+        try {
+            Cipher cipher = Cipher.getInstance("RSA");
+            cipher.init(Cipher.ENCRYPT_MODE, key);
+            return cipher.doFinal(bytes);
+        } catch (Exception e) {
+            //Should never happen
+            e.printStackTrace();
+            throw new RuntimeException();
+        }
+    }
+
+    public static byte[] decryptbytesRSAPriv(byte[] encryptedBytes, PrivateKey key) {
+        try {
+            Cipher cipher = Cipher.getInstance("RSA");
+            cipher.init(Cipher.DECRYPT_MODE, key);
+            return cipher.doFinal(encryptedBytes);
+        } catch (Exception e) {
+            //Should never happen
+            e.printStackTrace();
+            throw new RuntimeException();
+        }
+    }
+
+    public static byte[] encryptBytesRSAPriv(byte[] bytes, PrivateKey key) {
+        try {
+            Cipher cipher = Cipher.getInstance("RSA");
+            cipher.init(Cipher.ENCRYPT_MODE, key);
+            return cipher.doFinal(bytes);
+        } catch (Exception e) {
+            //Should never happen
+            e.printStackTrace();
+            throw new RuntimeException();
+        }
+    }
+
     public static byte[] generateIv() {
         // Generating IV.
-        byte[] iv = new byte[128];
+        byte[] iv = new byte[16];
         SecureRandom random = new SecureRandom();
         random.nextBytes(iv);
         return iv;

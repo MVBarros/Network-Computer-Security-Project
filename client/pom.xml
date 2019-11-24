@@ -74,6 +74,7 @@
                     <exclude>certs/ca.cert</exclude>
                     <exclude>certs/client.key</exclude>
                     <exclude>certs/client.pem</exclude>
+                    <exclude>certs/server.pem</exclude>
                 </excludes>
             </resource>
             <!-- resource processsing with a different output directory
@@ -84,6 +85,7 @@
                     <include>certs/ca.cert</include>
                     <include>certs/client.key</include>
                     <include>certs/client.pem</include>
+                    <include>certs/server.pem</include>
                 </includes>
                 <!-- relative to target/classes
                      i.e. ${project.build.outputDirectory} -->

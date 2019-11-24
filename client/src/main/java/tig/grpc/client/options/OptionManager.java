@@ -4,6 +4,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import tig.grpc.client.Client;
+import tig.grpc.client.CustomProtocolOperations;
 import tig.grpc.client.Operations;
 import tig.grpc.contract.Tig;
 
@@ -61,7 +62,7 @@ public class OptionManager {
             Operations.registerClient(client);
             return;
         }
-        Operations.loginClient(client);
+        CustomProtocolOperations.loginClient(client);
 
         if (cmd.hasOption('d')) {
             Operations.downloadFile(client, cmd.getOptionValues('d')[0], cmd.getOptionValues('d')[1], cmd.getOptionValues('d')[2]);

@@ -13,8 +13,6 @@ import tig.utils.keys.KeyFileLoader;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.Objects;
-
 
 public class App {
     //Client is static so we can logout in the Shutdown Hook
