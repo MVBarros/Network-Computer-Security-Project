@@ -87,6 +87,7 @@ message ListFilesReply {
 
 service CustomProtocolTigService {
     rpc login (CustomProtocolMessage) returns (CustomProtocolMessage);
+    rpc logout (CustomProtocolMessage) returns (CustomProtocolMessage);
 }
 
 message Signature {
@@ -98,6 +99,13 @@ message CustomProtocolLoginRequest {
     string usename = 1;
     string password = 2;
     bytes clientPubKey = 3;
+}
+
+message CustomProtocolLogoutRequest {
+    string nonce = 1;
+}
+
+message CustomProtocolLogoutReply {
 }
 
 message CustomProtocolMessage {
