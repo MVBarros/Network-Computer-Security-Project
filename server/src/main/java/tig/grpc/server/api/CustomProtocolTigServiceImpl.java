@@ -26,11 +26,6 @@ public class CustomProtocolTigServiceImpl extends CustomProtocolTigServiceGrpc.C
     @Override
     public void login(Tig.CustomProtocolMessage request, StreamObserver<Tig.CustomProtocolMessage> reply) {
         try {
-            Tig.CustomLoginRequest loginRequest = (Tig.CustomLoginRequest)ObjectSerializer.Deserialize(request.getMessage().toByteArray());
-            //Get Message Key
-            byte[] encryptionKey = loginRequest.getEncryptionKey().toByteArray();
-            encryptionKey = EncryptionUtils.decryptbytesRSAPriv(encryptionKey, privateKey);
-            SecretKeySpec secretKey = new SecretKeySpec(encryptionKey, "AES");
 
             //Verify signature
             byte[] message = request.getMessage().toByteArray();
@@ -40,6 +35,13 @@ public class CustomProtocolTigServiceImpl extends CustomProtocolTigServiceGrpc.C
                 throw new IllegalArgumentException("Invalid Signature");
             }
 
+            //Get Message Key
+            Tig.CustomLoginRequest loginRequest = (Tig.CustomLoginRequest)ObjectSerializer.Deserialize(request.getMessage().toByteArray());
+            byte[] encryptionKey = loginRequest.getEncryptionKey().toByteArray();
+            encryptionKey = EncryptionUtils.decryptbytesRSAPriv(encryptionKey, privateKey);
+            SecretKeySpec secretKey = new SecretKeySpec(encryptionKey, "AES");
+
+            //get Account Request
             byte[] accountMessage = EncryptionUtils.decryptbytesAES(loginRequest.getMessage().toByteArray(), secretKey);
             Tig.AccountRequest accountRequest = (Tig.AccountRequest) ObjectSerializer.Deserialize(accountMessage);
 
@@ -55,14 +57,21 @@ public class CustomProtocolTigServiceImpl extends CustomProtocolTigServiceGrpc.C
                     .setSecretKey(ByteString.copyFrom(sessionKey.getEncoded()))
                     .setSessionId(sessionId)
                     .build();
-            byte[] replyMessage = ObjectSerializer.Serialize(loginReply);
-            byte[] replySignature = HashUtils.hashBytes(replyMessage);
-            replyMessage = EncryptionUtils.encryptBytesAES(replyMessage, secretKey);
 
-            //sign with client public key
+            //generate response
+            byte[] replyMessage = ObjectSerializer.Serialize(loginReply);
+
+
+            //get client public key
             byte[] clientKey = loginRequest.getClientPubKey().toByteArray();
             PublicKey clientPubKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(clientKey));
+
+            //sign with client public key
+            byte[] replySignature = HashUtils.hashBytes(replyMessage);
             replySignature = EncryptionUtils.encryptBytesRSAPub(replySignature, clientPubKey);
+
+            //encrypt response
+            replyMessage = EncryptionUtils.encryptBytesAES(replyMessage, secretKey);
 
             Tig.CustomProtocolMessage actualReply = Tig.CustomProtocolMessage.newBuilder()
                     .setSignature(ByteString.copyFrom(replySignature))
