@@ -6,8 +6,6 @@ import tig.grpc.contract.Tig;
 import tig.utils.encryption.EncryptionUtils;
 import tig.utils.encryption.HashUtils;
 import tig.utils.serialization.ObjectSerializer;
-
-import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -32,45 +30,52 @@ public class CustomProtocolOperations {
             System.out.println(String.format("Login Client Custom Protocol %s", client.getUsername()
             ));
 
-            //Create request
+            //Create and Serialize AccountRequest
             Tig.AccountRequest.Builder builder = Tig.AccountRequest.newBuilder();
             builder.setUsername(client.getUsername());
             builder.setPassword(client.getPassword());
             byte[] message = ObjectSerializer.Serialize(builder.build());
-            //create signature
-            byte[] signature = HashUtils.hashBytes(message);
-            signature = EncryptionUtils.encryptBytesRSAPub(signature, client.getServerKey());
 
+            //Create Login Request
             SecretKey secretKey = EncryptionUtils.generateAESKey();
-
             message = EncryptionUtils.encryptBytesAES(message, (SecretKeySpec)secretKey);
-
             byte[] encryptedKey = EncryptionUtils.encryptBytesRSAPub(secretKey.getEncoded(),client.getServerKey());
-
-            Tig.CustomLoginMessage login = Tig.CustomLoginMessage.newBuilder()
+            Tig.CustomLoginRequest loginRequest = Tig.CustomLoginRequest.newBuilder()
                     .setMessage(ByteString.copyFrom(message))
-                    .setSignature(ByteString.copyFrom(signature))
                     .setEncryptionKey(ByteString.copyFrom(encryptedKey))
                     .setClientPubKey(ByteString.copyFrom(client.getPubKey().getEncoded()))
                     .build();
 
 
-            Tig.CustomProtocolMessage response = client.getCustomProtocolStub().login(
-                    login);
+            //create final message and signature
+            message = ObjectSerializer.Serialize(loginRequest);
+            byte[] signature = HashUtils.hashBytes(message);
+            signature = EncryptionUtils.encryptBytesRSAPub(signature, client.getServerKey());
 
+            //login user
+            Tig.CustomProtocolMessage response = client.getCustomProtocolStub().login(
+                    Tig.CustomProtocolMessage.newBuilder()
+                            .setMessage(ByteString.copyFrom(message))
+                            .setSignature(ByteString.copyFrom(signature))
+                            .build());
+
+            //unravel response
             byte[] responseBytes = response.getMessage().toByteArray();
             byte[] responseSignature = response.getSignature().toByteArray();
 
+            //decrypt reply
             responseBytes = EncryptionUtils.decryptbytesAES(responseBytes, (SecretKeySpec)secretKey);
             Tig.CustomProtocolLoginReply loginReply = (Tig.CustomProtocolLoginReply)ObjectSerializer.Deserialize(responseBytes);
 
+            //decrypt signature and verify
             responseSignature = EncryptionUtils.decryptbytesRSAPriv(responseSignature, client.getPrivKey());
-
             HashUtils.verifyMessageSignature(responseBytes, responseSignature);
 
             client.setSessionKey(new SecretKeySpec(loginReply.getSecretKey().toByteArray(), "AES"));
             client.setSessionId(loginReply.getSessionId());
+
             System.out.println(String.format("User %s Successfully logged in", client.getUsername()));
+
         } catch (StatusRuntimeException e) {
             System.out.print("Error logging in: ");
             System.out.println(e.getStatus().getDescription());
