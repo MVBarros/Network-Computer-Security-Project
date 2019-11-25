@@ -1,7 +1,8 @@
-package tig.grpc.client;
+package tig.grpc.client.operations;
 
 import com.google.protobuf.ByteString;
 import io.grpc.StatusRuntimeException;
+import tig.grpc.client.Client;
 import tig.grpc.contract.Tig;
 import tig.utils.encryption.EncryptionUtils;
 import tig.utils.encryption.HashUtils;

@@ -1,9 +1,10 @@
-package tig.grpc.client;
+package tig.grpc.client.operations;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Empty;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
+import tig.grpc.client.Client;
 import tig.grpc.contract.Tig;
 
 import java.io.*;

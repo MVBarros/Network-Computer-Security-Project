@@ -4,8 +4,8 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import tig.grpc.client.Client;
-import tig.grpc.client.CustomProtocolOperations;
-import tig.grpc.client.Operations;
+import tig.grpc.client.operations.CustomProtocolOperations;
+import tig.grpc.client.operations.Operations;
 import tig.grpc.contract.Tig;
 
 
