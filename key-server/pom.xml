@@ -2,6 +2,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <artifactId>tig-keys</artifactId>
+    <name>${project.artifactId}</name>
+    <version>1.0.0-RELEASE</version>
+    <packaging>jar</packaging>
+
     <parent>
         <artifactId>tig</artifactId>
         <groupId>T17.SIRS</groupId>
@@ -9,7 +15,6 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>tig-keys</artifactId>
 
 
 </project>
