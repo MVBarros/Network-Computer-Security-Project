@@ -17,7 +17,7 @@
         <module>contract</module>
         <module>server</module>
         <module>utils</module>
-        <module>tig-keys</module>
+        <module>key-server</module>
     </modules>
 
 </project>
