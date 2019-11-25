@@ -92,7 +92,7 @@ service CustomProtocolTigService {
 
 message Signature {
     string signerId = 1;
-    bytes value = 2;
+    bytes value = 2; // hash of the message that is encrypted with the receiver public key
 }
 
 message CustomLoginRequest {
