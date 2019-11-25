@@ -7,6 +7,7 @@ import tig.grpc.contract.Tig;
 import tig.utils.encryption.EncryptionUtils;
 import tig.utils.encryption.HashUtils;
 import tig.utils.serialization.ObjectSerializer;
+
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -39,8 +40,8 @@ public class CustomProtocolOperations {
 
             //Create Login Request
             SecretKey secretKey = EncryptionUtils.generateAESKey();
-            message = EncryptionUtils.encryptBytesAES(message, (SecretKeySpec)secretKey);
-            byte[] encryptedKey = EncryptionUtils.encryptBytesRSAPub(secretKey.getEncoded(),client.getServerKey());
+            message = EncryptionUtils.encryptBytesAES(message, (SecretKeySpec) secretKey);
+            byte[] encryptedKey = EncryptionUtils.encryptBytesRSAPub(secretKey.getEncoded(), client.getServerKey());
             Tig.CustomLoginRequest loginRequest = Tig.CustomLoginRequest.newBuilder()
                     .setMessage(ByteString.copyFrom(message))
                     .setEncryptionKey(ByteString.copyFrom(encryptedKey))
@@ -65,8 +66,8 @@ public class CustomProtocolOperations {
             byte[] responseSignature = response.getSignature().toByteArray();
 
             //decrypt reply
-            responseBytes = EncryptionUtils.decryptbytesAES(responseBytes, (SecretKeySpec)secretKey);
-            Tig.CustomProtocolLoginReply loginReply = (Tig.CustomProtocolLoginReply)ObjectSerializer.Deserialize(responseBytes);
+            responseBytes = EncryptionUtils.decryptbytesAES(responseBytes, (SecretKeySpec) secretKey);
+            Tig.CustomProtocolLoginReply loginReply = (Tig.CustomProtocolLoginReply) ObjectSerializer.Deserialize(responseBytes);
 
             //decrypt signature and verify
             responseSignature = EncryptionUtils.decryptbytesRSAPriv(responseSignature, client.getPrivKey());
@@ -87,16 +88,54 @@ public class CustomProtocolOperations {
 
     public static void logoutClient(Client client) {
         try {
-            System.out.println(String.format("logout Client %s ", client.getUsername()));
-            client.getStub().logout(Tig.SessionRequest.newBuilder().setSessionId(client.getSessionId()).build());
-            client.setSessionId(null);
+            System.out.println(String.format("Login Client Custom Protocol %s", client.getUsername()
+            ));
+
+            //Create Message
+            Tig.CustomProtocolLogoutRequest logoutRequest = Tig.CustomProtocolLogoutRequest.newBuilder().build();
+            byte[] message = ObjectSerializer.Serialize(logoutRequest);
+
+            //Create signature and encrypt it
+            byte[] signature = HashUtils.hashBytes(message);
+            signature = EncryptionUtils.encryptBytesRSAPub(signature, client.getServerKey());
+            Tig.Signature sign = Tig.Signature.newBuilder().setSignerId(client.getSessionId()).setValue(ByteString.copyFrom(signature)).build();
+            signature = ObjectSerializer.Serialize(sign);
+
+            //Encrypt message
+            message = EncryptionUtils.encryptBytesAES(message, (SecretKeySpec) client.getSessionKey());
+
+
+            //logout user
+            Tig.CustomProtocolMessage response = client.getCustomProtocolStub().logout(
+                    Tig.CustomProtocolMessage.newBuilder()
+                            .setMessage(ByteString.copyFrom(message))
+                            .setSignature(ByteString.copyFrom(signature))
+                            .build());
+
+            //unravel response
+            byte[] responseBytes = response.getMessage().toByteArray();
+            byte[] responseSignature = response.getSignature().toByteArray();
+
+            //decrypt reply
+            responseBytes = EncryptionUtils.decryptbytesAES(responseBytes, (SecretKeySpec) client.getSessionKey());
+            Tig.CustomProtocolLogoutReply loginReply = (Tig.CustomProtocolLogoutReply) ObjectSerializer.Deserialize(responseBytes);
+
+            //decrypt signature and verify
+            responseSignature = EncryptionUtils.decryptbytesRSAPub(responseSignature, client.getServerKey());
+            HashUtils.verifyMessageSignature(responseBytes, responseSignature);
+
+            //FIXME Verify nonce
             System.out.println(String.format("User %s Successfully logged out", client.getUsername()));
+
         } catch (StatusRuntimeException e) {
-            System.out.print("Error logging out: ");
+            System.out.print("Error logging in: ");
             System.out.println(e.getStatus().getDescription());
+            System.out.println(e);
             System.exit(1);
         }
     }
+
+}
 
 
 
@@ -148,4 +187,4 @@ public class CustomProtocolOperations {
     }*/
 
 
-}
+

@@ -90,22 +90,24 @@ public class CustomProtocolTigServiceImpl extends CustomProtocolTigServiceGrpc.C
     @Override
     public void logout(Tig.CustomProtocolMessage request, StreamObserver<Tig.CustomProtocolMessage> reply) {
         //validate message
-        /*byte[] encryptedMessage = request.getMessage().toByteArray();
-        byte[] encryptedSignature = request.getSignature().toByteArray();
-        byte[] iv = request.getIv().toByteArray();
+        byte[] encryptedMessage = request.getMessage().toByteArray();
 
-        byte[] serializedSignature = EncryptionUtils.decryptbytesAES(encryptedSignature, new SecretKeySpec(privateKey.getEncoded(), "RSA"), iv);
-        Tig.Signature signature = (Tig.Signature)ObjectSerializer.Deserialize(serializedSignature);
-        String signerId = signature.getSignerId();
+        byte[] serializedSignature = request.getSignature().toByteArray();
+        Tig.Signature sign = (Tig.Signature)ObjectSerializer.Deserialize(serializedSignature);
+        byte[] signature = EncryptionUtils.decryptbytesRSAPriv(sign.getValue().toByteArray(), privateKey);
+
+        //Get User Session Key
+        String signerId = sign.getSignerId();
         CustomUserToken token = (CustomUserToken)SessionAuthenticator.authenticateSession(signerId);
         Key sessionKey = token.getSessionKey();
-        byte[] message = EncryptionUtils.decryptbytesAES(encryptedMessage, new SecretKeySpec(sessionKey.getEncoded(), "RSA"), iv);
+        byte[] message = EncryptionUtils.decryptbytesAES(encryptedMessage, (SecretKeySpec)sessionKey);
 
-        if (!HashUtils.verifyMessageSignature(message, signature.getValue().toByteArray())) {
+        if (!HashUtils.verifyMessageSignature(message, signature)) {
             throw new IllegalArgumentException("Invalid Signature");
         }
         Tig.CustomProtocolLogoutRequest logoutRequest = (Tig.CustomProtocolLogoutRequest)ObjectSerializer.Deserialize(message);
-        //check nonce
+        //FIXME check nonce
+
         SessionAuthenticator.clearSession(signerId);
         //generate response
         Tig.CustomProtocolLogoutReply logoutReply = Tig.CustomProtocolLogoutReply.newBuilder()
@@ -115,16 +117,15 @@ public class CustomProtocolTigServiceImpl extends CustomProtocolTigServiceGrpc.C
         byte[] replySignature = HashUtils.hashBytes(replyMessage);
         byte[] replyIv = EncryptionUtils.generateIv();
 
-        replyMessage = EncryptionUtils.encryptBytesAES(replyMessage, new SecretKeySpec(sessionKey.getEncoded(), "RSA"), replyIv);
-        replySignature = EncryptionUtils.encryptBytesAES(replySignature, new SecretKeySpec(privateKey.getEncoded(), "RSA"), replyIv);
+        replyMessage = EncryptionUtils.encryptBytesAES(replyMessage, (SecretKeySpec)sessionKey);
+        replySignature = EncryptionUtils.encryptBytesRSAPriv(replySignature, privateKey);
         Tig.CustomProtocolMessage actualReply = Tig.CustomProtocolMessage.newBuilder()
-                .setIv(ByteString.copyFrom(replyIv))
                 .setSignature(ByteString.copyFrom(replySignature))
                 .setMessage(ByteString.copyFrom(replyMessage))
                 .build();
 
         reply.onNext(actualReply);
-        reply.onCompleted();*/
+        reply.onCompleted();
     }
 
 }

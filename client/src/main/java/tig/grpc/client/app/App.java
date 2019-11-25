@@ -5,6 +5,7 @@ import io.grpc.netty.GrpcSslContexts;
 import io.grpc.netty.NettyChannelBuilder;
 import org.apache.commons.cli.*;
 import tig.grpc.client.Client;
+import tig.grpc.client.operations.CustomProtocolOperations;
 import tig.grpc.client.operations.Operations;
 import tig.grpc.client.options.OptionManager;
 import tig.grpc.contract.TigServiceGrpc;
@@ -54,7 +55,7 @@ public class App {
             @Override
             public void run() {
                 if (client != null && client.getSessionId() != null) {
-                    Operations.logoutClient(client);
+                    CustomProtocolOperations.logoutClient(client);
                 }
                 channel.shutdownNow();
             }
