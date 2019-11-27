@@ -8,6 +8,7 @@ import io.grpc.netty.NettyChannelBuilder;
 import io.grpc.netty.NettyServerBuilder;
 import io.netty.handler.ssl.SslContext;
 import org.apache.log4j.Logger;
+import tig.grpc.contract.Tig;
 import tig.grpc.contract.TigKeyServiceGrpc;
 import tig.grpc.server.api.CustomProtocolTigServiceImpl;
 import tig.grpc.server.api.TigServiceImpl;
@@ -63,7 +64,11 @@ public class DocumentServer {
                                                     .sslContext(context)
                                                     .build();
         TigKeyServiceGrpc.TigKeyServiceBlockingStub keyStub = TigKeyServiceGrpc.newBlockingStub(channel);
-        System.out.println("Connected to key server successfully");
+
+        //Test Purposes only
+        System.out.println("Connected and authenticated to key server successfully");
+        Tig.HelloTigKeyRequest request = Tig.HelloTigKeyRequest.newBuilder().setRequest("Hello from tig server").build();
+        System.out.println(keyStub.helloTigKey(request).getRequest());
 
         //Start server
         final Server server = NettyServerBuilder

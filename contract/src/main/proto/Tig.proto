@@ -122,7 +122,15 @@ message CustomProtocolLoginReply {
 //**************************** Key Server ******************************
 
 service TigKeyService {
+    rpc helloTigKey (HelloTigKeyRequest) returns (HelloTigKeyReply);
+}
 
+message HelloTigKeyRequest {
+    string request = 1;
+}
+
+message HelloTigKeyReply {
+    string request = 1;
 }
 
 //**************************** Backup BD ******************************
