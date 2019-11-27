@@ -1,13 +1,18 @@
 package tig.grpc.server.service;
 
 import io.grpc.BindableService;
+import io.grpc.ManagedChannel;
 import io.grpc.Server;
+import io.grpc.netty.GrpcSslContexts;
+import io.grpc.netty.NettyChannelBuilder;
 import io.grpc.netty.NettyServerBuilder;
+import io.netty.handler.ssl.SslContext;
 import org.apache.log4j.Logger;
+import tig.grpc.contract.TigKeyServiceGrpc;
 import tig.grpc.server.api.CustomProtocolTigServiceImpl;
 import tig.grpc.server.api.TigServiceImpl;
-import tig.grpc.server.data.PostgreSQLJDBC;
-import tig.grpc.server.interceptor.ExceptionHandler;
+import tig.utils.db.PostgreSQLJDBC;
+import tig.utils.interceptor.ExceptionHandler;
 import tig.grpc.server.session.TokenCleanupThread;
 import tig.utils.keys.KeyFileLoader;
 
@@ -21,9 +26,9 @@ public class DocumentServer {
         System.out.println(DocumentServer.class.getSimpleName());
 
         // check arguments
-        if (args.length < 6) {
+        if (args.length < 8) {
             System.err.println("Argument(s) missing!");
-            System.err.printf("<Usage> java %s port dbport dbpassword certChainFile privateKeyFile privateKeyFilePCKS8%n", DocumentServer.class.getName());
+            System.err.printf("<Usage> java %s port dbport dbpassword certChainFile privateKeyFile privateKeyFilePCKS8 trustCertCollectionFile keyServerUrl%n", DocumentServer.class.getName());
             return;
         }
 
@@ -42,10 +47,25 @@ public class DocumentServer {
 
         //Server Private Key
         File privateKeyFile = new File(args[4]);
-        CustomProtocolTigServiceImpl.privateKey = KeyFileLoader.loadPrivateKey(new File(args[5]));
+        File privateKeyFileJava = new File(args[5]);
+        CustomProtocolTigServiceImpl.privateKey = KeyFileLoader.loadPrivateKey(privateKeyFileJava);
         CustomProtocolTigServiceImpl.publicKey = KeyFileLoader.loadPublicKey(certChainFile);
 
+        File trustCertCollection = new File(args[6]);
 
+        //SslContext for Key Server
+        SslContext context = GrpcSslContexts.forClient().trustManager(trustCertCollection)
+                                                        .keyManager(certChainFile, privateKeyFile)
+                                                        .build();
+
+        //Connect to key server
+        ManagedChannel channel = NettyChannelBuilder.forTarget(args[7])
+                                                    .sslContext(context)
+                                                    .build();
+        TigKeyServiceGrpc.TigKeyServiceBlockingStub keyStub = TigKeyServiceGrpc.newBlockingStub(channel);
+        System.out.println("Connected to key server successfully");
+
+        //Start server
         final Server server = NettyServerBuilder
                 .forPort(port)
                 .useTransportSecurity(certChainFile, privateKeyFile)

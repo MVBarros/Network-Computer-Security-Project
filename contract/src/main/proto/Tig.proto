@@ -117,3 +117,17 @@ message CustomProtocolLoginReply {
     bytes secretKey = 1;
     string sessionId = 2;
 }
+
+
+//**************************** Key Server ******************************
+
+service TigKeyService {
+
+}
+
+//**************************** Backup BD ******************************
+
+
+service TigBackupBDService {
+
+}

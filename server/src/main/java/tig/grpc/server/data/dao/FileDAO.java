@@ -1,6 +1,6 @@
 package tig.grpc.server.data.dao;
 
-import tig.grpc.server.data.PostgreSQLJDBC;
+import tig.utils.db.PostgreSQLJDBC;
 
 import tig.utils.encryption.EncryptedFile;
 import tig.utils.encryption.EncryptionUtils;

@@ -1,4 +1,4 @@
-package tig.grpc.server.interceptor;
+package tig.utils.interceptor;
 
 import io.grpc.*;
 

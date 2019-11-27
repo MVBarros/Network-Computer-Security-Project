@@ -1,6 +1,6 @@
 package tig.grpc.server.data.dao;
 
-import tig.grpc.server.data.PostgreSQLJDBC;
+import tig.utils.db.PostgreSQLJDBC;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

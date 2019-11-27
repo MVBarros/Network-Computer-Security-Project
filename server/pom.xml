@@ -25,6 +25,7 @@
         <server.port>8080</server.port>
         <db.port>5432</db.port>
         <db.password>root</db.password>
+        <keyserver.url>localhost:8090</keyserver.url>
     </properties>
 
     <dependencies>
@@ -89,6 +90,8 @@
                         <argument>${basedir}/src/main/resources/certs/server.pem</argument>
                         <argument>${basedir}/src/main/resources/certs/server.key</argument>
                         <argument>${basedir}/src/main/resources/certs/server_pcks8.key</argument>
+                        <argument>${basedir}/src/main/resources/certs/ca.cert</argument>
+                        <argument>${keyserver.url}</argument>
                     </arguments>
                 </configuration>
             </plugin>

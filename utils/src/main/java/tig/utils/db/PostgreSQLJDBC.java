@@ -1,4 +1,4 @@
-package tig.grpc.server.data;
+package tig.utils.db;
 
 import org.apache.log4j.Logger;
 
