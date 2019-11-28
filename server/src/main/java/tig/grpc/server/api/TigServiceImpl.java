@@ -8,11 +8,9 @@ import org.apache.log4j.Logger;
 import tig.grpc.contract.Tig;
 import tig.grpc.contract.TigKeyServiceGrpc;
 import tig.grpc.contract.TigServiceGrpc;
-import tig.grpc.server.data.dao.AuthenticationDAO;
 import tig.grpc.server.data.dao.FileDAO;
 import tig.grpc.server.session.SessionAuthenticator;
 import tig.utils.encryption.EncryptionUtils;
-
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Arrays;
 
@@ -99,7 +97,7 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
             private int counter = 0;
             private ByteString file = ByteString.copyFrom(new byte[]{});
             private String filename;
-            private String username;
+            private String sessionId;
             private final Object lock = new Object();
 
             @Override
@@ -114,9 +112,10 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
                         }
                     }
                     //Renew Lease
-                    username = SessionAuthenticator.authenticateSession(value.getSessionId()).getUsername();
                     if (counter == 0) {
                         filename = value.getFileName();
+                        SessionAuthenticator.authenticateSession(value.getSessionId());
+                        sessionId = value.getSessionId();
                     }
                     file = file.concat(value.getContent());
                     counter++;
@@ -130,6 +129,10 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
 
             @Override
             public void onCompleted() {
+                keyStub.newFileKey(Tig.KeyFileMessage.newBuilder()
+                        .setFilename(filename)
+                        .setOwner()
+                        .setSessionId(Tig.TigKeySessionIdMessage.newBuilder().setSessionId(sessionId)))
                 responseObserver.onNext(Empty.newBuilder().build());
                 FileDAO.fileUpload(filename, file.toByteArray(), username);
                 responseObserver.onCompleted();
@@ -146,6 +149,7 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
             private String owner;
             private byte[] key;
             private byte[] iv;
+            String sessionId;
             private final Object lock = new Object();
 
             @Override
@@ -162,17 +166,7 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
                     //Renew lease
                     SessionAuthenticator.authenticateSession(value.getSessionId());
                     if (counter == 0) {
-                        Tig.KeyFileTigKeyRequest keyRequest =  Tig.KeyFileTigKeyRequest.newBuilder()
-                                .setFilename(value.getFileName())
-                                .setOwner(value.getOwner())
-                                .setSessionId(Tig.TigKeySessionIdMessage
-                                              .newBuilder()
-                                              .setSessionId(value.getSessionId()))
-                                              .build();
-
-                        Tig.CanEditTigKeyReply reply = keyStub.canEditTigKey(keyRequest);
-                        key = reply.getNewKeyFile().toByteArray();
-                        iv = reply.getIv().toByteArray();
+                        sessionId = value.getSessionId();
                         filename = value.getFileName();
                         owner = value.getOwner();
                     }
@@ -190,9 +184,19 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
 
             @Override
             public void onCompleted() {
+                Tig.CanEditTigKeyReply reply;
+                try {
+                     reply = keyStub.canEditTigKey(Tig.KeyFileTigKeyRequest.newBuilder()
+                            .setFilename(filename)
+                            .setOwner(owner)
+                            .setSessionId(Tig.TigKeySessionIdMessage.newBuilder().setSessionId(sessionId))
+                            .build());
+                } catch (StatusRuntimeException e) {
+                    throw new IllegalArgumentException(e.getMessage());
+                }
+                FileDAO.fileEdit(filename, file.toByteArray(), owner, reply.getNewKeyFile().toByteArray(), reply.getIv().toByteArray());
+
                 responseObserver.onNext(Empty.newBuilder().build());
-                FileDAO.fileEdit(filename, file.toByteArray(), owner, key, iv);
-                //Update to key server
                 responseObserver.onCompleted();
             }
         };
