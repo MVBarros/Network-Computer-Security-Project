@@ -128,7 +128,7 @@ service TigKeyService {
     rpc keyFileTigKey (KeyFileTigKeyRequest) returns (KeyFileTigKeyReply);
     //rpc keyFileRecoverTigKey (keyFileRecoverTigKeyRequest) returns (keyFileRecoverTigKeyReply);
     rpc canSaveTigKey (KeyFileTigKeyRequest) returns (CanEditTigKeyReply);
-    // TODO por list
+    rpc listFileTigKey (TigKeySessionIdMessage) returns (ListFilesReply);
 }
 
 message LoginTigKeyRequest {
