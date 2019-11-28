@@ -132,12 +132,21 @@ service TigKeyService {
     rpc listFileTigKey (TigKeySessionIdMessage) returns (ListFilesReply);
     rpc accessControlFileTigKey (AccessControlRequest) returns (google.protobuf.Empty);
     rpc deleteFileTigKey (DeleteFileRequest) returns (google.protobuf.Empty);
-
+    rpc newFileKey (KeyFileMessage) returns (google.protobuf.Empty);
+    rpc updateFileKey (KeyFileMessage) returns (google.protobuf.Empty);
 }
 
 
 message TigKeySessionIdMessage {
     string sessionId = 1;
+}
+
+message KeyFileMessage {
+    TigKeySessionIdMessage sessionId = 1;
+    string owner = 2;
+    string filename = 3;
+    bytes key = 4;
+    bytes iv = 5;
 }
 
 message KeyFileTigKeyRequest {
