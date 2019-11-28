@@ -40,13 +40,13 @@ public class TigKeyServiceImpl extends TigKeyServiceGrpc.TigKeyServiceImplBase {
 
 
     @Override
-    public void loginTigKey(Tig.LoginTigKeyRequest request, StreamObserver<Tig.TigKeySessionIdMessage> reply) {
+    public void loginTigKey(Tig.AccountRequest request, StreamObserver<Tig.LoginReply> reply) {
         logger.info(String.format("Login username: %s", request.getUsername()));
 
         UsersDAO.authenticateUser(request.getUsername(), request.getPassword());
         String sessionId = SessionAuthenticator.createSession(request.getUsername());
 
-        Tig.TigKeySessionIdMessage.Builder builder = Tig.TigKeySessionIdMessage.newBuilder().setSessionId(sessionId);
+        Tig.LoginReply.Builder builder = Tig.LoginReply.newBuilder().setSessionId(sessionId);
 
         reply.onNext(builder.build());
         reply.onCompleted();
