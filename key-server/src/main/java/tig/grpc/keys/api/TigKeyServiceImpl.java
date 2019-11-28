@@ -1,5 +1,6 @@
 package tig.grpc.keys.api;
 
+import com.google.protobuf.Empty;
 import io.grpc.stub.StreamObserver;
 import org.apache.log4j.Logger;
 import tig.grpc.contract.Tig;
@@ -30,6 +31,13 @@ public class TigKeyServiceImpl extends TigKeyServiceGrpc.TigKeyServiceImplBase {
         reply.onNext(builder.build());
         reply.onCompleted();
 
+    }
+    @Override
+    public void logoutTigKey(Tig.TigKeySessionIdMessage request, StreamObserver<Empty> responseObserver) {
+        logger.info("Logout no Key Server");
+        SessionAuthenticator.clearSession(request.getSessionId());
+        responseObserver.onNext(Empty.newBuilder().build());
+        responseObserver.onCompleted();
     }
 
     @Override
