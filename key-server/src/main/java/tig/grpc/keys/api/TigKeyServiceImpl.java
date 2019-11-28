@@ -92,8 +92,26 @@ public class TigKeyServiceImpl extends TigKeyServiceGrpc.TigKeyServiceImplBase {
         String username = SessionAuthenticator.authenticateSession(request.getSessionId().toString()).getUsername();
         AuthenticationDAO.authenticateFileAccess(username, request.getFilename(), request.getOwner(), 1);
 
-        SecretKey key = EncryptionUtils.generateAESKey();
+        byte[] key = EncryptionUtils.generateAESKey().getEncoded();
+        byte[] iv = EncryptionUtils.generateIv();
 
+        Tig.CanEditTigKeyReply.Builder builder = Tig.CanEditTigKeyReply.newBuilder();
+
+        builder.setNewKeyFile(ByteString.copyFrom(key));
+        builder.setIv(ByteString.copyFrom(iv));
+
+        reply.onNext(builder.build());
+        reply.onCompleted();
+
+    }
+
+    @Override
+    public void deleteFileTigKey(Tig.DeleteFileRequest request, StreamObserver<Empty> responseObserver) {
+        String username = SessionAuthenticator.authenticateSession(request.getSessionId()).getUsername();
+        logger.info(String.format("Delete filename: %s of users %s", request.getFilename(), username));
+        FileDAO.deleteFile(username, request.getFilename());
+        responseObserver.onNext(Empty.newBuilder().build());
+        responseObserver.onCompleted();
     }
 
     @Override
@@ -107,6 +125,19 @@ public class TigKeyServiceImpl extends TigKeyServiceGrpc.TigKeyServiceImplBase {
         responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
 
+    }
+
+    @Override
+    public void accessControlFileTigKey(Tig.AccessControlRequest request, StreamObserver<Empty> responseObserver) {
+        String username = SessionAuthenticator.authenticateSession(request.getSessionId()).getUsername();
+
+        logger.info(String.format("Access Control from file %s of user %s to user %s and make it: %s", request.getFileName(),
+                username, request.getTarget(), request.getPermission()));
+
+        AuthenticationDAO.updateAccessControl(request.getFileName(), username, request.getTarget(), request.getPermission().getNumber());
+
+        responseObserver.onNext(Empty.newBuilder().build());
+        responseObserver.onCompleted();
     }
 
 }

@@ -47,7 +47,6 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
     @Override
     public void logout(Tig.SessionRequest request, StreamObserver<Empty> responseObserver) {
         logger.info("Logout");
-
         SessionAuthenticator.clearSession(request.getSessionId());
         responseObserver.onNext(Empty.newBuilder().build());
         responseObserver.onCompleted();
@@ -56,25 +55,19 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
     @Override
     public void deleteFile(Tig.DeleteFileRequest request, StreamObserver<Empty> responseObserver) {
         String username = SessionAuthenticator.authenticateSession(request.getSessionId()).getUsername();
-
         logger.info(String.format("Delete filename: %s of users %s", request.getFilename(), username));
 
-        FileDAO.deleteFile(username, request.getFilename());
-
-        responseObserver.onNext(Empty.newBuilder().build());
+        responseObserver.onNext(keyStub.deleteFileTigKey(request));
         responseObserver.onCompleted();
     }
 
     @Override
     public void accessControlFile(Tig.AccessControlRequest request, StreamObserver<Empty> responseObserver) {
         String username = SessionAuthenticator.authenticateSession(request.getSessionId()).getUsername();
-
         logger.info(String.format("Access Control from file %s of user %s to user %s and make it: %s", request.getFileName(),
                 username, request.getTarget(), request.getPermission()));
 
-        AuthenticationDAO.updateAccessControl(request.getFileName(), username, request.getTarget(), request.getPermission().getNumber());
-
-        responseObserver.onNext(Empty.newBuilder().build());
+        responseObserver.onNext(keyStub.accessControlFileTigKey(request));
         responseObserver.onCompleted();
     }
 

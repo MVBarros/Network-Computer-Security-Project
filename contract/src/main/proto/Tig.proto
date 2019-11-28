@@ -131,6 +131,7 @@ service TigKeyService {
     rpc canEditTigKey (KeyFileTigKeyRequest) returns (CanEditTigKeyReply);
     rpc listFileTigKey (TigKeySessionIdMessage) returns (ListFilesReply);
     rpc accessControlFileTigKey (AccessControlRequest) returns (google.protobuf.Empty);
+    rpc deleteFileTigKey (DeleteFileRequest) returns (google.protobuf.Empty);
 
 }
 
@@ -152,6 +153,7 @@ message KeyFileTigKeyReply {
 
 message CanEditTigKeyReply {
     bytes newKeyFile = 1;
+    bytes iv = 2;
 }
 
 message HelloTigKeyRequest {
