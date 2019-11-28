@@ -19,13 +19,13 @@ public class TigKeyServiceImpl extends TigKeyServiceGrpc.TigKeyServiceImplBase {
     }
 
     @Override
-    public void loginTigKey(Tig.LoginTigKeyRequest request, StreamObserver<Tig.LoginTigKeyReply> reply) {
+    public void loginTigKey(Tig.LoginTigKeyRequest request, StreamObserver<Tig.TigKeySessionIdMessage> reply) {
         logger.info(String.format("Login username: %s", request.getUsername()));
 
         UsersDAO.authenticateUser(request.getUsername(), request.getPassword());
         String sessionId = SessionAuthenticator.createSession(request.getUsername());
 
-        Tig.LoginTigKeyReply.Builder builder = Tig.LoginTigKeyReply.newBuilder().setSessionId(sessionId);
+        Tig.TigKeySessionIdMessage.Builder builder = Tig.TigKeySessionIdMessage.newBuilder().setSessionId(sessionId);
 
         reply.onNext(builder.build());
         reply.onCompleted();
@@ -38,7 +38,7 @@ public class TigKeyServiceImpl extends TigKeyServiceGrpc.TigKeyServiceImplBase {
     }
 
     @Override
-    public void canSaveTigKey(Tig.CanEditTigKeyRequest request, StreamObserver<Tig.CanEditTigKeyReply> reply) {
+    public void canSaveTigKey(Tig.KeyFileTigKeyRequest request, StreamObserver<Tig.CanEditTigKeyReply> reply) {
         logger.info(String.format("session id: %s", request.getSessionId()));
     }
 
