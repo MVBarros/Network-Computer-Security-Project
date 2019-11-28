@@ -15,7 +15,15 @@ public class TigKeyServiceImpl extends TigKeyServiceGrpc.TigKeyServiceImplBase {
     }
 
 
-    public void helloTigKey(Tig.HelloTigKeyRequest request, StreamObserver<Tig.HelloTigKeyReply> reply) {
+    public void loginTigKey(Tig.LoginTigKeyRequest request, StreamObserver<Tig.LoginTigKeyReply> reply) {
+
+    }
+
+    public void keyFileTigKey(Tig.KeyFileTigKeyRequest request, StreamObserver<Tig.KeyFileTigKeyReply> reply) {
+
+    }
+
+    public void canSaveTigKey(Tig.CanEditTigKeyRequest request, StreamObserver<Tig.CanEditTigKeyReply> reply) {
 
     }
 

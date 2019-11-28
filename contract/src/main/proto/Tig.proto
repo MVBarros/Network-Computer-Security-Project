@@ -124,9 +124,9 @@ message CustomProtocolLoginReply {
 service TigKeyService {
     rpc helloTigKey (HelloTigKeyRequest) returns (HelloTigKeyReply);
     rpc loginTigKey (LoginTigKeyRequest) returns (LoginTigKeyReply);
-    //rpc keyFileTigKey (keyFileTigKeyRequest) returns (keyFileTigKeyReply);
+    rpc keyFileTigKey (KeyFileTigKeyRequest) returns (KeyFileTigKeyReply);
     //rpc keyFileRecoverTigKey (keyFileRecoverTigKeyRequest) returns (keyFileRecoverTigKeyReply);
-    //rpc canSaveTigKey (canSaveTigKeyRequest) returns (canSaveTigKeyReply);
+    rpc canSaveTigKey (CanEditTigKeyRequest) returns (CanEditTigKeyReply);
 }
 
 message LoginTigKeyRequest {
@@ -136,6 +136,24 @@ message LoginTigKeyRequest {
 
 message LoginTigKeyReply {
     string sessionId = 1;
+}
+
+message KeyFileTigKeyRequest {
+    string sessionId = 1;
+    string owner = 2;
+    string filename = 3;
+}
+
+message KeyFileTigKeyReply {
+    bytes keyFile = 1;
+}
+
+message CanEditTigKeyRequest {
+    string sessionId = 1;
+}
+
+message CanEditTigKeyReply {
+    bytes newKeyFile = 1;
 }
 
 message HelloTigKeyRequest {
