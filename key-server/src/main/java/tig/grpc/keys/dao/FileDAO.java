@@ -56,6 +56,38 @@ public class FileDAO {
         }
     }
 
+    public static void updateFileKey(FileKey key, String filename, String fileowner) {
+        Connection conn = PostgreSQLJDBC.getInstance().getConn();
+        try {
+            PreparedStatement key_stmt = conn.prepareStatement("UPDATE files SET encryption_key=(?), iv=(?) WHERE filename=(?) AND fileowner=(?)");
+            key_stmt.setBytes(1, key.getKey());
+            key_stmt.setBytes(2, key.getIv());
+            key_stmt.setString(3, filename);
+            key_stmt.setString(4, fileowner);
+            key_stmt.executeUpdate();
+        } catch (SQLException e) {
+            //Should never happen
+            throw new RuntimeException();
+        }
+
+    }
+
+    public static void createFileKey(FileKey key, String filename, String fileowner) {
+        Connection conn = PostgreSQLJDBC.getInstance().getConn();
+        try {
+            PreparedStatement key_stmt = conn.prepareStatement("INSERT INTO files VALUES (?,?,?,?)");
+            key_stmt.setString(1, filename);
+            key_stmt.setString(2, fileowner);
+            key_stmt.setBytes(3, key.getKey());
+            key_stmt.setBytes(4, key.getIv());
+            key_stmt.executeUpdate();
+        } catch (SQLException e) {
+            //Should never happen
+            throw new RuntimeException();
+        }
+
+    }
+
     public static List<String> listFiles(String username) {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
 

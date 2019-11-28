@@ -41,7 +41,6 @@ public class TigKeyServiceImpl extends TigKeyServiceGrpc.TigKeyServiceImplBase {
         reply.onCompleted();
     }
 
-
     @Override
     public void loginTigKey(Tig.AccountRequest request, StreamObserver<Tig.LoginReply> reply) {
         logger.info(String.format("Login username: %s", request.getUsername()));
@@ -89,7 +88,7 @@ public class TigKeyServiceImpl extends TigKeyServiceGrpc.TigKeyServiceImplBase {
     public void canEditTigKey(Tig.KeyFileTigKeyRequest request, StreamObserver<Tig.CanEditTigKeyReply> reply) {
         logger.info(String.format("filename: %s, owner: %s, session id: %s", request.getFilename(), request.getOwner(), request.getSessionId()));
 
-        String username = SessionAuthenticator.authenticateSession(request.getSessionId().toString()).getUsername();
+        String username = SessionAuthenticator.authenticateSession(request.getSessionId().getSessionId()).getUsername();
         AuthenticationDAO.authenticateFileAccess(username, request.getFilename(), request.getOwner(), 1);
 
         byte[] key = EncryptionUtils.generateAESKey().getEncoded();
@@ -138,6 +137,25 @@ public class TigKeyServiceImpl extends TigKeyServiceGrpc.TigKeyServiceImplBase {
 
         responseObserver.onNext(Empty.newBuilder().build());
         responseObserver.onCompleted();
+    }
+
+    @Override
+    public void newFileKey(Tig.KeyFileMessage request, StreamObserver<Empty> responseObserver) {
+        logger.info(String.format("receiveFileKey, file name %s, file owner %s", request.getFilename(), request.getOwner()));
+        FileDAO.createFileKey(new FileKey(request.getKey().toByteArray(), request.getIv().toByteArray()), request.getFilename(), request.getOwner());
+        responseObserver.onNext(Empty.newBuilder().build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void updateFileKey(Tig.KeyFileMessage request, StreamObserver<Empty> responseObserver) {
+        String username = SessionAuthenticator.authenticateSession(request.getSessionId().getSessionId()).getUsername();
+        AuthenticationDAO.authenticateFileAccess(username, request.getFilename(), request.getOwner(), 1);
+        logger.info(String.format("receiveFileKey, file name %s, file owner %s", request.getFilename(), request.getOwner()));
+        FileDAO.updateFileKey(new FileKey(request.getKey().toByteArray(), request.getIv().toByteArray()), request.getFilename(), request.getOwner());
+        responseObserver.onNext(Empty.newBuilder().build());
+        responseObserver.onCompleted();
+
     }
 
 }
