@@ -132,7 +132,7 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
                 keyStub.newFileKey(Tig.KeyFileMessage.newBuilder()
                         .setFilename(filename)
                         .setOwner()
-                        .setSessionId(Tig.TigKeySessionIdMessage.newBuilder().setSessionId(sessionId)))
+                        .setSessionId(Tig.TigKeySessionIdMessage.newBuilder().setSessionId(sessionId)));
                 responseObserver.onNext(Empty.newBuilder().build());
                 FileDAO.fileUpload(filename, file.toByteArray(), username);
                 responseObserver.onCompleted();
