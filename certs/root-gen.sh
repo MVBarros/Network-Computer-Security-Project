@@ -5,6 +5,7 @@ mkdir root-ca/ca
 mkdir root-ca/server
 mkdir root-ca/client
 mkdir root-ca/key-server
+mkdir root-ca/backup-server
 #generate ca key
 openssl genrsa -out root-ca/ca/ca.key 4096
 
@@ -53,17 +54,31 @@ openssl genrsa -out root-ca/key-server/key-server.key
 openssl pkcs8 -topk8 -in root-ca/key-server/key-server.key -nocrypt -out root-ca/key-server/key-server2.key
 mv root-ca/key-server/key-server2.key root-ca/key-server/key-server.key
 
-
 #generate key server signing request
 openssl req -new -key root-ca/key-server/key-server.key -out root-ca/key-server/key-server.csr -config certificate.conf
 
 #sign key server key with ca key
 openssl x509 -req -in root-ca/key-server/key-server.csr -CA root-ca/ca/ca.cert -CAkey root-ca/ca/ca.key -CAcreateserial -out root-ca/key-server/key-server.pem -days 365 -sha256 -extfile certificate.conf -extensions req_ext
 
+
+#generate backup-server key
+openssl genrsa -out root-ca/backup-server/backup-server.key
+
+#convert backup-server key to grpc format
+openssl pkcs8 -topk8 -in root-ca/backup-server/backup-server.key -nocrypt -out root-ca/backup-server/backup-server2.key
+mv root-ca/backup-server/backup-server2.key root-ca/backup-server/backup-server.key
+
+#generate backup-server signing request
+openssl req -new -key root-ca/backup-server/backup-server.key -out root-ca/backup-server/backup-server.csr -config certificate.conf
+
+#sign backup server key with ca key
+openssl x509 -req -in root-ca/backup-server/backup-server.csr -CA root-ca/ca/ca.cert -CAkey root-ca/ca/ca.key -CAcreateserial -out root-ca/backup-server/backup-server.pem -days 365 -sha256 -extfile certificate.conf -extensions req_ext
+
 #copy ca certificate
 cp root-ca/ca/ca.cert root-ca/server
 cp root-ca/ca/ca.cert root-ca/client
 cp root-ca/ca/ca.cert root-ca/key-server
+cp root-ca/ca/ca.cert root-ca/backup-server
 
 #copy server certificate
 cp root-ca/server/server.pem root-ca/client
@@ -73,8 +88,10 @@ cp root-ca/server/server.pem root-ca/client
 rm root-ca/server/server.csr
 rm root-ca/client/client.csr
 rm root-ca/key-server/key-server.csr
+rm root-ca/backup-server/backup-server.csr
 
 #copy to modules
 cp root-ca/server/* ../server/src/main/resources/certs
 cp root-ca/client/* ../client/src/main/resources/certs
 cp root-ca/key-server/* ../key-server/src/main/resources/certs
+cp root-ca/backup-server/* ../backup/src/main/resources/certs

@@ -65,4 +65,34 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <!-- Plugin that provides two goals to execute system and Java programs -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>${exec-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <!-- to prevent deprecation warning: -->
+                    <killAfter>-1</killAfter>
+                    <mainClass>${mainclass}</mainClass>
+                    <arguments>
+                        <argument>${server.port}</argument>
+                        <argument>${db.name}</argument>
+                        <argument>${basedir}/src/main/resources/certs/backup-server.pem</argument>
+                        <argument>${basedir}/src/main/resources/certs/backup-server.key</argument>
+                        <argument>${basedir}/src/main/resources/certs/ca.cert</argument>
+                    </arguments>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>
