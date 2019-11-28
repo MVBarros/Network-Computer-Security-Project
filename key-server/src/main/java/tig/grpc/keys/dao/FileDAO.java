@@ -20,7 +20,7 @@ public class FileDAO {
     public static FileKey getFileEncryptionKey(String filename, String owner) {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
         try {
-            PreparedStatement stmt = conn.prepareStatement("SELECT encryption_key, iv FROM files" +
+            PreparedStatement stmt = conn.prepareStatement("SELECT encryption_key, iv FROM files " +
                     "WHERE filename = (?) AND fileowner = (?)");
 
             stmt.setString(1, filename);

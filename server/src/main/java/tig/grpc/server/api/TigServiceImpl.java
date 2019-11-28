@@ -83,7 +83,8 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
         SessionAuthenticator.authenticateSession(request.getSessionId());
         logger.info("List files");
         try {
-            Tig.ListFilesReply files = keyStub.listFileTigKey(Tig.TigKeySessionIdMessage.newBuilder(Tig.TigKeySessionIdMessage.newBuilder().build()).build());
+            Tig.ListFilesReply files = keyStub.listFileTigKey(Tig.TigKeySessionIdMessage.newBuilder(
+                    Tig.TigKeySessionIdMessage.newBuilder().setSessionId(request.getSessionId()).build()).build());
             responseObserver.onNext(files);
             responseObserver.onCompleted();
         }catch (StatusRuntimeException e) {
