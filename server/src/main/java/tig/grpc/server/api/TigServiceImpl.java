@@ -24,14 +24,11 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
 
     @Override
     public void register(Tig.AccountRequest request, StreamObserver<Empty> responseObserver) {
-
-        /*
         logger.info(String.format("Register username: %s", request.getUsername()));
-        PasswordUtils.validateNewPassword(request.getPassword());
-        UsersDAO.insertUser(request.getUsername(), request.getPassword());
 
+        keyStub.registerTigKey(request);
         responseObserver.onNext(Empty.newBuilder().build());
-        responseObserver.onCompleted();*/
+        responseObserver.onCompleted();
     }
 
     @Override
