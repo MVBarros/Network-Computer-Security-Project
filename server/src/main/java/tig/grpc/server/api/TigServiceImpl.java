@@ -54,32 +54,39 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
 
     @Override
     public void deleteFile(Tig.DeleteFileRequest request, StreamObserver<Empty> responseObserver) {
-        String username = SessionAuthenticator.authenticateSession(request.getSessionId()).getUsername();
-        logger.info(String.format("Delete filename: %s of users %s", request.getFilename(), username));
-
-        responseObserver.onNext(keyStub.deleteFileTigKey(request));
-        responseObserver.onCompleted();
+        logger.info("Delete file");
+        SessionAuthenticator.authenticateSession(request.getSessionId());
+        try {
+            responseObserver.onNext(keyStub.deleteFileTigKey(request));
+            responseObserver.onCompleted();
+        }catch (StatusRuntimeException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        }
     }
 
     @Override
     public void accessControlFile(Tig.AccessControlRequest request, StreamObserver<Empty> responseObserver) {
-        String username = SessionAuthenticator.authenticateSession(request.getSessionId()).getUsername();
-        logger.info(String.format("Access Control from file %s of user %s to user %s and make it: %s", request.getFileName(),
-                username, request.getTarget(), request.getPermission()));
-
-        responseObserver.onNext(keyStub.accessControlFileTigKey(request));
-        responseObserver.onCompleted();
+        logger.info("Access Control file");
+        SessionAuthenticator.authenticateSession(request.getSessionId());
+        try {
+            responseObserver.onNext(keyStub.accessControlFileTigKey(request));
+            responseObserver.onCompleted();
+        }catch (StatusRuntimeException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        }
     }
 
     @Override
     public void listFiles(Tig.SessionRequest request, StreamObserver<Tig.ListFilesReply> responseObserver) {
-        String username = SessionAuthenticator.authenticateSession(request.getSessionId()).getUsername();
-        logger.info("List files " + username);
-
-        Tig.ListFilesReply files = keyStub.listFileTigKey(Tig.TigKeySessionIdMessage.newBuilder(Tig.TigKeySessionIdMessage.newBuilder().build()).build());
-
-        responseObserver.onNext(files);
-        responseObserver.onCompleted();
+        SessionAuthenticator.authenticateSession(request.getSessionId());
+        logger.info("List files");
+        try {
+            Tig.ListFilesReply files = keyStub.listFileTigKey(Tig.TigKeySessionIdMessage.newBuilder(Tig.TigKeySessionIdMessage.newBuilder().build()).build());
+            responseObserver.onNext(files);
+            responseObserver.onCompleted();
+        }catch (StatusRuntimeException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        }
     }
 
     @Override
