@@ -41,6 +41,19 @@ public class EncryptionUtils {
         }
     }
 
+    public static EncryptedFile encryptFile(byte[] originalFile, SecretKey key, byte[] iv) {
+        try {
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            cipher.init(Cipher.ENCRYPT_MODE, key);
+            return new EncryptedFile(cipher.doFinal(originalFile), iv);
+        } catch (Exception e) {
+            //Should never happen
+            e.printStackTrace();
+            throw new RuntimeException();
+        }
+    }
+
+
     public static byte[] decryptFile(EncryptedFile encryptedFile, SecretKeySpec key) {
         try {
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");

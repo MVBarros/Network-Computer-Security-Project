@@ -141,6 +141,8 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
             private ByteString file = ByteString.copyFrom(new byte[0]);
             private String filename;
             private String owner;
+            private byte[] key;
+            private byte[] iv;
             private final Object lock = new Object();
 
             @Override
@@ -155,9 +157,19 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
                         }
                     }
                     //Renew lease
-                    String username = SessionAuthenticator.authenticateSession(value.getSessionId()).getUsername();
+                    SessionAuthenticator.authenticateSession(value.getSessionId());
                     if (counter == 0) {
-                        AuthenticationDAO.authenticateFileAccess(username, value.getFileName(), value.getOwner(), 1);
+                        Tig.KeyFileTigKeyRequest keyRequest =  Tig.KeyFileTigKeyRequest.newBuilder()
+                                .setFilename(value.getFileName())
+                                .setOwner(value.getOwner())
+                                .setSessionId(Tig.TigKeySessionIdMessage
+                                              .newBuilder()
+                                              .setSessionId(value.getSessionId()))
+                                              .build();
+
+                        Tig.CanEditTigKeyReply reply = keyStub.canEditTigKey(keyRequest);
+                        key = reply.getNewKeyFile().toByteArray();
+                        iv = reply.getIv().toByteArray();
                         filename = value.getFileName();
                         owner = value.getOwner();
                     }
@@ -176,7 +188,8 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
             @Override
             public void onCompleted() {
                 responseObserver.onNext(Empty.newBuilder().build());
-                FileDAO.fileEdit(filename, file.toByteArray(), owner);
+                FileDAO.fileEdit(filename, file.toByteArray(), owner, key, iv);
+                //Update to key server
                 responseObserver.onCompleted();
             }
         };
@@ -195,7 +208,8 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
             fileKeyReply = keyStub.keyFileTigKey(Tig.KeyFileTigKeyRequest.newBuilder()
                     .setFilename(filename)
                     .setOwner(owner)
-                    .setSessionId(Tig.TigKeySessionIdMessage.newBuilder().setSessionId(sessionId).build()).build());
+                    .setSessionId(Tig.TigKeySessionIdMessage.newBuilder().setSessionId(sessionId).build())
+                    .build());
         } catch (StatusRuntimeException e) {
             throw new IllegalArgumentException(e.getMessage());
         }
