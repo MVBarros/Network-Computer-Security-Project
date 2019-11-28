@@ -24,6 +24,11 @@ public class TigKeyServiceImpl extends TigKeyServiceGrpc.TigKeyServiceImplBase {
 
     @Override
     public void loginTigKey(Tig.LoginTigKeyRequest request, StreamObserver<Tig.TigKeySessionIdMessage> reply) {
+
+    }
+
+    @Override
+    public void loginTigKey(Tig.LoginTigKeyRequest request, StreamObserver<Tig.TigKeySessionIdMessage> reply) {
         logger.info(String.format("Login username: %s", request.getUsername()));
 
         UsersDAO.authenticateUser(request.getUsername(), request.getPassword());
