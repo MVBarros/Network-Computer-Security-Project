@@ -47,8 +47,7 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
     @Override
     public void logout(Tig.SessionRequest request, StreamObserver<Empty> responseObserver) {
         logger.info("Logout");
-        SessionAuthenticator.clearSession(request.getSessionId());
-        responseObserver.onNext(Empty.newBuilder().build());
+        responseObserver.onNext(keyStub.logoutTigKey(request));
         responseObserver.onCompleted();
     }
 
