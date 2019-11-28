@@ -63,6 +63,7 @@ public class DocumentServer {
                                                     .sslContext(context)
                                                     .build();
         TigKeyServiceGrpc.TigKeyServiceBlockingStub keyStub = TigKeyServiceGrpc.newBlockingStub(channel);
+        TigServiceImpl.keyStub = keyStub;
 
         //Test Purposes only
         System.out.println("Connected and authenticated to key server successfully");

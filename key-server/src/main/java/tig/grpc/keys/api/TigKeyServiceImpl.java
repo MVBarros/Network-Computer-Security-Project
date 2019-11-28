@@ -5,8 +5,11 @@ import io.grpc.stub.StreamObserver;
 import org.apache.log4j.Logger;
 import tig.grpc.contract.Tig;
 import tig.grpc.contract.TigKeyServiceGrpc;
+import tig.grpc.keys.dao.FileDAO;
 import tig.grpc.keys.dao.UsersDAO;
 import tig.grpc.keys.session.SessionAuthenticator;
+
+import java.util.List;
 
 public class TigKeyServiceImpl extends TigKeyServiceGrpc.TigKeyServiceImplBase {
     private final static Logger logger = Logger.getLogger(TigKeyServiceImpl.class);
@@ -51,7 +54,15 @@ public class TigKeyServiceImpl extends TigKeyServiceGrpc.TigKeyServiceImplBase {
     }
 
     @Override
-    public void listFileTigKey(Tig.TigKeySessionIdMessage request, StreamObserver<Tig.ListFilesReply> reply) {
+    public void listFileTigKey(Tig.TigKeySessionIdMessage request, StreamObserver<Tig.ListFilesReply> responseObserver) {
+        String username = SessionAuthenticator.authenticateSession(request.getSessionId()).getUsername();
+        List<String> files = FileDAO.listFiles(username);
+        logger.info("List files " + username);
+
+        Tig.ListFilesReply.Builder builder = Tig.ListFilesReply.newBuilder();
+        builder.addAllFileInfo(files);
+        responseObserver.onNext(builder.build());
+        responseObserver.onCompleted();
 
     }
 

@@ -5,6 +5,7 @@ import com.google.protobuf.Empty;
 import io.grpc.stub.StreamObserver;
 import org.apache.log4j.Logger;
 import tig.grpc.contract.Tig;
+import tig.grpc.contract.TigKeyServiceGrpc;
 import tig.grpc.contract.TigServiceGrpc;
 import tig.grpc.server.data.dao.AuthenticationDAO;
 import tig.grpc.server.data.dao.FileDAO;
@@ -19,6 +20,7 @@ import java.util.List;
 
 public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
     private final static Logger logger = Logger.getLogger(TigServiceImpl.class);
+    public static TigKeyServiceGrpc.TigKeyServiceBlockingStub keyStub;
 
     @Override
     public void register(Tig.AccountRequest request, StreamObserver<Empty> responseObserver) {
@@ -80,12 +82,11 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
     @Override
     public void listFiles(Tig.SessionRequest request, StreamObserver<Tig.ListFilesReply> responseObserver) {
         String username = SessionAuthenticator.authenticateSession(request.getSessionId()).getUsername();
-        List<String> files = FileDAO.listFiles(username);
         logger.info("List files " + username);
 
-        Tig.ListFilesReply.Builder builder = Tig.ListFilesReply.newBuilder();
-        builder.addAllFileInfo(files);
-        responseObserver.onNext(builder.build());
+        Tig.ListFilesReply files = keyStub.listFileTigKey(Tig.TigKeySessionIdMessage.newBuilder(Tig.TigKeySessionIdMessage.newBuilder().build()).build());
+
+        responseObserver.onNext(files);
         responseObserver.onCompleted();
     }
 
