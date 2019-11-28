@@ -10,6 +10,7 @@ import io.netty.handler.ssl.ClientAuth;
 import io.netty.handler.ssl.SslContext;
 import org.apache.log4j.Logger;
 import tig.grpc.keys.api.TigKeyServiceImpl;
+import tig.grpc.keys.session.TokenCleanupThread;
 import tig.utils.db.PostgreSQLJDBC;
 import tig.utils.interceptor.ExceptionHandler;
 import tig.utils.keys.KeyFileLoader;
@@ -75,6 +76,9 @@ public class KeyServer {
                 server.shutdownNow();
             }
         });
+
+        //Cleanup hanging Session Tokens in the background
+        new Thread(new TokenCleanupThread()).start();
 
         // Do not exit the main thread. Wait until server is terminated.
         server.awaitTermination();

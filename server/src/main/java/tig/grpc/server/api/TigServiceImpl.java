@@ -10,16 +10,11 @@ import tig.grpc.contract.TigKeyServiceGrpc;
 import tig.grpc.contract.TigServiceGrpc;
 import tig.grpc.server.data.dao.AuthenticationDAO;
 import tig.grpc.server.data.dao.FileDAO;
-import tig.grpc.server.data.dao.UsersDAO;
 import tig.grpc.server.session.SessionAuthenticator;
-import tig.utils.PasswordUtils;
 import tig.utils.encryption.EncryptionUtils;
 
 import javax.crypto.spec.SecretKeySpec;
-import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.util.Arrays;
-import java.util.List;
 
 public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
     private final static Logger logger = Logger.getLogger(TigServiceImpl.class);
@@ -28,20 +23,25 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
     @Override
     public void register(Tig.AccountRequest request, StreamObserver<Empty> responseObserver) {
         logger.info(String.format("Register username: %s", request.getUsername()));
-
-
-
-        keyStub.registerTigKey(request);
-        responseObserver.onNext(Empty.newBuilder().build());
-        responseObserver.onCompleted();
+        try {
+            responseObserver.onNext(keyStub.registerTigKey(request));
+            responseObserver.onCompleted();
+        }catch (StatusRuntimeException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        }
     }
 
     @Override
     public void login(Tig.AccountRequest request, StreamObserver<Tig.LoginReply> responseObserver) {
         logger.info(String.format("Login username: %s", request.getUsername()));
-
-        responseObserver.onNext(keyStub.loginTigKey(request));
+        try {
+        Tig.LoginReply replyMessage = keyStub.loginTigKey(request);
+        SessionAuthenticator.insertSession(replyMessage.getSessionId());
+        responseObserver.onNext(replyMessage);
         responseObserver.onCompleted();
+        } catch(StatusRuntimeException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        }
     }
 
     @Override
