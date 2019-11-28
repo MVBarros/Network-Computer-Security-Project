@@ -29,21 +29,21 @@ public class EncryptionUtils {
         return new SecretKeySpec(encoding, 0, encoding.length, "AES");
     }
 
-    public static EncryptedFile encryptFile(byte[] originalFile, SecretKey key, byte[] iv) {
-        try {
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-            cipher.init(Cipher.ENCRYPT_MODE, key);
-            return new EncryptedFile(cipher.doFinal(originalFile), iv);
-        } catch (Exception e) {
-            //Should never happen
-            e.printStackTrace();
-            throw new RuntimeException();
+        public static EncryptedFile encryptFile(byte[] originalFile, SecretKey key, byte[] iv) {
+            try {
+                Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+                cipher.init(Cipher.ENCRYPT_MODE, key,new IvParameterSpec(iv));
+                return new EncryptedFile(cipher.doFinal(originalFile), iv);
+            } catch (Exception e) {
+                //Should never happen
+                e.printStackTrace();
+                throw new RuntimeException();
+            }
         }
-    }
 
-    public static byte[] decryptFile(EncryptedFile encryptedFile, SecretKeySpec key) {
-        try {
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        public static byte[] decryptFile(EncryptedFile encryptedFile, SecretKeySpec key) {
+            try {
+                Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
             cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(encryptedFile.getIv()));
             return cipher.doFinal(encryptedFile.getContent());
         } catch (Exception e) {
