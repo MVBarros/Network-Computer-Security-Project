@@ -129,13 +129,18 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
 
             @Override
             public void onCompleted() {
-                keyStub.newFileKey(Tig.KeyFileMessage.newBuilder()
+                Tig.newFileReply reply = keyStub.newFileKey(Tig.newFileRequest.newBuilder()
                         .setFilename(filename)
-                        .setOwner()
-                        .setSessionId(Tig.TigKeySessionIdMessage.newBuilder().setSessionId(sessionId)))
-                responseObserver.onNext(Empty.newBuilder().build());
-                FileDAO.fileUpload(filename, file.toByteArray(), username);
-                responseObserver.onCompleted();
+                        .setSessionId(Tig.TigKeySessionIdMessage.newBuilder().setSessionId(sessionId))
+                        .build()
+                );
+                try {
+                    responseObserver.onNext(Empty.newBuilder().build());
+                    FileDAO.fileUpload(filename, file.toByteArray(), reply.getOwner(), reply.getKey().toByteArray(), reply.getIv().toByteArray());
+                    responseObserver.onCompleted();
+                } catch (StatusRuntimeException e) {
+                    throw new IllegalArgumentException(e.getMessage());
+                }
             }
         };
     }

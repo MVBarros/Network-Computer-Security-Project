@@ -18,21 +18,19 @@ import java.util.List;
 
 public class FileDAO {
 
-    public static void fileUpload(String filename, byte[] fileContent, String owner) {
+    public static void fileUpload(String filename, byte[] fileContent, String owner, byte[] key, byte[] iv) {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
 
         try {
-            PreparedStatement stmt = conn.prepareStatement("INSERT INTO files VALUES (?,?,?,?,?,?)");
+            PreparedStatement stmt = conn.prepareStatement("INSERT INTO files VALUES (?,?,?,?)");
 
-            SecretKey secretKey = EncryptionUtils.generateAESKey();
-            EncryptedFile encryptedContent = EncryptionUtils.encryptFile(fileContent, secretKey);
+            SecretKey secretKey = EncryptionUtils.getAesKey(key);
+            EncryptedFile encryptedContent = EncryptionUtils.encryptFile(fileContent, secretKey, iv);
 
             stmt.setString(1, filename);
             stmt.setString(2, owner);
             stmt.setString(3, LocalDateTime.now().toString());
             stmt.setBytes(4, encryptedContent.getContent());
-            stmt.setBytes(5, secretKey.getEncoded());
-            stmt.setBytes(6, encryptedContent.getIv());
             stmt.executeUpdate();
 
         } catch (SQLException e) {

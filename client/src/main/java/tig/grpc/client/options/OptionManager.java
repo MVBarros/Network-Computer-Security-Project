@@ -62,7 +62,7 @@ public class OptionManager {
             Operations.registerClient(client);
             return;
         }
-        CustomProtocolOperations.loginClient(client);
+        Operations.loginClient(client);
 
         if (cmd.hasOption('d')) {
             Operations.downloadFile(client, cmd.getOptionValues('d')[0], cmd.getOptionValues('d')[1], cmd.getOptionValues('d')[2]);
