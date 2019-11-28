@@ -7,9 +7,7 @@
     <version>1.0.0.RELEASE</version>
     <packaging>pom</packaging>
 
-    <properties>
-        <netty.tcnative.version>2.0.25.Final</netty.tcnative.version>
-    </properties>
+
 
 
     <modules>
@@ -18,6 +16,7 @@
         <module>server</module>
         <module>utils</module>
         <module>key-server</module>
+        <module>backup</module>
     </modules>
 
 </project>

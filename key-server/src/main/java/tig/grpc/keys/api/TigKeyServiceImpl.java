@@ -134,7 +134,6 @@ public class TigKeyServiceImpl extends TigKeyServiceGrpc.TigKeyServiceImplBase {
 
         logger.info(String.format("Access Control from file %s of user %s to user %s and make it: %s", request.getFileName(),
                 username, request.getTarget(), request.getPermission()));
-
         AuthenticationDAO.updateAccessControl(request.getFileName(), username, request.getTarget(), request.getPermission().getNumber());
 
         responseObserver.onNext(Empty.newBuilder().build());
@@ -148,14 +147,12 @@ public class TigKeyServiceImpl extends TigKeyServiceGrpc.TigKeyServiceImplBase {
 
         byte[] key = EncryptionUtils.generateAESKey().getEncoded();
         byte[] iv = EncryptionUtils.generateIv();
-
         FileDAO.createFileKey(new FileKey(key, iv), request.getFilename(), username);
         Tig.NewFileReply.Builder builder = Tig.NewFileReply.newBuilder();
 
         builder.setOwner(username);
         builder.setIv(ByteString.copyFrom(iv));
         builder.setKey(ByteString.copyFrom(key));
-
         reply.onNext(builder.build());
         reply.onCompleted();
     }

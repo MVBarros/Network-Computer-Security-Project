@@ -25,13 +25,10 @@ public class FileDAO {
 
             stmt.setString(1, filename);
             stmt.setString(2, owner);
-
             ResultSet rs = stmt.executeQuery();
             //there should be only one result
             rs.next();
-
             return new FileKey(rs.getBytes("encryption_key"), rs.getBytes("iv"));
-
         }catch (SQLException e) {
             //Should never happen
             throw new RuntimeException();
@@ -40,7 +37,6 @@ public class FileDAO {
 
 
     public static void deleteFile(String username, String filename) {
-
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
         try {
             PreparedStatement delete_stmt = conn.prepareStatement("DELETE FROM files WHERE filename=(?) AND fileowner=(?)");
@@ -90,32 +86,26 @@ public class FileDAO {
 
     public static List<String> listFiles(String username) {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
-
         PreparedStatement stmt = null;
         try {
             stmt = conn.prepareStatement("SELECT  filename, fileowner FROM files WHERE fileowner = (?)");
             stmt.setString(1, username);
             ResultSet rs = stmt.executeQuery();
-
             List<String> result = new ArrayList<>();
             while (rs.next()) {
                 result.add(String.format("File:%s\tOwner:%s\tPermission:R/W", rs.getString("filename"), rs.getString("fileowner")));
             }
-
             stmt = conn.prepareStatement("SELECT  filename, fileowner, permission FROM authorizations WHERE username = (?)");
             stmt.setString(1, username);
             rs = stmt.executeQuery();
-
             while (rs.next()) {
                 result.add(String.format("File:%s\tOwner:%s\tPermission:%s", rs.getString("filename"),
                         rs.getString("fileowner"), rs.getInt("permission") == 1 ? "RW" : "R"));
             }
-
             if (result.size() == 0) {
                 result.add("User has no files");
             }
             return result;
-
         } catch (SQLException e) {
             //Should never happen
             throw new RuntimeException();
