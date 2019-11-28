@@ -129,7 +129,7 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
 
             @Override
             public void onCompleted() {
-                Tig.newFileReply reply = keyStub.newFileKey(Tig.newFileRequest.newBuilder()
+                Tig.NewFileReply reply = keyStub.newFileKey(Tig.NewFileRequest.newBuilder()
                         .setFilename(filename)
                         .setSessionId(Tig.TigKeySessionIdMessage.newBuilder().setSessionId(sessionId))
                         .build()
