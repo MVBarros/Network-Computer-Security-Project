@@ -3,6 +3,7 @@ package tig.grpc.keys.dao;
 import tig.utils.db.PostgreSQLJDBC;
 import tig.utils.encryption.EncryptedFile;
 import tig.utils.encryption.EncryptionUtils;
+import tig.utils.encryption.FileKey;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -16,71 +17,27 @@ import java.util.List;
 
 public class FileDAO {
 
-    public static void fileUpload(String filename, byte[] fileContent, String owner) {
-        Connection conn = PostgreSQLJDBC.getInstance().getConn();
-
-        try {
-            PreparedStatement stmt = conn.prepareStatement("INSERT INTO files VALUES (?,?,?,?,?,?)");
-
-            SecretKey secretKey = EncryptionUtils.generateAESKey();
-            EncryptedFile encryptedContent = EncryptionUtils.encryptFile(fileContent, secretKey);
-
-            stmt.setString(1, filename);
-            stmt.setString(2, owner);
-            stmt.setString(3, LocalDateTime.now().toString());
-            stmt.setBytes(4, encryptedContent.getContent());
-            stmt.setBytes(5, secretKey.getEncoded());
-            stmt.setBytes(6, encryptedContent.getIv());
-            stmt.executeUpdate();
-
-        } catch (SQLException e) {
-            //Primary Key violation
-            throw new IllegalArgumentException("Filename Provided already exists");
-        }
-    }
-
-    public static void fileEdit(String filename, byte[] fileContent, String owner) {
-        Connection conn = PostgreSQLJDBC.getInstance().getConn();
-
-        try {
-            PreparedStatement stmt = conn.prepareStatement("UPDATE files SET content=(?), encryption_key=(?), iv=(?) WHERE filename=(?) AND fileowner=(?)");
-
-            SecretKey secretKey = EncryptionUtils.generateAESKey();
-            EncryptedFile encryptedFile = EncryptionUtils.encryptFile(fileContent, secretKey);
-
-            stmt.setBytes(1, encryptedFile.getContent());
-            stmt.setBytes(2, secretKey.getEncoded());
-            stmt.setBytes(3, encryptedFile.getIv());
-            stmt.setString(4, filename);
-            stmt.setString(5, owner);
-            stmt.executeUpdate();
-
-        } catch (SQLException e) {
-            //Should never happen
-            throw new RuntimeException();
-        }
-    }
-
-    public static byte[] getFileContent(String filename, String owner) {
+    public static FileKey getFileEncryptionKey(String filename, String owner) {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
         try {
-            PreparedStatement stmt = conn.prepareStatement("SELECT content, encryption_key, iv FROM files " +
+            PreparedStatement stmt = conn.prepareStatement("SELECT encryption_key, iv FROM files" +
                     "WHERE filename = (?) AND fileowner = (?)");
 
             stmt.setString(1, filename);
             stmt.setString(2, owner);
+
             ResultSet rs = stmt.executeQuery();
+            //there should be only one result
             rs.next();
 
-            SecretKeySpec key = EncryptionUtils.getAesKey(rs.getBytes("encryption_key"));
+            return new FileKey(rs.getBytes("encryption_key"), rs.getBytes("iv"));
 
-            return EncryptionUtils.decryptFile(new EncryptedFile(rs.getBytes("content"), rs.getBytes("iv")), key);
-
-        } catch (SQLException e) {
+        }catch (SQLException e) {
             //Should never happen
             throw new RuntimeException();
         }
     }
+
 
     public static void deleteFile(String username, String filename) {
 
