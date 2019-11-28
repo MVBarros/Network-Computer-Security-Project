@@ -62,10 +62,10 @@ public class FileDAO {
         }
     }
 
-    public static byte[] getFileContent(String filename, String owner) {
+    public static byte[] getFileContent(String filename, String owner, SecretKeySpec fileKey, byte[] iv ) {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
         try {
-            PreparedStatement stmt = conn.prepareStatement("SELECT content, encryption_key, iv FROM files " +
+            PreparedStatement stmt = conn.prepareStatement("SELECT content FROM files " +
                     "WHERE filename = (?) AND fileowner = (?)");
 
             stmt.setString(1, filename);
@@ -73,9 +73,7 @@ public class FileDAO {
             ResultSet rs = stmt.executeQuery();
             rs.next();
 
-            SecretKeySpec key = EncryptionUtils.getAesKey(rs.getBytes("encryption_key"));
-
-            return EncryptionUtils.decryptFile(new EncryptedFile(rs.getBytes("content"), rs.getBytes("iv")), key);
+            return EncryptionUtils.decryptFile(new EncryptedFile(rs.getBytes("content"), iv), fileKey);
 
         } catch (SQLException e) {
             //Should never happen
