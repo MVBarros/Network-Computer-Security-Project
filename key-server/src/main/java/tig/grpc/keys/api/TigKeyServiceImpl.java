@@ -13,4 +13,10 @@ public class TigKeyServiceImpl extends TigKeyServiceGrpc.TigKeyServiceImplBase {
         reply.onNext(keyReply);
         reply.onCompleted();
     }
+
+
+    public void helloTigKey(Tig.HelloTigKeyRequest request, StreamObserver<Tig.HelloTigKeyReply> reply) {
+
+    }
+
 }

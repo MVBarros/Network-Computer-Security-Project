@@ -123,6 +123,19 @@ message CustomProtocolLoginReply {
 
 service TigKeyService {
     rpc helloTigKey (HelloTigKeyRequest) returns (HelloTigKeyReply);
+    rpc loginTigKey (LoginTigKeyRequest) returns (LoginTigKeyReply);
+    //rpc keyFileTigKey (keyFileTigKeyRequest) returns (keyFileTigKeyReply);
+    //rpc keyFileRecoverTigKey (keyFileRecoverTigKeyRequest) returns (keyFileRecoverTigKeyReply);
+    //rpc canSaveTigKey (canSaveTigKeyRequest) returns (canSaveTigKeyReply);
+}
+
+message LoginTigKeyRequest {
+    string username = 1;
+    string password = 2;
+}
+
+message LoginTigKeyReply {
+    string sessionId = 1;
 }
 
 message HelloTigKeyRequest {
