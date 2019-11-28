@@ -147,7 +147,8 @@ message KeyFileTigKeyRequest {
 }
 
 message KeyFileTigKeyReply {
-    bytes keyFile = 1;
+    bytes key = 1;
+    bytes iv = 2;
 }
 
 message CanEditTigKeyReply {

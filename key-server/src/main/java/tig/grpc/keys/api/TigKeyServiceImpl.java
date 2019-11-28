@@ -1,5 +1,6 @@
 package tig.grpc.keys.api;
 
+import com.google.protobuf.ByteString;
 import com.google.protobuf.Empty;
 import io.grpc.stub.StreamObserver;
 import org.apache.log4j.Logger;
@@ -9,6 +10,8 @@ import tig.grpc.keys.dao.AuthenticationDAO;
 import tig.grpc.keys.dao.FileDAO;
 import tig.grpc.keys.dao.UsersDAO;
 import tig.grpc.keys.session.SessionAuthenticator;
+import tig.grpc.keys.session.UserToken;
+import tig.utils.encryption.FileKey;
 import tig.utils.encryption.EncryptionUtils;
 
 import javax.crypto.SecretKey;
@@ -62,7 +65,24 @@ public class TigKeyServiceImpl extends TigKeyServiceGrpc.TigKeyServiceImplBase {
 
     @Override
     public void keyFileTigKey(Tig.KeyFileTigKeyRequest request, StreamObserver<Tig.KeyFileTigKeyReply> reply) {
-        logger.info(String.format("file with name: %s of owner: %s", request.getFilename(), request.getOwner()));
+        logger.info(String.format("get key of file with name: %s of owner: %s", request.getFilename(), request.getOwner()));
+        String sessionId = request.getSessionId().getSessionId();
+        String filename = request.getFilename();
+        String owner = request.getOwner();
+
+        UserToken userToken = SessionAuthenticator.authenticateSession(sessionId);
+        String username = userToken.getUsername();
+
+        AuthenticationDAO.authenticateFileAccess(username, filename, owner, 0);
+
+        FileKey fileKey = FileDAO.getFileEncryptionKey(filename, owner);
+        Tig.KeyFileTigKeyReply replyMessage = Tig.KeyFileTigKeyReply.newBuilder()
+                                              .setIv(ByteString.copyFrom(fileKey.getIv()))
+                                              .setKey(ByteString.copyFrom(fileKey.getKey()))
+                                              .build();
+
+        reply.onNext(replyMessage);
+        reply.onCompleted();
     }
 
     @Override

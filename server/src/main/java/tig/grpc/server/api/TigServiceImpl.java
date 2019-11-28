@@ -2,6 +2,7 @@ package tig.grpc.server.api;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Empty;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import org.apache.log4j.Logger;
 import tig.grpc.contract.Tig;
@@ -12,7 +13,9 @@ import tig.grpc.server.data.dao.FileDAO;
 import tig.grpc.server.data.dao.UsersDAO;
 import tig.grpc.server.session.SessionAuthenticator;
 import tig.utils.PasswordUtils;
+import tig.utils.encryption.EncryptionUtils;
 
+import javax.crypto.spec.SecretKeySpec;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Arrays;
@@ -175,11 +178,27 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
     @Override
     public void downloadFile(Tig.FileRequest request, StreamObserver<Tig.FileChunkDownload> responseObserver) {
         logger.info(String.format("Download file: %s", request.getFileName()));
+        String sessionId = request.getSessionId();
+        String filename = request.getFileName();
+        String owner = request.getOwner();
 
-        String username = SessionAuthenticator.authenticateSession(request.getSessionId()).getUsername();
-        AuthenticationDAO.authenticateFileAccess(username, request.getFileName(), request.getOwner(), 0);
+        Tig.KeyFileTigKeyReply fileKeyReply;
 
-        byte[] file = FileDAO.getFileContent(request.getFileName(), request.getOwner());
+        try {
+            fileKeyReply = keyStub.keyFileTigKey(Tig.KeyFileTigKeyRequest.newBuilder()
+                    .setFilename(filename)
+                    .setOwner(owner)
+                    .setSessionId(Tig.TigKeySessionIdMessage.newBuilder().setSessionId(sessionId).build()).build());
+        } catch (StatusRuntimeException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        }
+
+        byte[] keyArray = fileKeyReply.getKey().toByteArray();
+        byte[] iv = fileKeyReply.getIv().toByteArray();
+        SecretKeySpec fileKey = EncryptionUtils.getAesKey(keyArray);
+
+        byte[] file = FileDAO.getFileContent(filename, owner, fileKey, iv);
+
         int sequence = 0;
         //Send file 1MB chunk at a time
         for (int i = 0; i < file.length; i += 1024 * 1024, sequence++) {
