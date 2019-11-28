@@ -50,4 +50,9 @@ public class TigKeyServiceImpl extends TigKeyServiceGrpc.TigKeyServiceImplBase {
         logger.info(String.format("session id: %s", request.getSessionId()));
     }
 
+    @Override
+    public void listFileTigKey(Tig.TigKeySessionIdMessage request, StreamObserver<Tig.ListFilesReply> reply) {
+
+    }
+
 }
