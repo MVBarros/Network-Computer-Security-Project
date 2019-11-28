@@ -23,7 +23,7 @@
         <!-- application properties -->
         <mainclass>tig.grpc.keys.service.KeyServer</mainclass>
         <server.port>8090</server.port>
-        <db.name>tigkeyserver</db.name>
+        <db.name>src/main/resources/db/tigkeyserver</db.name>
         <db.password>root</db.password>
         <tig.server.url>localhost:8080</tig.server.url>
     </properties>

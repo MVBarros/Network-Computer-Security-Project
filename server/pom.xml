@@ -23,7 +23,7 @@
         <!-- application properties -->
         <mainclass>tig.grpc.server.service.DocumentServer</mainclass>
         <server.port>8080</server.port>
-        <db.name>tigserver</db.name>
+        <db.name>src/main/resources/db/tigserver</db.name>
         <db.password>root</db.password>
         <keyserver.url>localhost:8090</keyserver.url>
     </properties>
