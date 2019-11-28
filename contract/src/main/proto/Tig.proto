@@ -186,6 +186,6 @@ message HelloTigKeyReply {
 //**************************** Backup BD ******************************
 
 
-service TigBackupBDService {
+service TigBackupService {
 
 }
