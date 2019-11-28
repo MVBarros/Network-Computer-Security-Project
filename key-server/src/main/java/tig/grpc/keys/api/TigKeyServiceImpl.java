@@ -56,7 +56,7 @@ public class TigKeyServiceImpl extends TigKeyServiceGrpc.TigKeyServiceImplBase {
 
     }
     @Override
-    public void logoutTigKey(Tig.TigKeySessionIdMessage request, StreamObserver<Empty> responseObserver) {
+    public void logoutTigKey(Tig.SessionRequest request, StreamObserver<Empty> responseObserver) {
         logger.info("Logout no Key Server");
         SessionAuthenticator.clearSession(request.getSessionId());
         responseObserver.onNext(Empty.newBuilder().build());
