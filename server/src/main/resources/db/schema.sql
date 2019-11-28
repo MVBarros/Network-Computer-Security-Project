@@ -1,3 +1,5 @@
+PRAGMA foreign_keys = ON;
+
 drop table if exists files;
 drop table if exists users;
 
