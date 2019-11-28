@@ -25,7 +25,7 @@ public class CustomProtocolTigServiceImpl extends CustomProtocolTigServiceGrpc.C
 
     @Override
     public void login(Tig.CustomProtocolMessage request, StreamObserver<Tig.CustomProtocolMessage> reply) {
-        try {
+        /*try {
 
             //Verify signature
             byte[] message = request.getMessage().toByteArray();
@@ -84,13 +84,13 @@ public class CustomProtocolTigServiceImpl extends CustomProtocolTigServiceGrpc.C
         }catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
             //Should never happen
             throw new RuntimeException();
-        }
+        }*/
     }
 
     @Override
     public void logout(Tig.CustomProtocolMessage request, StreamObserver<Tig.CustomProtocolMessage> reply) {
         //validate message
-        byte[] encryptedMessage = request.getMessage().toByteArray();
+        /*byte[] encryptedMessage = request.getMessage().toByteArray();
 
         byte[] serializedSignature = request.getSignature().toByteArray();
         Tig.Signature sign = (Tig.Signature)ObjectSerializer.Deserialize(serializedSignature);
@@ -126,6 +126,8 @@ public class CustomProtocolTigServiceImpl extends CustomProtocolTigServiceGrpc.C
 
         reply.onNext(actualReply);
         reply.onCompleted();
+
+         */
     }
 
 }

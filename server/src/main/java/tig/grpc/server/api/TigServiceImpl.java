@@ -47,8 +47,13 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
     @Override
     public void logout(Tig.SessionRequest request, StreamObserver<Empty> responseObserver) {
         logger.info("Logout");
+        try {
+        SessionAuthenticator.clearSession(request.getSessionId());
         responseObserver.onNext(keyStub.logoutTigKey(request));
         responseObserver.onCompleted();
+        } catch(StatusRuntimeException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        }
     }
 
     @Override
@@ -113,13 +118,11 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
                     if (counter == 0) {
                         filename = value.getFileName();
                     }
-
                     file = file.concat(value.getContent());
                     counter++;
                     lock.notify();
                 }
             }
-
             @Override
             public void onError(Throwable t) {
                 responseObserver.onError(t);
