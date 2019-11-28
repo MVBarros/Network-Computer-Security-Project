@@ -9,8 +9,11 @@ import tig.grpc.contract.Tig;
 import tig.grpc.contract.TigKeyServiceGrpc;
 import tig.grpc.contract.TigServiceGrpc;
 import tig.grpc.server.data.dao.FileDAO;
+import tig.grpc.server.data.dao.UsersDAO;
 import tig.grpc.server.session.SessionAuthenticator;
 import tig.utils.encryption.EncryptionUtils;
+import tig.utils.encryption.FileKey;
+
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Arrays;
 
@@ -23,6 +26,7 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
         logger.info(String.format("Register username: %s", request.getUsername()));
         try {
             responseObserver.onNext(keyStub.registerTigKey(request));
+            UsersDAO.insertUser(request.getUsername());
             responseObserver.onCompleted();
         }catch (StatusRuntimeException e) {
             throw new IllegalArgumentException(e.getMessage());
@@ -59,7 +63,9 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
         logger.info("Delete file");
         SessionAuthenticator.authenticateSession(request.getSessionId());
         try {
-            responseObserver.onNext(keyStub.deleteFileTigKey(request));
+            Tig.DeleteFileReply reply = keyStub.deleteFileTigKey(request);
+            FileDAO.deleteFile(reply.getOwner(), request.getFilename());
+            responseObserver.onNext(Empty.newBuilder().build());
             responseObserver.onCompleted();
         }catch (StatusRuntimeException e) {
             throw new IllegalArgumentException(e.getMessage());
