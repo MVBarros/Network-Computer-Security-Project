@@ -118,4 +118,17 @@ public class TigKeyServiceImpl extends TigKeyServiceGrpc.TigKeyServiceImplBase {
 
     }
 
+    @Override
+    public void accessControlFileTigKey(Tig.AccessControlRequest request, StreamObserver<Empty> responseObserver) {
+        String username = SessionAuthenticator.authenticateSession(request.getSessionId()).getUsername();
+
+        logger.info(String.format("Access Control from file %s of user %s to user %s and make it: %s", request.getFileName(),
+                username, request.getTarget(), request.getPermission()));
+
+        AuthenticationDAO.updateAccessControl(request.getFileName(), username, request.getTarget(), request.getPermission().getNumber());
+
+        responseObserver.onNext(Empty.newBuilder().build());
+        responseObserver.onCompleted();
+    }
+
 }
