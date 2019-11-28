@@ -142,11 +142,22 @@ public class TigKeyServiceImpl extends TigKeyServiceGrpc.TigKeyServiceImplBase {
     }
 
     @Override
-    public void newFileKey(Tig.KeyFileMessage request, StreamObserver<Empty> responseObserver) {
-        logger.info(String.format("receiveFileKey, file name %s, file owner %s", request.getFilename(), request.getOwner()));
-        FileDAO.createFileKey(new FileKey(request.getKey().toByteArray(), request.getIv().toByteArray()), request.getFilename(), request.getOwner());
-        responseObserver.onNext(Empty.newBuilder().build());
-        responseObserver.onCompleted();
+    public void newFileKey(Tig.NewFileRequest request, StreamObserver<Tig.NewFileReply> reply) {
+        logger.info(String.format("newFileKey, file name %s", request.getFilename()));
+        String username = SessionAuthenticator.authenticateSession(request.getSessionId().getSessionId()).getUsername();
+
+        byte[] key = EncryptionUtils.generateAESKey().getEncoded();
+        byte[] iv = EncryptionUtils.generateIv();
+
+        FileDAO.createFileKey(new FileKey(key, iv), request.getFilename(), username);
+        Tig.NewFileReply.Builder builder = Tig.NewFileReply.newBuilder();
+
+        builder.setOwner(username);
+        builder.setIv(ByteString.copyFrom(iv));
+        builder.setKey(ByteString.copyFrom(key));
+
+        reply.onNext(builder.build());
+        reply.onCompleted();
     }
 
 
