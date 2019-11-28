@@ -124,20 +124,16 @@ message CustomProtocolLoginReply {
 service TigKeyService {
     rpc helloTigKey (HelloTigKeyRequest) returns (HelloTigKeyReply);
     rpc registerTigKey (AccountRequest) returns (google.protobuf.Empty);
-    rpc loginTigKey (LoginTigKeyRequest) returns (TigKeySessionIdMessage);
+    rpc loginTigKey (AccountRequest) returns (LoginReply);
     rpc logoutTigKey (TigKeySessionIdMessage) returns (google.protobuf.Empty);
     rpc keyFileTigKey (KeyFileTigKeyRequest) returns (KeyFileTigKeyReply);
     //rpc keyFileRecoverTigKey (keyFileRecoverTigKeyRequest) returns (keyFileRecoverTigKeyReply);
-    rpc canSaveTigKey (KeyFileTigKeyRequest) returns (CanEditTigKeyReply);
+    rpc canEditTigKey (KeyFileTigKeyRequest) returns (CanEditTigKeyReply);
     rpc listFileTigKey (TigKeySessionIdMessage) returns (ListFilesReply);
     rpc accessControlFileTigKey (AccessControlRequest) returns (google.protobuf.Empty);
 
 }
 
-message LoginTigKeyRequest {
-    string username = 1;
-    string password = 2;
-}
 
 message TigKeySessionIdMessage {
     string sessionId = 1;

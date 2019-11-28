@@ -27,26 +27,20 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
 
     @Override
     public void register(Tig.AccountRequest request, StreamObserver<Empty> responseObserver) {
-
-        /*
         logger.info(String.format("Register username: %s", request.getUsername()));
-        PasswordUtils.validateNewPassword(request.getPassword());
-        UsersDAO.insertUser(request.getUsername(), request.getPassword());
 
+
+
+        keyStub.registerTigKey(request);
         responseObserver.onNext(Empty.newBuilder().build());
-        responseObserver.onCompleted();*/
+        responseObserver.onCompleted();
     }
 
     @Override
     public void login(Tig.AccountRequest request, StreamObserver<Tig.LoginReply> responseObserver) {
         logger.info(String.format("Login username: %s", request.getUsername()));
 
-        UsersDAO.authenticateUser(request.getUsername(), request.getPassword());
-        String sessionId = SessionAuthenticator.createSession(request.getUsername());
-
-        Tig.LoginReply.Builder builder = Tig.LoginReply.newBuilder().setSessionId(sessionId);
-
-        responseObserver.onNext(builder.build());
+        responseObserver.onNext(keyStub.loginTigKey(request));
         responseObserver.onCompleted();
     }
 
