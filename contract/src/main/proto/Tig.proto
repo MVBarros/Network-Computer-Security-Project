@@ -133,7 +133,6 @@ service TigKeyService {
     rpc accessControlFileTigKey (AccessControlRequest) returns (google.protobuf.Empty);
     rpc deleteFileTigKey (DeleteFileRequest) returns (google.protobuf.Empty);
     rpc newFileKey (KeyFileMessage) returns (google.protobuf.Empty);
-    rpc updateFileKey (KeyFileMessage) returns (google.protobuf.Empty);
 }
 
 
