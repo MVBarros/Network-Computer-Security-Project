@@ -25,9 +25,9 @@ public class KeyServer {
         System.out.println(KeyServer.class.getSimpleName());
 
         // check arguments
-        if (args.length < 6) {
+        if (args.length < 5) {
             System.err.println("Argument(s) missing!");
-            System.err.printf("<Usage> java %s port dbport dbpassword certChainFile privateKeyFile trustCertCollection%n", KeyServer.class.getName());
+            System.err.printf("<Usage> java %s port dbname certChainFile privateKeyFile trustCertCollection%n", KeyServer.class.getName());
             return;
         }
 
@@ -36,18 +36,17 @@ public class KeyServer {
 
 
         //Initialize Postgres Connection
-        //PostgreSQLJDBC.setPort(Integer.parseInt(args[1]));
-        //PostgreSQLJDBC.setPassword(args[2]);
-        //PostgreSQLJDBC.getInstance();
+        PostgreSQLJDBC.setDbName(args[1]);
+        PostgreSQLJDBC.getInstance();
 
         //Key Server Public Key Certificate
-        File certChainFile = new File(args[3]);
+        File certChainFile = new File(args[2]);
 
         //Key Server Private Key
-        File privateKeyFile = new File(args[4]);
+        File privateKeyFile = new File(args[3]);
 
         //main Server Private Key
-        File trustCertCollection = new File(args[5]);
+        File trustCertCollection = new File(args[4]);
 
 
         //Ssl Context requiring server authentication

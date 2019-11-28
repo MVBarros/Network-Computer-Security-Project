@@ -27,9 +27,9 @@ public class DocumentServer {
         System.out.println(DocumentServer.class.getSimpleName());
 
         // check arguments
-        if (args.length < 8) {
+        if (args.length < 7) {
             System.err.println("Argument(s) missing!");
-            System.err.printf("<Usage> java %s port dbport dbpassword certChainFile privateKeyFile privateKeyFilePCKS8 trustCertCollectionFile keyServerUrl%n", DocumentServer.class.getName());
+            System.err.printf("<Usage> java %s port dbname certChainFile privateKeyFile privateKeyFilePCKS8 trustCertCollectionFile keyServerUrl%n", DocumentServer.class.getName());
             return;
         }
 
@@ -39,20 +39,19 @@ public class DocumentServer {
 
 
         //Initialize Postgres Connection
-        PostgreSQLJDBC.setPort(Integer.parseInt(args[1]));
-        PostgreSQLJDBC.setPassword(args[2]);
+        PostgreSQLJDBC.setDbName(args[1]);
         PostgreSQLJDBC.getInstance();
 
         //Server Public Key Certificate
-        File certChainFile = new File(args[3]);
+        File certChainFile = new File(args[2]);
 
         //Server Private Key
-        File privateKeyFile = new File(args[4]);
-        File privateKeyFileJava = new File(args[5]);
+        File privateKeyFile = new File(args[3]);
+        File privateKeyFileJava = new File(args[4]);
         CustomProtocolTigServiceImpl.privateKey = KeyFileLoader.loadPrivateKey(privateKeyFileJava);
         CustomProtocolTigServiceImpl.publicKey = KeyFileLoader.loadPublicKey(certChainFile);
 
-        File trustCertCollection = new File(args[6]);
+        File trustCertCollection = new File(args[5]);
 
         //SslContext for Key Server
         SslContext context = GrpcSslContexts.forClient().trustManager(trustCertCollection)
@@ -60,7 +59,7 @@ public class DocumentServer {
                                                         .build();
 
         //Connect to key server
-        ManagedChannel channel = NettyChannelBuilder.forTarget(args[7])
+        ManagedChannel channel = NettyChannelBuilder.forTarget(args[6])
                                                     .sslContext(context)
                                                     .build();
         TigKeyServiceGrpc.TigKeyServiceBlockingStub keyStub = TigKeyServiceGrpc.newBlockingStub(channel);

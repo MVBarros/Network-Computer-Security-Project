@@ -9,33 +9,25 @@ public class PostgreSQLJDBC {
 
     private static final Logger logger = Logger.getLogger(PostgreSQLJDBC.class);
 
-    private static Integer port = null;
-    private static String password = null;
     private static PostgreSQLJDBC instance = null;
-
+    private static String dbName = null;
     private Connection conn;
 
+    public static void setDbName(String dbName) {
+        PostgreSQLJDBC.dbName = dbName;
+
+    }
 
     public Connection getConn() {
         return conn;
     }
 
-
-    public static void setPassword(String password) {
-        PostgreSQLJDBC.password = password;
-    }
-
-    public static void setPort(int port) {
-        PostgreSQLJDBC.port = port;
-    }
-
     private PostgreSQLJDBC() {
         conn = null;
         try {
-            Class.forName("org.postgresql.Driver");
+            Class.forName("org.sqlite.JDBC");
             conn = DriverManager
-                    .getConnection("jdbc:postgresql://localhost:" + Integer.toString(port) + "/tigdb",
-                            "postgres", password);
+                    .getConnection("jdbc:sqlite:" + dbName + ".db");
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println(e.getClass().getName() + ": " + e.getMessage());

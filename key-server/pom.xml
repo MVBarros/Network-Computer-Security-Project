@@ -23,7 +23,7 @@
         <!-- application properties -->
         <mainclass>tig.grpc.keys.service.KeyServer</mainclass>
         <server.port>8090</server.port>
-        <db.port>5435</db.port>
+        <db.name>tigkeyserver</db.name>
         <db.password>root</db.password>
         <tig.server.url>localhost:8080</tig.server.url>
     </properties>
@@ -41,11 +41,10 @@
             <artifactId>tig-utils</artifactId>
             <version>1.0.0-RELEASE</version>
         </dependency>
-        <!--Postgres-->
         <dependency>
-            <groupId>postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>9.0-801.jdbc4</version>
+            <groupId>org.xerial</groupId>
+            <artifactId>sqlite-jdbc</artifactId>
+            <version>3.7.2</version>
         </dependency>
         <dependency>
             <groupId>log4j</groupId>
@@ -85,8 +84,7 @@
                     <mainClass>${mainclass}</mainClass>
                     <arguments>
                         <argument>${server.port}</argument>
-                        <argument>${db.port}</argument>
-                        <argument>${db.password}</argument>
+                        <argument>${db.name}</argument>
                         <argument>${basedir}/src/main/resources/certs/key-server.pem</argument>
                         <argument>${basedir}/src/main/resources/certs/key-server.key</argument>
                         <argument>${basedir}/src/main/resources/certs/ca.cert</argument>
