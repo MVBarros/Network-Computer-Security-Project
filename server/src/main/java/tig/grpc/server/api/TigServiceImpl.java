@@ -25,9 +25,6 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
     @Override
     public void register(Tig.AccountRequest request, StreamObserver<Empty> responseObserver) {
         logger.info(String.format("Register username: %s", request.getUsername()));
-
-
-
         keyStub.registerTigKey(request);
         responseObserver.onNext(Empty.newBuilder().build());
         responseObserver.onCompleted();
@@ -36,7 +33,6 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
     @Override
     public void login(Tig.AccountRequest request, StreamObserver<Tig.LoginReply> responseObserver) {
         logger.info(String.format("Login username: %s", request.getUsername()));
-
         responseObserver.onNext(keyStub.loginTigKey(request));
         responseObserver.onCompleted();
     }
@@ -44,7 +40,6 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
     @Override
     public void logout(Tig.SessionRequest request, StreamObserver<Empty> responseObserver) {
         logger.info("Logout");
-
         SessionAuthenticator.clearSession(request.getSessionId());
         responseObserver.onNext(Empty.newBuilder().build());
         responseObserver.onCompleted();
@@ -53,12 +48,9 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
     @Override
     public void deleteFile(Tig.DeleteFileRequest request, StreamObserver<Empty> responseObserver) {
         String username = SessionAuthenticator.authenticateSession(request.getSessionId()).getUsername();
-
         logger.info(String.format("Delete filename: %s of users %s", request.getFilename(), username));
 
-        FileDAO.deleteFile(username, request.getFilename());
-
-        responseObserver.onNext(Empty.newBuilder().build());
+        responseObserver.onNext(keyStub.deleteFileTigKey(request));
         responseObserver.onCompleted();
     }
 
