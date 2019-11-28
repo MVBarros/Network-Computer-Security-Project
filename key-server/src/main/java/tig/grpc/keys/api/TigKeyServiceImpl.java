@@ -53,8 +53,8 @@ public class TigKeyServiceImpl extends TigKeyServiceGrpc.TigKeyServiceImplBase {
 
         reply.onNext(builder.build());
         reply.onCompleted();
-
     }
+
     @Override
     public void logoutTigKey(Tig.SessionRequest request, StreamObserver<Empty> responseObserver) {
         logger.info("Logout no Key Server");
