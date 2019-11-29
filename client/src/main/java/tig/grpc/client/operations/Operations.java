@@ -208,6 +208,24 @@ public class Operations {
         }
     }
 
+    public static void listRecoverFiles(Client client) {
+        try {
+            System.out.println("List Files that can be recovered");
+            Tig.ListFilesReply reply = client.getStub().listBackupFiles(Tig.ListBackupFilesRequest.newBuilder().
+                    setSessionId(client.getSessionId()).build());
+            Object[] names = reply.getFileInfoList().toArray();
+            for (Object name : names) {
+                System.out.println(name.toString() + "\n");
+            }
+
+        } catch (StatusRuntimeException e) {
+            System.out.print("Error listing files: ");
+            System.out.println(e.getStatus().getDescription());
+            System.exit(1);
+        }
+    }
+
+
     public static void downloadFile(Client client, String filename, String owner, String filepath) {
         try {
             System.out.println(String.format("Download File with filename %s with owner %s. With file path: %s", filename, owner, filepath));

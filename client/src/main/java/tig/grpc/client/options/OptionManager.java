@@ -54,6 +54,11 @@ public class OptionManager {
         register.setRequired(false);
         options.addOption(edit);
 
+        Option recover = new Option("b", "Use to list backup files");
+        edit.setArgs(0);
+        register.setRequired(false);
+        options.addOption(recover);
+
         return options;
     }
 
@@ -82,6 +87,10 @@ public class OptionManager {
         }
         if (cmd.hasOption('l')) {
             Operations.listFiles(client);
+            return;
+        }
+        if (cmd.hasOption('b')) {
+            Operations.listRecoverFiles(client);
             return;
         }
         if (cmd.hasOption('c')) {
