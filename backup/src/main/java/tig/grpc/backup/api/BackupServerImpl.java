@@ -14,8 +14,9 @@ public class BackupServerImpl extends TigBackupServiceGrpc.TigBackupServiceImplB
 
     @Override
     public void listBackupFiles (Tig.ListBackupFilesRequest request, StreamObserver<Tig.ListFilesReply> reply) {
-        logger.info("List files that can be recovered " + request.getFileowner());
-        List<String> files = FileDAO.listFiles(request.getFileowner());
+        String username = SessionAuthenticator.authenticateSession(request.getSessionId()).getUsername();
+        logger.info("List files that can be recovered " + username);
+        List<String> files = FileDAO.listFiles(username);
         Tig.ListFilesReply.Builder builder = Tig.ListFilesReply.newBuilder();
         builder.addAllFileInfo(files);
         reply.onNext(builder.build());
