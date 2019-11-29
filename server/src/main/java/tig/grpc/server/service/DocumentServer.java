@@ -28,9 +28,9 @@ public class DocumentServer {
         System.out.println(DocumentServer.class.getSimpleName());
 
         // check arguments
-        if (args.length < 7) {
+        if (args.length < 8) {
             System.err.println("Argument(s) missing!");
-            System.err.printf("<Usage> java %s port dbname certChainFile privateKeyFile privateKeyFilePCKS8 trustCertCollectionFile keyServerUrl%n", DocumentServer.class.getName());
+            System.err.printf("<Usage> java %s port dbname certChainFile privateKeyFile privateKeyFilePCKS8 trustCertCollectionFile keyServerUrl backupServerUrl%n", DocumentServer.class.getName());
             return;
         }
 
@@ -72,7 +72,7 @@ public class DocumentServer {
         System.out.println(keyStub.helloTigKey(request).getRequest());
 
         //Connect to backup server
-        ManagedChannel bdChannel = NettyChannelBuilder.forTarget(args[6])
+        ManagedChannel bdChannel = NettyChannelBuilder.forTarget(args[7])
                 .sslContext(context)
                 .build();
         TigBackupServiceGrpc.TigBackupServiceBlockingStub backupStub = TigBackupServiceGrpc.newBlockingStub(bdChannel);

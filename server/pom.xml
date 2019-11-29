@@ -24,8 +24,9 @@
         <mainclass>tig.grpc.server.service.DocumentServer</mainclass>
         <server.port>8080</server.port>
         <db.name>src/main/resources/db/tigserver</db.name>
-        <db.password>root</db.password>
         <keyserver.url>localhost:8090</keyserver.url>
+        <backupserver.url>localhost:8091</backupserver.url>
+
     </properties>
 
     <dependencies>
@@ -90,6 +91,7 @@
                         <argument>${basedir}/src/main/resources/certs/server_pcks8.key</argument>
                         <argument>${basedir}/src/main/resources/certs/ca.cert</argument>
                         <argument>${keyserver.url}</argument>
+                        <argument>${backupserver.url}</argument>
                     </arguments>
                 </configuration>
             </plugin>
