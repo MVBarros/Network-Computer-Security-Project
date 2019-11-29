@@ -91,7 +91,20 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
             throw new IllegalArgumentException(e.getMessage());
         }
     }
-
+/*
+    @Override
+    public void listBackupFiles(Tig.SessionRequest request, StreamObserver<Tig.ListFilesReply> responseObserver) {
+        logger.info("List files");
+        try {
+            Tig.ListFilesReply files = keyStub.listFileTigKey(Tig.TigKeySessionIdMessage.newBuilder(
+                    Tig.TigKeySessionIdMessage.newBuilder().setSessionId(request.getSessionId()).build()).build());
+            responseObserver.onNext(files);
+            responseObserver.onCompleted();
+        }catch (StatusRuntimeException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        }
+    }
+*/
     @Override
     public StreamObserver<Tig.FileChunkClientUpload> uploadFile(StreamObserver<Empty> responseObserver) {
         return new StreamObserver<Tig.FileChunkClientUpload>() {

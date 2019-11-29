@@ -13,6 +13,8 @@ service TigService {
     rpc accessControlFile (AccessControlRequest) returns (google.protobuf.Empty);
     rpc downloadFile (FileRequest) returns (stream FileChunkDownload);
     rpc listFiles (SessionRequest) returns (ListFilesReply);
+    rpc listBackupFiles (ListBackupFilesRequest) returns (ListFilesReply);
+    rpc recoverFile (RecoverFileRequest) returns (stream FileChunkDownload);
 }
 
 
@@ -189,21 +191,21 @@ service TigBackupService {
 }
 
 message ListBackupFilesRequest {
-    string fileowner = 1;
+    string sessionId = 1;
 }
 
 // FILE STREAM OPERATION
 message BackupFileUpload {
     bytes content = 1;
     string sessionId = 2;
-    string   fileName = 3;
+    string  fileName = 3;
     int32 sequence = 4;
     string t_created = 5;
 }
 
 message RecoverFileRequest {
     string filename = 1;
-    string fileowner = 2;
+    string sessionId = 2;
     string t_created = 3;
 }
 
