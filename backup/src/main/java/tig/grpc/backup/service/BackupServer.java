@@ -69,7 +69,7 @@ public class BackupServer {
         TigKeyServiceGrpc.TigKeyServiceBlockingStub keyStub = TigKeyServiceGrpc.newBlockingStub(keyChannel);
         BackupServerImpl.keyStub = keyStub;
         System.out.println("Connected to the key server successfully");
-        
+
         final Server server = NettyServerBuilder
                 .forPort(port)
                 .sslContext(context)
