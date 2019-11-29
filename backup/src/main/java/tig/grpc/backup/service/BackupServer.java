@@ -57,13 +57,19 @@ public class BackupServer {
                 .clientAuth(ClientAuth.REQUIRE)
                 .build();
 
+        SslContext clientContext  = GrpcSslContexts.forClient()
+                .keyManager(certChainFile, privateKeyFile)
+                .trustManager(trustCertCollection)
+                .build();
+
+
         ManagedChannel keyChannel = NettyChannelBuilder.forTarget(args[5])
-                .sslContext(context)
+                .sslContext(clientContext)
                 .build();
         TigKeyServiceGrpc.TigKeyServiceBlockingStub keyStub = TigKeyServiceGrpc.newBlockingStub(keyChannel);
-
         BackupServerImpl.keyStub = keyStub;
-
+        System.out.println("Connected to the key server successfully");
+        
         final Server server = NettyServerBuilder
                 .forPort(port)
                 .sslContext(context)
