@@ -122,7 +122,6 @@ message CustomProtocolLoginReply {
 //**************************** Key Server ******************************
 
 service TigKeyService {
-    rpc helloTigKey (HelloTigKeyRequest) returns (HelloTigKeyReply);
     rpc registerTigKey (AccountRequest) returns (google.protobuf.Empty);
     rpc loginTigKey (AccountRequest) returns (LoginReply);
     rpc logoutTigKey (SessionRequest) returns (google.protobuf.Empty);
@@ -136,7 +135,7 @@ service TigKeyService {
 }
 
 message DeleteFileReply {
-    string owner = 1;
+    string fileId = 1;
 }
 
 message TigKeySessionIdMessage {
@@ -157,7 +156,7 @@ message NewFileRequest {
 }
 
 message NewFileReply {
-    string owner = 1;
+    string fileId = 1;
     bytes key = 2;
     bytes iv = 3;
 }
@@ -171,19 +170,13 @@ message KeyFileTigKeyRequest {
 message KeyFileTigKeyReply {
     bytes key = 1;
     bytes iv = 2;
+    string fileId = 3;
 }
 
 message CanEditTigKeyReply {
     bytes newKeyFile = 1;
     bytes iv = 2;
-}
-
-message HelloTigKeyRequest {
-    string request = 1;
-}
-
-message HelloTigKeyReply {
-    string request = 1;
+    string fileId = 3;
 }
 
 //**************************** Backup BD ******************************

@@ -5,6 +5,7 @@ public class FileKey {
 
     private byte[] key;
     private byte[] iv;
+    private String id;
 
     public byte[] getKey() {
         return key;
@@ -14,9 +15,12 @@ public class FileKey {
         return iv;
     }
 
-    public FileKey(byte[] key, byte[] iv) {
+    public String getId() { return id; }
+
+    public FileKey(byte[] key, byte[] iv, String id) {
         this.key = key;
         this.iv = iv;
+        this.id = id;
     }
 
 
