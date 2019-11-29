@@ -48,4 +48,24 @@ public class FileDAO {
             throw new RuntimeException();
         }
     }
+
+    public static byte[] getFileContent(String filename, String t_created) {
+        Connection conn = PostgreSQLJDBC.getInstance().getConn();
+        try {
+            PreparedStatement stmt = conn.prepareStatement("SELECT content FROM files " +
+                    "WHERE filename = (?) and t_created = (?)");
+
+            stmt.setString(1, filename);
+            stmt.setString(2, t_created);
+            ResultSet rs = stmt.executeQuery();
+            rs.next();
+
+            return rs.getBytes("content");
+
+        } catch (SQLException e) {
+            //Should never happen
+            throw new RuntimeException();
+        }
+    }
+
 }
