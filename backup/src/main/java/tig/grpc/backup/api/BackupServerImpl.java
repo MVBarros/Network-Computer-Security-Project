@@ -7,6 +7,8 @@ import tig.grpc.backup.dao.FileDAO;
 import tig.grpc.contract.Tig;
 import tig.grpc.contract.TigBackupServiceGrpc;
 import com.google.protobuf.Empty;
+import tig.grpc.contract.TigKeyServiceGrpc;
+
 import java.util.List;
 
 import java.util.Arrays;
@@ -14,12 +16,12 @@ import java.util.Arrays;
 public class BackupServerImpl extends TigBackupServiceGrpc.TigBackupServiceImplBase {
     private final static Logger logger = Logger.getLogger(BackupServerImpl.class);
 
-    public static TigBackupServiceGrpc.TigBackupServiceBlockingStub keystub;
+    public static TigKeyServiceGrpc.TigKeyServiceBlockingStub keyStub;
 
     @Override
     public void listBackupFiles (Tig.ListBackupFilesRequest request, StreamObserver<Tig.ListFilesReply> reply) {
-        String username = SessionAuthenticator.authenticateSession(request.getSessionId()).getUsername();
-
+        String username = "ol";
+   //     String username = keystub.listBackupFiles(Tig.ListBackupFilesRequest.newBuilder(Tig.ListBackupFilesRequest.newBuilder().setSessionId(request.getSessionId()).build()).build());
         logger.info("List files that can be recovered " + username);
         List<String> files = FileDAO.listFiles(username);
         Tig.ListFilesReply.Builder builder = Tig.ListFilesReply.newBuilder();
