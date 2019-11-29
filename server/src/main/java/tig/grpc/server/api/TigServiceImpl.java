@@ -115,7 +115,6 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
                     //Renew Lease
                     if (counter == 0) {
                         filename = value.getFileName();
-                        SessionAuthenticator.authenticateSession(value.getSessionId());
                         sessionId = value.getSessionId();
                     }
                     file = file.concat(value.getContent());

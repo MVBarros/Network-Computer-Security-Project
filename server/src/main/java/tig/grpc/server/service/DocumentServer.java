@@ -68,20 +68,18 @@ public class DocumentServer {
 
         //Test Purposes only
         System.out.println("Connected and authenticated to key server successfully");
-        Tig.HelloTigKeyRequest request = Tig.HelloTigKeyRequest.newBuilder().setRequest("Hello from tig server").build();
-        System.out.println(keyStub.helloTigKey(request).getRequest());
 
         //Connect to backup server
-        ManagedChannel bdChannel = NettyChannelBuilder.forTarget(args[7])
+        /*ManagedChannel bdChannel = NettyChannelBuilder.forTarget(args[7])
                 .sslContext(context)
                 .build();
         TigBackupServiceGrpc.TigBackupServiceBlockingStub backupStub = TigBackupServiceGrpc.newBlockingStub(bdChannel);
         TigServiceImpl.backupStub = backupStub;
-
+*/
         //Test Purposes only
         System.out.println("Connected and authenticated to backup server successfully");
-        Tig.HelloTigBackupRequest bdRequest = Tig.HelloTigBackupRequest.newBuilder().setRequest("Hello from tig server").build();
-        System.out.println(backupStub.helloTigBackup(bdRequest).getRequest());
+        //Tig.HelloTigBackupRequest bdRequest = Tig.HelloTigBackupRequest.newBuilder().setRequest("Hello from tig server").build();
+        //System.out.println(backupStub.helloTigBackup(bdRequest).getRequest());
 
         //Start server
         final Server server = NettyServerBuilder
