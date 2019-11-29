@@ -186,10 +186,20 @@ service TigBackupService {
     rpc helloTigBackup (HelloTigBackupRequest) returns (HelloTigBackupReply);
     rpc listBackupFiles (ListBackupFilesRequest) returns (ListFilesReply);
     rpc recoverFile (RecoverFileRequest) returns (stream FileChunkDownload);
+    rpc insertFileBackup (stream BackupFileUpload) returns (google.protobuf.Empty);
 }
 
 message ListBackupFilesRequest {
     string fileowner = 1;
+}
+
+// FILE STREAM OPERATION
+message BackupFileUpload {
+    bytes content = 1;
+    string sessionId = 2;
+    string   fileName = 3;
+    int32 sequence = 4;
+    string t_created = 5;
 }
 
 message RecoverFileRequest {
