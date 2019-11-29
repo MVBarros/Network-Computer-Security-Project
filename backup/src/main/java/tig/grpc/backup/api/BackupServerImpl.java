@@ -12,6 +12,8 @@ import java.util.List;
 public class BackupServerImpl extends TigBackupServiceGrpc.TigBackupServiceImplBase {
     private final static Logger logger = Logger.getLogger(BackupServerImpl.class);
 
+    public static TigBackupServiceGrpc.TigBackupServiceBlockingStub keystub;
+
     @Override
     public void listBackupFiles (Tig.ListBackupFilesRequest request, StreamObserver<Tig.ListFilesReply> reply) {
         logger.info("List files that can be recovered " + request.getFileowner());

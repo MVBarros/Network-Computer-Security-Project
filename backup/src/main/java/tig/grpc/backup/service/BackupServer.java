@@ -14,6 +14,7 @@ import org.apache.log4j.Logger;
 import java.io.File;
 
 import tig.grpc.backup.api.BackupServerImpl;
+import tig.grpc.contract.TigBackupServiceGrpc;
 import tig.utils.db.PostgreSQLJDBC;
 import tig.utils.interceptor.ExceptionHandler;
 
@@ -26,9 +27,9 @@ public class BackupServer {
         System.out.println(BackupServer.class.getSimpleName());
 
         // check arguments
-        if (args.length < 5) {
+        if (args.length < 6) {
             System.err.println("Argument(s) missing!");
-            System.err.printf("<Usage> java %s port dbname certChainFile privateKeyFile trustCertCollection%n", BackupServer.class.getName());
+            System.err.printf("<Usage> java %s port dbname certChainFile privateKeyFile trustCertCollection keyServerURL%n", BackupServer.class.getName());
             return;
         }
 
@@ -55,6 +56,12 @@ public class BackupServer {
                 .clientAuth(ClientAuth.REQUIRE)
                 .build();
 
+        ManagedChannel keyChannel = NettyChannelBuilder.forTarget(args[5])
+                .sslContext(context)
+                .build();
+        TigBackupServiceGrpc.TigBackupServiceBlockingStub keyStub = TigBackupServiceGrpc.newBlockingStub(keyChannel);
+
+        BackupServerImpl.keystub = keyStub;
 
         final Server server = NettyServerBuilder
                 .forPort(port)
@@ -78,7 +85,6 @@ public class BackupServer {
 
         // Do not exit the main thread. Wait until server is terminated.
         server.awaitTermination();
-
 
     }
 

@@ -25,7 +25,7 @@
         <mainclass>tig.grpc.backup.service.BackupServer</mainclass>
         <server.port>8091</server.port>
         <db.name>src/main/resources/db/backupbd</db.name>
-
+        <keyserver.url>localhost:8090</keyserver.url>
         <tig.server.url>localhost:8081</tig.server.url>
     </properties>
 
@@ -89,6 +89,7 @@
                         <argument>${basedir}/src/main/resources/certs/backup-server.pem</argument>
                         <argument>${basedir}/src/main/resources/certs/backup-server.key</argument>
                         <argument>${basedir}/src/main/resources/certs/ca.cert</argument>
+                        <argument>${keyserver.url}</argument>
                     </arguments>
                 </configuration>
             </plugin>
