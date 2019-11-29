@@ -191,6 +191,18 @@ message HelloTigKeyReply {
 
 service TigBackupService {
     rpc helloTigBackup (HelloTigBackupRequest) returns (HelloTigBackupReply);
+    rpc listBackupFiles (ListBackupFilesRequest) returns (ListFilesReply);
+    rpc recoverFile (RecoverFileRequest) returns (stream FileChunkDownload);
+}
+
+message ListBackupFilesRequest {
+    string fileowner = 1;
+}
+
+message RecoverFileRequest {
+    string filename = 1;
+    string fileowner = 2;
+    string t_created = 3;
 }
 
 message HelloTigBackupRequest {
