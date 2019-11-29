@@ -17,12 +17,13 @@ import java.util.Arrays;
 public class BackupServerImpl extends TigBackupServiceGrpc.TigBackupServiceImplBase {
     private final static Logger logger = Logger.getLogger(BackupServerImpl.class);
 
-    public static TigKeyServiceGrpc.TigKeyServiceBlockingStub keystub;
+    public static TigKeyServiceGrpc.TigKeyServiceBlockingStub keyStub;
+
 
     @Override
     public void listBackupFiles (Tig.ListBackupFilesRequest request, StreamObserver<Tig.ListFilesReply> reply) {
-        String username = SessionAuthenticator.authenticateSession(request.getSessionId()).getUsername();
-
+        String username = "ol";
+   //     String username = keystub.listBackupFiles(Tig.ListBackupFilesRequest.newBuilder(Tig.ListBackupFilesRequest.newBuilder().setSessionId(request.getSessionId()).build()).build());
         logger.info("List files that can be recovered " + username);
         List<String> files = FileDAO.listFiles(username);
         Tig.ListFilesReply.Builder builder = Tig.ListFilesReply.newBuilder();
@@ -94,7 +95,7 @@ public class BackupServerImpl extends TigBackupServiceGrpc.TigBackupServiceImplB
             @Override
             public void onCompleted() {
                 try {
-                    String owner = keystub.getUsernameForSession(
+                    String owner = keyStub.getUsernameForSession(
                             Tig.TigKeySessionIdMessage.newBuilder()
                                     .setSessionId(sessionId)
                                     .build()).getUsername();
