@@ -1,7 +1,6 @@
 package tig.grpc.backup.dao;
 
 import tig.utils.db.PostgreSQLJDBC;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -11,11 +10,29 @@ import java.util.List;
 
 public class FileDAO {
 
+    public static void uploadFile(String filename, String fileowner, String t_created, byte[] content) {
+        Connection conn = PostgreSQLJDBC.getInstance().getConn();
+
+        try {
+            PreparedStatement stmt = conn.prepareStatement("INSERT INTO files(filename, fileowner, t_created, content) VALUES (?,?,?,?)");
+
+            stmt.setString(1, filename);
+            stmt.setString(2, fileowner);
+            stmt.setString(3, t_created);
+            stmt.setBytes(4, content);
+            stmt.executeUpdate();
+
+        } catch (SQLException e) {
+            //Primary Key violation
+            throw new IllegalArgumentException("Repeated backup");
+        }
+    }
+
     public static List<String> listFiles(String username) {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
         PreparedStatement stmt = null;
         try {
-            stmt = conn.prepareStatement("SELECT  filename, fileowner,t_created FROM files WHERE fileowner = (?)");
+            stmt = conn.prepareStatement("SELECT  filename, fileowner, t_created FROM files WHERE fileowner = (?)");
             stmt.setString(1, username);
             ResultSet rs = stmt.executeQuery();
             List<String> result = new ArrayList<>();
@@ -31,6 +48,4 @@ public class FileDAO {
             throw new RuntimeException();
         }
     }
-
-
 }
