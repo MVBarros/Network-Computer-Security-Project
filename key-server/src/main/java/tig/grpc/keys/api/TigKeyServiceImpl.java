@@ -29,9 +29,17 @@ public class TigKeyServiceImpl extends TigKeyServiceGrpc.TigKeyServiceImplBase {
 
         responseObserver.onNext(Empty.newBuilder().build());
         responseObserver.onCompleted();
-
     }
 
+    public void getUsernameForSession(Tig.TigKeySessionIdMessage request, StreamObserver<Tig.TigKeyUsernameMessage> responseObserver) {
+
+        UserToken userToken = SessionAuthenticator.authenticateSession(request.getSessionId());
+        String username = userToken.getUsername();
+
+        Tig.TigKeyUsernameMessage reply = Tig.TigKeyUsernameMessage.newBuilder().setUsername(username).build();
+        responseObserver.onNext(reply);
+        responseObserver.onCompleted();
+    }
 
     @Override
     public void loginTigKey(Tig.AccountRequest request, StreamObserver<Tig.LoginReply> reply) {

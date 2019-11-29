@@ -131,6 +131,7 @@ service TigKeyService {
     //rpc keyFileRecoverTigKey (keyFileRecoverTigKeyRequest) returns (keyFileRecoverTigKeyReply);
     rpc canEditTigKey (KeyFileTigKeyRequest) returns (CanEditTigKeyReply);
     rpc listFileTigKey (TigKeySessionIdMessage) returns (ListFilesReply);
+    rpc getUsernameForSession (TigKeySessionIdMessage) returns (TigKeyUsernameMessage);
     rpc accessControlFileTigKey (AccessControlRequest) returns (google.protobuf.Empty);
     rpc deleteFileTigKey (DeleteFileRequest) returns (DeleteFileReply);
     rpc newFileKey (NewFileRequest) returns (NewFileReply);
@@ -142,6 +143,10 @@ message DeleteFileReply {
 
 message TigKeySessionIdMessage {
     string sessionId = 1;
+}
+
+message TigKeyUsernameMessage {
+    string username = 1;
 }
 
 message KeyFileMessage {
