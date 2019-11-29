@@ -28,9 +28,9 @@ public class DocumentServer {
         System.out.println(DocumentServer.class.getSimpleName());
 
         // check arguments
-        if (args.length < 7) {
+        if (args.length < 8) {
             System.err.println("Argument(s) missing!");
-            System.err.printf("<Usage> java %s port dbname certChainFile privateKeyFile privateKeyFilePCKS8 trustCertCollectionFile keyServerUrl%n", DocumentServer.class.getName());
+            System.err.printf("<Usage> java %s port dbname certChainFile privateKeyFile privateKeyFilePCKS8 trustCertCollectionFile keyServerUrl backupServerUrl%n", DocumentServer.class.getName());
             return;
         }
 
@@ -68,20 +68,18 @@ public class DocumentServer {
 
         //Test Purposes only
         System.out.println("Connected and authenticated to key server successfully");
-        Tig.HelloTigKeyRequest request = Tig.HelloTigKeyRequest.newBuilder().setRequest("Hello from tig server").build();
-        System.out.println(keyStub.helloTigKey(request).getRequest());
 
         //Connect to backup server
-        ManagedChannel bdChannel = NettyChannelBuilder.forTarget(args[6])
+        /*ManagedChannel bdChannel = NettyChannelBuilder.forTarget(args[7])
                 .sslContext(context)
                 .build();
         TigBackupServiceGrpc.TigBackupServiceBlockingStub backupStub = TigBackupServiceGrpc.newBlockingStub(bdChannel);
         TigServiceImpl.backupStub = backupStub;
-
+*/
         //Test Purposes only
         System.out.println("Connected and authenticated to backup server successfully");
-        Tig.HelloTigBackupRequest bdRequest = Tig.HelloTigBackupRequest.newBuilder().setRequest("Hello from tig server").build();
-        System.out.println(backupStub.helloTigBackup(bdRequest).getRequest());
+        //Tig.HelloTigBackupRequest bdRequest = Tig.HelloTigBackupRequest.newBuilder().setRequest("Hello from tig server").build();
+        //System.out.println(backupStub.helloTigBackup(bdRequest).getRequest());
 
         //Start server
         final Server server = NettyServerBuilder

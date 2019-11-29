@@ -17,18 +17,36 @@ import java.util.List;
 
 public class FileDAO {
 
-    public static FileKey getFileEncryptionKey(String filename, String owner) {
+    public static String getFileId(String filename, String fileowner) {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
         try {
-            PreparedStatement stmt = conn.prepareStatement("SELECT encryption_key, iv FROM files " +
+            PreparedStatement stmt = conn.prepareStatement("SELECT  fileId FROM files " +
                     "WHERE filename = (?) AND fileowner = (?)");
 
             stmt.setString(1, filename);
-            stmt.setString(2, owner);
+            stmt.setString(2, fileowner);
             ResultSet rs = stmt.executeQuery();
             //there should be only one result
             rs.next();
-            return new FileKey(rs.getBytes("encryption_key"), rs.getBytes("iv"));
+            return rs.getString("fileId");
+        }catch (SQLException e) {
+            //Should never happen
+            throw new IllegalArgumentException("No such file exists");
+        }
+    }
+
+    public static FileKey getFileEncryptionKey(String filename, String fileowner) {
+        Connection conn = PostgreSQLJDBC.getInstance().getConn();
+        try {
+            PreparedStatement stmt = conn.prepareStatement("SELECT encryption_key, iv, fileId FROM files " +
+                    "WHERE filename = (?) AND fileowner = (?)");
+
+            stmt.setString(1, filename);
+            stmt.setString(2, fileowner);
+            ResultSet rs = stmt.executeQuery();
+            //there should be only one result
+            rs.next();
+            return new FileKey(rs.getBytes("encryption_key"), rs.getBytes("iv"), rs.getString("fileId"));
         }catch (SQLException e) {
             //Should never happen
             throw new RuntimeException();
@@ -36,31 +54,35 @@ public class FileDAO {
     }
 
 
-    public static void deleteFile(String username, String filename) {
+    public static String deleteFile(String fileowner, String filename) {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
         try {
+            String fileId = getFileId(fileowner, filename);
             PreparedStatement delete_stmt = conn.prepareStatement("DELETE FROM files WHERE filename=(?) AND fileowner=(?)");
             delete_stmt.setString(1, filename);
-            delete_stmt.setString(2, username);
+            delete_stmt.setString(2, fileowner);
             int result = delete_stmt.executeUpdate();
             if (result == 0) {
                 throw new IllegalArgumentException("No such file name owned.");
             }
+            return fileId;
         } catch (SQLException e) {
             //Should never happen
             throw new RuntimeException();
         }
     }
 
-    public static void updateFileKey(FileKey key, String filename, String fileowner) {
+    public static String updateFileKey(FileKey key, String filename, String fileowner) {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
         try {
+            String fileId = getFileId(filename, fileowner);
             PreparedStatement key_stmt = conn.prepareStatement("UPDATE files SET encryption_key=(?), iv=(?) WHERE filename=(?) AND fileowner=(?)");
             key_stmt.setBytes(1, key.getKey());
             key_stmt.setBytes(2, key.getIv());
             key_stmt.setString(3, filename);
             key_stmt.setString(4, fileowner);
             key_stmt.executeUpdate();
+            return fileId;
         } catch (SQLException e) {
             //Should never happen
             throw new RuntimeException();
@@ -71,11 +93,12 @@ public class FileDAO {
     public static void createFileKey(FileKey key, String filename, String fileowner) {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
         try {
-            PreparedStatement key_stmt = conn.prepareStatement("INSERT INTO files VALUES (?,?,?,?)");
+            PreparedStatement key_stmt = conn.prepareStatement("INSERT INTO files VALUES (?,?,?,?,?)");
             key_stmt.setString(1, filename);
             key_stmt.setString(2, fileowner);
             key_stmt.setBytes(3, key.getKey());
             key_stmt.setBytes(4, key.getIv());
+            key_stmt.setString(5, key.getId());
             key_stmt.executeUpdate();
         } catch (SQLException e) {
             //Should never happen

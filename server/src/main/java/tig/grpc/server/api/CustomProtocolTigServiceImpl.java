@@ -1,21 +1,10 @@
 package tig.grpc.server.api;
 
-import com.google.protobuf.ByteString;
 import io.grpc.stub.StreamObserver;
 import tig.grpc.contract.CustomProtocolTigServiceGrpc;
 import tig.grpc.contract.Tig;
-import tig.grpc.server.data.dao.UsersDAO;
-import tig.grpc.server.session.CustomUserToken;
-import tig.grpc.server.session.SessionAuthenticator;
-import tig.utils.encryption.EncryptionUtils;
-import tig.utils.encryption.HashUtils;
-import tig.utils.keys.KeyGen;
-import tig.utils.serialization.ObjectSerializer;
 
-import javax.crypto.spec.SecretKeySpec;
 import java.security.*;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
 
 public class CustomProtocolTigServiceImpl extends CustomProtocolTigServiceGrpc.CustomProtocolTigServiceImplBase {
 

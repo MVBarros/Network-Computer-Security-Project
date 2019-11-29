@@ -11,10 +11,9 @@ import tig.grpc.keys.dao.FileDAO;
 import tig.grpc.keys.dao.UsersDAO;
 import tig.grpc.keys.session.SessionAuthenticator;
 import tig.grpc.keys.session.UserToken;
+import tig.utils.StringGenerator;
 import tig.utils.encryption.FileKey;
 import tig.utils.encryption.EncryptionUtils;
-
-import javax.crypto.SecretKey;
 import tig.utils.PasswordUtils;
 
 import java.util.List;
@@ -33,13 +32,6 @@ public class TigKeyServiceImpl extends TigKeyServiceGrpc.TigKeyServiceImplBase {
 
     }
 
-    @Override
-    public void helloTigKey(Tig.HelloTigKeyRequest request, StreamObserver<Tig.HelloTigKeyReply> reply) {
-        System.out.println(String.format("Hello %s", request.getRequest()));
-        Tig.HelloTigKeyReply keyReply = Tig.HelloTigKeyReply.newBuilder().setRequest("Hello from Tig Key").build();
-        reply.onNext(keyReply);
-        reply.onCompleted();
-    }
 
     @Override
     public void loginTigKey(Tig.AccountRequest request, StreamObserver<Tig.LoginReply> reply) {
@@ -78,6 +70,7 @@ public class TigKeyServiceImpl extends TigKeyServiceGrpc.TigKeyServiceImplBase {
         Tig.KeyFileTigKeyReply replyMessage = Tig.KeyFileTigKeyReply.newBuilder()
                                               .setIv(ByteString.copyFrom(fileKey.getIv()))
                                               .setKey(ByteString.copyFrom(fileKey.getKey()))
+                                              .setFileId(fileKey.getId())
                                               .build();
 
         reply.onNext(replyMessage);
@@ -94,12 +87,13 @@ public class TigKeyServiceImpl extends TigKeyServiceGrpc.TigKeyServiceImplBase {
         byte[] key = EncryptionUtils.generateAESKey().getEncoded();
         byte[] iv = EncryptionUtils.generateIv();
 
-        FileDAO.updateFileKey(new FileKey(key, iv), request.getFilename(), request.getOwner());
+        String fileId = FileDAO.updateFileKey(new FileKey(key, iv, ""), request.getFilename(), request.getOwner());
 
         Tig.CanEditTigKeyReply.Builder builder = Tig.CanEditTigKeyReply.newBuilder();
 
         builder.setNewKeyFile(ByteString.copyFrom(key));
         builder.setIv(ByteString.copyFrom(iv));
+        builder.setFileId(fileId);
 
         reply.onNext(builder.build());
         reply.onCompleted();
@@ -110,8 +104,8 @@ public class TigKeyServiceImpl extends TigKeyServiceGrpc.TigKeyServiceImplBase {
     public void deleteFileTigKey(Tig.DeleteFileRequest request, StreamObserver<Tig.DeleteFileReply> responseObserver) {
         String username = SessionAuthenticator.authenticateSession(request.getSessionId()).getUsername();
         logger.info(String.format("Delete filename: %s of users %s", request.getFilename(), username));
-        FileDAO.deleteFile(username, request.getFilename());
-        responseObserver.onNext(Tig.DeleteFileReply.newBuilder().setOwner(username).build());
+        String fileId = FileDAO.deleteFile(username, request.getFilename());
+        responseObserver.onNext(Tig.DeleteFileReply.newBuilder().setFileId(fileId).build());
         responseObserver.onCompleted();
     }
 
@@ -134,6 +128,7 @@ public class TigKeyServiceImpl extends TigKeyServiceGrpc.TigKeyServiceImplBase {
 
         logger.info(String.format("Access Control from file %s of user %s to user %s and make it: %s", request.getFileName(),
                 username, request.getTarget(), request.getPermission()));
+
         AuthenticationDAO.updateAccessControl(request.getFileName(), username, request.getTarget(), request.getPermission().getNumber());
 
         responseObserver.onNext(Empty.newBuilder().build());
@@ -147,10 +142,13 @@ public class TigKeyServiceImpl extends TigKeyServiceGrpc.TigKeyServiceImplBase {
 
         byte[] key = EncryptionUtils.generateAESKey().getEncoded();
         byte[] iv = EncryptionUtils.generateIv();
-        FileDAO.createFileKey(new FileKey(key, iv), request.getFilename(), username);
+
+        String fileId = StringGenerator.randomString(256);
+
+        FileDAO.createFileKey(new FileKey(key, iv, fileId), request.getFilename(), username);
         Tig.NewFileReply.Builder builder = Tig.NewFileReply.newBuilder();
 
-        builder.setOwner(username);
+        builder.setFileId(fileId);
         builder.setIv(ByteString.copyFrom(iv));
         builder.setKey(ByteString.copyFrom(key));
         reply.onNext(builder.build());

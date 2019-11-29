@@ -9,11 +9,9 @@ import tig.grpc.contract.Tig;
 import tig.grpc.contract.TigBackupServiceGrpc;
 import tig.grpc.contract.TigKeyServiceGrpc;
 import tig.grpc.contract.TigServiceGrpc;
-import tig.grpc.server.data.dao.FileDAO;
-import tig.grpc.server.data.dao.UsersDAO;
+import tig.grpc.server.dao.FileDAO;
 import tig.grpc.server.session.SessionAuthenticator;
 import tig.utils.encryption.EncryptionUtils;
-import tig.utils.encryption.FileKey;
 
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Arrays;
@@ -28,7 +26,6 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
         logger.info(String.format("Register username: %s", request.getUsername()));
         try {
             responseObserver.onNext(keyStub.registerTigKey(request));
-            UsersDAO.insertUser(request.getUsername());
             responseObserver.onCompleted();
         }catch (StatusRuntimeException e) {
             throw new IllegalArgumentException(e.getMessage());
@@ -40,7 +37,6 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
         logger.info(String.format("Login username: %s", request.getUsername()));
         try {
         Tig.LoginReply replyMessage = keyStub.loginTigKey(request);
-        SessionAuthenticator.insertSession(replyMessage.getSessionId());
         responseObserver.onNext(replyMessage);
         responseObserver.onCompleted();
         } catch(StatusRuntimeException e) {
@@ -52,7 +48,6 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
     public void logout(Tig.SessionRequest request, StreamObserver<Empty> responseObserver) {
         logger.info("Logout");
         try {
-        SessionAuthenticator.clearSession(request.getSessionId());
         responseObserver.onNext(keyStub.logoutTigKey(request));
         responseObserver.onCompleted();
         } catch(StatusRuntimeException e) {
@@ -63,10 +58,9 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
     @Override
     public void deleteFile(Tig.DeleteFileRequest request, StreamObserver<Empty> responseObserver) {
         logger.info("Delete file");
-        SessionAuthenticator.authenticateSession(request.getSessionId());
         try {
             Tig.DeleteFileReply reply = keyStub.deleteFileTigKey(request);
-            FileDAO.deleteFile(reply.getOwner(), request.getFilename());
+            FileDAO.deleteFile(reply.getFileId());
             responseObserver.onNext(Empty.newBuilder().build());
             responseObserver.onCompleted();
         }catch (StatusRuntimeException e) {
@@ -77,7 +71,6 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
     @Override
     public void accessControlFile(Tig.AccessControlRequest request, StreamObserver<Empty> responseObserver) {
         logger.info("Access Control file");
-        SessionAuthenticator.authenticateSession(request.getSessionId());
         try {
             responseObserver.onNext(keyStub.accessControlFileTigKey(request));
             responseObserver.onCompleted();
@@ -88,7 +81,6 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
 
     @Override
     public void listFiles(Tig.SessionRequest request, StreamObserver<Tig.ListFilesReply> responseObserver) {
-        SessionAuthenticator.authenticateSession(request.getSessionId());
         logger.info("List files");
         try {
             Tig.ListFilesReply files = keyStub.listFileTigKey(Tig.TigKeySessionIdMessage.newBuilder(
@@ -123,7 +115,6 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
                     //Renew Lease
                     if (counter == 0) {
                         filename = value.getFileName();
-                        SessionAuthenticator.authenticateSession(value.getSessionId());
                         sessionId = value.getSessionId();
                     }
                     file = file.concat(value.getContent());
@@ -145,7 +136,7 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
                 );
                 try {
                     responseObserver.onNext(Empty.newBuilder().build());
-                    FileDAO.fileUpload(filename, file.toByteArray(), reply.getOwner(), reply.getKey().toByteArray(), reply.getIv().toByteArray());
+                    FileDAO.fileUpload(reply.getFileId(), file.toByteArray(), reply.getKey().toByteArray(), reply.getIv().toByteArray());
                     responseObserver.onCompleted();
                 } catch (StatusRuntimeException e) {
                     throw new IllegalArgumentException(e.getMessage());
@@ -161,8 +152,6 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
             private ByteString file = ByteString.copyFrom(new byte[0]);
             private String filename;
             private String owner;
-            private byte[] key;
-            private byte[] iv;
             String sessionId;
             private final Object lock = new Object();
 
@@ -177,8 +166,7 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
                             //Should never happen
                         }
                     }
-                    //Renew lease
-                    SessionAuthenticator.authenticateSession(value.getSessionId());
+
                     if (counter == 0) {
                         sessionId = value.getSessionId();
                         filename = value.getFileName();
@@ -208,7 +196,8 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
                 } catch (StatusRuntimeException e) {
                     throw new IllegalArgumentException(e.getMessage());
                 }
-                FileDAO.fileEdit(filename, file.toByteArray(), owner, reply.getNewKeyFile().toByteArray(), reply.getIv().toByteArray());
+
+                FileDAO.fileEdit(reply.getFileId(), file.toByteArray(), reply.getNewKeyFile().toByteArray(), reply.getIv().toByteArray());
 
                 responseObserver.onNext(Empty.newBuilder().build());
                 responseObserver.onCompleted();
@@ -239,7 +228,7 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
         byte[] iv = fileKeyReply.getIv().toByteArray();
         SecretKeySpec fileKey = EncryptionUtils.getAesKey(keyArray);
 
-        byte[] file = FileDAO.getFileContent(filename, owner, fileKey, iv);
+        byte[] file = FileDAO.getFileContent(fileKeyReply.getFileId(), fileKey, iv);
 
         int sequence = 0;
         //Send file 1MB chunk at a time
