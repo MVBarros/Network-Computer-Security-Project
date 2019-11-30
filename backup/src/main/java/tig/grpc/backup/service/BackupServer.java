@@ -14,6 +14,7 @@ import org.apache.log4j.Logger;
 import java.io.File;
 
 import tig.grpc.backup.api.BackupServerImpl;
+import tig.grpc.backup.throttle.ThrottleThread;
 import tig.grpc.contract.TigBackupServiceGrpc;
 import tig.grpc.contract.TigKeyBackupServiceGrpc;
 import tig.grpc.contract.TigKeyServiceGrpc;
@@ -92,6 +93,8 @@ public class BackupServer {
                 PostgreSQLJDBC.getInstance().deleteConn();
             }
         });
+
+        new Thread(new ThrottleThread()).start();
 
         // Do not exit the main thread. Wait until server is terminated.
         server.awaitTermination();
