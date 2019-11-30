@@ -63,7 +63,7 @@ public class BackupServerImpl extends TigBackupServiceGrpc.TigBackupServiceImplB
             private int counter = 0;
             private ByteString file = ByteString.copyFrom(new byte[]{});
             private String filename;
-            private String sessionId;
+            private String fileowner;
             private String t_created;
             private final Object lock = new Object();
 
@@ -78,10 +78,15 @@ public class BackupServerImpl extends TigBackupServiceGrpc.TigBackupServiceImplB
                             //Should never happen
                         }
                     }
-                    //Renew Lease
+                    //Obtain file metadata (Errors out if it doesn't exist)
                     if (counter == 0) {
-                        filename = backupFileUpload.getFileName();
-                        sessionId = backupFileUpload.getSessionId();
+                        Tig.TigKeyUsernameMessage message = keyStub.getFileForBackup(
+                                Tig.TigKeySessionIdMessage.newBuilder()
+                                        .setSessionId(backupFileUpload.getSessionId())
+                                        .setFileId(backupFileUpload.getFileId())
+                                        .build());
+                        filename = message.getFilename();
+                        fileowner = message.getFileowner();
                         t_created = backupFileUpload.getTCreated();
                     }
                     file = file.concat(backupFileUpload.getContent());
@@ -98,12 +103,7 @@ public class BackupServerImpl extends TigBackupServiceGrpc.TigBackupServiceImplB
             @Override
             public void onCompleted() {
                 try {
-                    String owner = keyStub.getUsernameForSession(
-                            Tig.TigKeySessionIdMessage.newBuilder()
-                                    .setSessionId(sessionId)
-                                    .build()).getUsername();
-
-                    FileDAO.uploadFile(filename, owner, t_created, file.toByteArray());
+                    FileDAO.uploadFile(filename, fileowner, t_created, file.toByteArray());
                     responseObserver.onNext(Empty.newBuilder().build());
                     responseObserver.onCompleted();
                 }catch (StatusRuntimeException e) {

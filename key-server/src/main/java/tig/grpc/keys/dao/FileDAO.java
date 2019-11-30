@@ -1,17 +1,11 @@
 package tig.grpc.keys.dao;
 
 import tig.utils.db.PostgreSQLJDBC;
-import tig.utils.encryption.EncryptedFile;
-import tig.utils.encryption.EncryptionUtils;
 import tig.utils.encryption.FileKey;
-
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +24,24 @@ public class FileDAO {
             rs.next();
             return rs.getString("fileId");
         }catch (SQLException e) {
+            //Should never happen
+            throw new IllegalArgumentException("No such file exists");
+        }
+    }
+
+    public static String getFileName(String fileowner, String fileId) {
+        Connection conn = PostgreSQLJDBC.getInstance().getConn();
+        try {
+            PreparedStatement stmt = conn.prepareStatement("SELECT  filename FROM files " +
+                    "WHERE fileowner = (?) AND fileId = (?)");
+
+            stmt.setString(1, fileowner);
+            stmt.setString(2, fileId);
+            ResultSet rs = stmt.executeQuery();
+            //there should be only one result
+            rs.next();
+            return rs.getString("filename");
+        }   catch (SQLException e) {
             //Should never happen
             throw new IllegalArgumentException("No such file exists");
         }
@@ -87,7 +99,6 @@ public class FileDAO {
             //Should never happen
             throw new RuntimeException();
         }
-
     }
 
     public static void createFileKey(FileKey key, String filename, String fileowner) {
@@ -104,7 +115,6 @@ public class FileDAO {
             //Should never happen
             throw new RuntimeException();
         }
-
     }
 
     public static List<String> listFiles(String username) {
