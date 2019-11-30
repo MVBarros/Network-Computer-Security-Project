@@ -23,7 +23,7 @@ public class BackupServerImpl extends TigBackupServiceGrpc.TigBackupServiceImplB
     @Override
     public void listBackupFiles (Tig.ListBackupFilesRequest request, StreamObserver<Tig.ListFilesReply> reply) {
         String username = keyStub.getUsernameForSession(Tig.TigKeySessionIdMessage.newBuilder(
-                        Tig.TigKeySessionIdMessage.newBuilder().setSessionId(request.getSessionId()).build()).build()).getUsername();
+                        Tig.TigKeySessionIdMessage.newBuilder().setSessionId(request.getSessionId()).build()).build()).getFileowner();
         logger.info("List files that can be recovered " + username);
         List<String> files = FileDAO.listFiles(username);
         Tig.ListFilesReply.Builder builder = Tig.ListFilesReply.newBuilder();
@@ -39,7 +39,7 @@ public class BackupServerImpl extends TigBackupServiceGrpc.TigBackupServiceImplB
         String filename = request.getFileName();
         String owner = keyStub.getUsernameForSession(Tig.TigKeySessionIdMessage.newBuilder()
                                                                                 .setSessionId(request.getSessionId())
-                                                                                .build()).getUsername();
+                                                                                .build()).getFileowner();
         String time_created = request.getTCreated();
 
         byte[] file = FileDAO.getFileContent(filename, owner, time_created);
@@ -58,6 +58,8 @@ public class BackupServerImpl extends TigBackupServiceGrpc.TigBackupServiceImplB
 
     @Override
     public StreamObserver<Tig.BackupFileUpload> insertFileBackup (StreamObserver<Empty> responseObserver) {
+        logger.info("Insert backup file: %s");
+
         return new StreamObserver<Tig.BackupFileUpload> () {
 
             private int counter = 0;

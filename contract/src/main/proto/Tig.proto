@@ -128,6 +128,7 @@ service TigKeyService {
     rpc loginTigKey (AccountRequest) returns (LoginReply);
     rpc logoutTigKey (SessionRequest) returns (google.protobuf.Empty);
     rpc keyFileTigKey (KeyFileTigKeyRequest) returns (KeyFileTigKeyReply);
+    rpc getUsernameForSession (TigKeySessionIdMessage) returns (TigKeyUsernameMessage);
     //rpc keyFileRecoverTigKey (keyFileRecoverTigKeyRequest) returns (keyFileRecoverTigKeyReply);
     rpc canEditTigKey (KeyFileTigKeyRequest) returns (CanEditTigKeyReply);
     rpc listFileTigKey (TigKeySessionIdMessage) returns (ListFilesReply);
