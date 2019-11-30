@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.sql.Statement;
 
 public class PostgreSQLJDBC {
@@ -22,6 +23,16 @@ public class PostgreSQLJDBC {
     public Connection getConn() {
         return conn;
     }
+
+    public void deleteConn() {
+        try {
+            conn.close();
+        }catch (SQLException e) {
+            //Should never happen
+            e.printStackTrace();
+        }
+    }
+
 
     private PostgreSQLJDBC() {
         conn = null;
