@@ -31,12 +31,16 @@ public class TigKeyServiceImpl extends TigKeyServiceGrpc.TigKeyServiceImplBase {
         responseObserver.onCompleted();
     }
 
-    public void getUsernameForSession(Tig.TigKeySessionIdMessage request, StreamObserver<Tig.TigKeyUsernameMessage> responseObserver) {
+    @Override
+    public void getFileForBackup(Tig.TigKeySessionIdMessage request, StreamObserver<Tig.TigKeyUsernameMessage> responseObserver) {
+        String fileowner = SessionAuthenticator.authenticateSession(request.getSessionId()).getUsername();
+        String fileId = request.getFileId();
+        String filename = FileDAO.getFileName(fileowner, fileId);
 
-        UserToken userToken = SessionAuthenticator.authenticateSession(request.getSessionId());
-        String username = userToken.getUsername();
-
-        Tig.TigKeyUsernameMessage reply = Tig.TigKeyUsernameMessage.newBuilder().setUsername(username).build();
+        Tig.TigKeyUsernameMessage reply = Tig.TigKeyUsernameMessage.newBuilder()
+                .setFileowner(fileowner)
+                .setFilename(filename)
+                .build();
         responseObserver.onNext(reply);
         responseObserver.onCompleted();
     }
