@@ -13,6 +13,7 @@ import tig.grpc.contract.TigBackupServiceGrpc;
 import tig.grpc.contract.TigKeyServiceGrpc;
 import tig.grpc.server.api.CustomProtocolTigServiceImpl;
 import tig.grpc.server.api.TigServiceImpl;
+import tig.grpc.server.background.BackupThread;
 import tig.utils.db.PostgreSQLJDBC;
 import tig.utils.interceptor.ExceptionHandler;
 import tig.grpc.server.session.TokenCleanupThread;
@@ -66,6 +67,7 @@ public class DocumentServer {
         TigKeyServiceGrpc.TigKeyServiceBlockingStub keyStub = TigKeyServiceGrpc.newBlockingStub(channel);
         TigServiceImpl.keyStub = keyStub;
 
+
         //Test Purposes only
         System.out.println("Connected and authenticated to key server successfully");
 
@@ -73,8 +75,10 @@ public class DocumentServer {
         ManagedChannel bdChannel = NettyChannelBuilder.forTarget(args[7])
                 .sslContext(context)
                 .build();
-        TigBackupServiceGrpc.TigBackupServiceBlockingStub backupStub = TigBackupServiceGrpc.newBlockingStub(bdChannel);
-        TigServiceImpl.backupStub = backupStub;
+        TigServiceImpl.backupStub = TigBackupServiceGrpc.newBlockingStub(bdChannel);
+
+        BackupThread.backupStub = TigBackupServiceGrpc.newStub(channel);
+
 
         //Test Purposes only
         System.out.println("Connected and authenticated to backup server successfully");

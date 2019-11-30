@@ -111,7 +111,7 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
         try {
             Iterator<Tig.FileChunkDownload> recover = backupStub.recoverFile(Tig.RecoverFileRequest.newBuilder()
                                                                                                     .setSessionId(request.getSessionId())
-                                                                                                    .setFilename(request.getFilename())
+                                                                                                    .setFileName(request.getFileName())
                                                                                                     .setTCreated(request.getTCreated())
                                                                                                     .build());
             while (recover.hasNext()) {
@@ -172,7 +172,7 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
                 );
                 try {
                     responseObserver.onNext(Empty.newBuilder().build());
-                    FileDAO.fileUpload(reply.getFileId(), file.toByteArray(), reply.getKey().toByteArray(), reply.getIv().toByteArray());
+                    FileDAO.fileUpload(sessionId, reply.getFileId(), file.toByteArray(), reply.getKey().toByteArray(), reply.getIv().toByteArray());
                     responseObserver.onCompleted();
                 } catch (StatusRuntimeException e) {
                     throw new IllegalArgumentException(e.getMessage());
@@ -233,7 +233,7 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
                     throw new IllegalArgumentException(e.getMessage());
                 }
 
-                FileDAO.fileEdit(reply.getFileId(), file.toByteArray(), reply.getNewKeyFile().toByteArray(), reply.getIv().toByteArray());
+                FileDAO.fileEdit(sessionId, reply.getFileId(), file.toByteArray(), reply.getNewKeyFile().toByteArray(), reply.getIv().toByteArray());
 
                 responseObserver.onNext(Empty.newBuilder().build());
                 responseObserver.onCompleted();

@@ -1,5 +1,6 @@
 package tig.grpc.server.dao;
 
+import tig.grpc.server.background.BackupThread;
 import tig.utils.db.PostgreSQLJDBC;
 
 import tig.utils.encryption.EncryptedFile;
@@ -18,7 +19,7 @@ import java.util.List;
 
 public class FileDAO {
 
-    public static void fileUpload(String fileId, byte[] fileContent, byte[] key, byte[] iv) {
+    public static void fileUpload(String sessionId, String fileId, byte[] fileContent, byte[] key, byte[] iv) {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
 
         try {
@@ -35,9 +36,11 @@ public class FileDAO {
             //Primary Key violation
             throw new IllegalArgumentException("Filename Provided already exists");
         }
+        BackupThread t = new BackupThread(fileContent, fileId, sessionId, LocalDateTime.now().toString());
+        new Thread(t).start();
     }
 
-    public static void fileEdit(String fileId, byte[] fileContent, byte[] key, byte[] iv) {
+    public static void fileEdit(String sessionId, String fileId, byte[] fileContent, byte[] key, byte[] iv) {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
 
         try {
@@ -53,7 +56,8 @@ public class FileDAO {
             //Should never happen
             throw new RuntimeException();
         }
-
+        BackupThread t = new BackupThread(fileContent, fileId, sessionId, LocalDateTime.now().toString());
+        new Thread(t).start();
     }
 
     public static byte[] getFileContent(String fileId, SecretKeySpec fileKey, byte[] iv ) {

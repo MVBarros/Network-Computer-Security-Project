@@ -14,14 +14,15 @@ public class BackupThread implements Runnable{
     private byte[] content;
     private String fileId;
     private String sessionId;
-    private TigBackupServiceGrpc.TigBackupServiceStub backupStub;
+    private String t_created;
+    public static TigBackupServiceGrpc.TigBackupServiceStub backupStub;
 
 
-    public BackupThread(byte[] content, String fileId, String sessionId, TigBackupServiceGrpc.TigBackupServiceStub backupStub) {
+    public BackupThread(byte[] content, String fileId, String sessionId, String t_created) {
         this.content = content;
         this.fileId = fileId;
         this.sessionId = sessionId;
-        this.backupStub = backupStub;
+        this.t_created = t_created;
     }
 
     public void run() {
@@ -60,6 +61,7 @@ public class BackupThread implements Runnable{
                 fileChunk.setFileId(fileId);
                 fileChunk.setSessionId(sessionId);
                 fileChunk.setSequence(sequence);
+                fileChunk.setTCreated(t_created);
                 requestObserver.onNext(fileChunk.build());
                 sequence++;
             }
