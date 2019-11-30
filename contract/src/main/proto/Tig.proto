@@ -209,7 +209,7 @@ message BackupFileUpload {
 }
 
 message RecoverFileRequest {
-    string filename = 1;
+    string fileName = 1;
     string sessionId = 2;
     string t_created = 3;
 }
