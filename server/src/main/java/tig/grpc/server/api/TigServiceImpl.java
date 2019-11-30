@@ -11,6 +11,8 @@ import tig.grpc.contract.TigKeyServiceGrpc;
 import tig.grpc.contract.TigServiceGrpc;
 import tig.grpc.server.dao.FileDAO;
 import tig.grpc.server.session.SessionAuthenticator;
+import tig.grpc.server.throttle.Throttle;
+import tig.grpc.server.throttle.ThrottleThread;
 import tig.utils.encryption.EncryptionUtils;
 
 import javax.crypto.spec.SecretKeySpec;
@@ -37,10 +39,12 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
     public void login(Tig.AccountRequest request, StreamObserver<Tig.LoginReply> responseObserver) {
         logger.info(String.format("Login username: %s", request.getUsername()));
         try {
-        Tig.LoginReply replyMessage = keyStub.loginTigKey(request);
-        responseObserver.onNext(replyMessage);
-        responseObserver.onCompleted();
+            Throttle.throottle(request.getUsername());
+            Tig.LoginReply replyMessage = keyStub.loginTigKey(request);
+            responseObserver.onNext(replyMessage);
+            responseObserver.onCompleted();
         } catch(StatusRuntimeException e) {
+            Throttle.login(request.getUsername());
             throw new IllegalArgumentException(e.getMessage());
         }
     }

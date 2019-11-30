@@ -14,6 +14,7 @@ import tig.grpc.contract.TigKeyServiceGrpc;
 import tig.grpc.server.api.CustomProtocolTigServiceImpl;
 import tig.grpc.server.api.TigServiceImpl;
 import tig.grpc.server.background.BackupThread;
+import tig.grpc.server.throttle.ThrottleThread;
 import tig.utils.db.PostgreSQLJDBC;
 import tig.utils.interceptor.ExceptionHandler;
 import tig.grpc.server.session.TokenCleanupThread;
@@ -104,6 +105,9 @@ public class DocumentServer {
                 PostgreSQLJDBC.getInstance().deleteConn();
             }
         });
+
+        //Thread for throttling login
+        new Thread((new ThrottleThread()).start());
 
         //Cleanup hanging Session Tokens in the background
         new Thread(new TokenCleanupThread()).start();

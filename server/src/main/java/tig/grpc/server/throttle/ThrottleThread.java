@@ -8,9 +8,9 @@ public class ThrottleThread implements Runnable {
     @Override
     public void run() {
         while(true) {
-            Throttle.accessMap.replaceAll((k, v) -> new AtomicLong(0));
+            Throttle.accessMap.replaceAll((k, v) -> new AtomicInteger(0));
             try {
-                Thread.sleep(1000 * 60 * 60);
+                Thread.sleep(1000 * 60 * 5);
             } catch (InterruptedException e) {
                 //Should never happen
                 e.printStackTrace();
