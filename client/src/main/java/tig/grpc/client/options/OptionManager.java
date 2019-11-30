@@ -14,24 +14,24 @@ public class OptionManager {
     public static Options createOptions() {
         Options options = new Options();
 
-        Option register = new Option("n", "Use to register new user");
+        Option register = new Option("n", "Use to register New user");
         register.setArgs(0);
         register.setRequired(false);
         options.addOption(register);
 
-        Option download = new Option("d", "Use to download a file");
+        Option download = new Option("d", "Use to Download a file");
         download.setArgs(3);
         download.setArgName("filename owner filepath");
         register.setRequired(false);
         options.addOption(download);
 
-        Option delete = new Option("r", "Use to remove (delete) a file");
+        Option delete = new Option("r", "Use to Remove (delete) a file");
         delete.setArgs(1);
         delete.setArgName("filename");
         register.setRequired(false);
         options.addOption(delete);
 
-        Option list = new Option("l", "Use to list all files");
+        Option list = new Option("l", "Use to List all files");
         list.setArgs(0);
         register.setRequired(false);
         options.addOption(list);
@@ -42,22 +42,29 @@ public class OptionManager {
         register.setRequired(false);
         options.addOption(access);
 
-        Option upload = new Option("u", "Use to upload a new file");
+        Option upload = new Option("u", "Use to Upload a new file");
         upload.setArgs(2);
         upload.setArgName("filename filepath");
         register.setRequired(false);
         options.addOption(upload);
 
-        Option edit = new Option("e", "Use to edit a file");
+        Option edit = new Option("e", "Use to Edit a file");
         edit.setArgs(3);
         edit.setArgName("filename owner filepath");
         register.setRequired(false);
         options.addOption(edit);
 
-        Option recover = new Option("b", "Use to list backup files");
+        Option list_recover = new Option("b", "Use to list Backup files");
         edit.setArgs(0);
         register.setRequired(false);
+        options.addOption(list_recover);
+
+        Option recover = new Option("g", "Use to Get a backup file");
+        edit.setArgs(3);
+        edit.setArgName("filename t_created filepath");
+        register.setRequired(false);
         options.addOption(recover);
+
 
         return options;
     }

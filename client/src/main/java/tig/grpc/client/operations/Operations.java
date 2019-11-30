@@ -226,6 +226,37 @@ public class Operations {
     }
 
 
+    public static void recoverFile(Client client, String filename, String t_created, String filepath) {
+        try {
+            System.out.println(String.format("Recover File with file name %s with t_created %s", filename, t_created));
+
+            Iterator<Tig.FileChunkDownload> iterator = client.getStub().recoverFile(Tig.RecoverFileRequest.newBuilder()
+                    .setSessionId(client.getSessionId())
+                    .setFileName(filename)
+                    .setTCreated(t_created).build());
+
+            BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(filepath));
+            //Write bytes to file
+            while (iterator.hasNext()) {
+                Tig.FileChunkDownload chunk = iterator.next();
+                byte[] fileBytes = chunk.getContent().toByteArray();
+                out.write(fileBytes);
+            }
+
+            out.close();
+            System.out.println(String.format("File with filename %s with t_created %s sucessfully downloaded into %s", filename, t_created, filepath));
+        } catch (StatusRuntimeException e) {
+            System.out.print("Error downloading file: ");
+            System.out.println(e.getStatus().getDescription());
+        } catch (IOException e) {
+            //Should never happen
+            System.out.println("Error writing to file");
+            System.out.println(String.format("Cause: %s", e.getMessage()));
+            System.out.println("Aborting download");
+        }
+    }
+
+
     public static void downloadFile(Client client, String filename, String owner, String filepath) {
         try {
             System.out.println(String.format("Download File with filename %s with owner %s. With file path: %s", filename, owner, filepath));
