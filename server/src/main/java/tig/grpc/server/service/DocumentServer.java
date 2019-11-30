@@ -107,7 +107,7 @@ public class DocumentServer {
         });
 
         //Thread for throttling login
-        new Thread((new ThrottleThread()).start());
+        new Thread(new ThrottleThread()).start();
 
         //Cleanup hanging Session Tokens in the background
         new Thread(new TokenCleanupThread()).start();

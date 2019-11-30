@@ -2,28 +2,26 @@ package tig.grpc.backup.throttle;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class Throttler {
 
-    public static ConcurrentHashMap<String, AtomicInteger> accessMap = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<String, Integer> accessMap = new ConcurrentHashMap<>();
+
+    public static final int MAX_ATTEMPTS = 10;
 
     public static void access(String username) {
         if (accessMap.containsKey(username)) {
-            accessMap.get(username).incrementAndGet();
+            accessMap.put(username, accessMap.get(username) + 1);
         }
         else {
-            accessMap.put(username, new AtomicInteger(1));
+            accessMap.put(username, 1);
         }
     }
 
     public static void throttle(String username) {
-        try {
-            TimeUnit.SECONDS.sleep((int)Math.pow(accessMap.get(username).get(), 2));
-        } catch (InterruptedException e) {
-            //Should never happen
-            e.printStackTrace();
-        }
+            if(accessMap.containsKey(username) && accessMap.get(username) >= MAX_ATTEMPTS) {
+                throw new IllegalArgumentException("To much backups for this particular user");
+            }
     }
 
 }

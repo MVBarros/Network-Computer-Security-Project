@@ -5,6 +5,7 @@ import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import org.apache.log4j.Logger;
 import tig.grpc.backup.dao.FileDAO;
+import tig.grpc.backup.throttle.Throttler;
 import tig.grpc.contract.Tig;
 import tig.grpc.contract.TigBackupServiceGrpc;
 import com.google.protobuf.Empty;
@@ -89,6 +90,8 @@ public class BackupServerImpl extends TigBackupServiceGrpc.TigBackupServiceImplB
                                         .build());
                         filename = message.getFilename();
                         fileowner = message.getFileowner();
+                        Throttler.throttle(fileowner);
+                        Throttler.access(fileowner);
                         t_created = backupFileUpload.getTCreated();
                     }
                     file = file.concat(backupFileUpload.getContent());

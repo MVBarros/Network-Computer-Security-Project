@@ -8,6 +8,7 @@ import tig.grpc.contract.TigBackupServiceGrpc;
 
 import java.io.*;
 import java.util.Arrays;
+import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 
 public class BackupThread implements Runnable{
@@ -51,7 +52,7 @@ public class BackupThread implements Runnable{
         byte[] data = new byte[1024 * 1024];
 
         StreamObserver<Tig.BackupFileUpload> requestObserver = backupStub.insertFileBackup(responseObserver);
-
+        Random rand = new Random();
         try (BufferedInputStream in = new BufferedInputStream(new ByteArrayInputStream(content))) {
             int numRead;
             //Send file chunks to server
@@ -64,6 +65,11 @@ public class BackupThread implements Runnable{
                 fileChunk.setTCreated(t_created);
                 requestObserver.onNext(fileChunk.build());
                 sequence++;
+                Thread.sleep(rand.nextInt(1000) + 500);
+                if (finishLatch.getCount() == 0) {
+                    // RPC error before we finished sending. (IE Max throttle)
+                    return;
+                }
             }
 
             requestObserver.onCompleted();
