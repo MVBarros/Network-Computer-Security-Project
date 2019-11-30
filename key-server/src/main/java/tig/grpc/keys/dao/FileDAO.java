@@ -29,18 +29,17 @@ public class FileDAO {
         }
     }
 
-    public static String getFileName(String fileowner, String fileId) {
+    public static String[] getFileName(String fileId) {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
         try {
-            PreparedStatement stmt = conn.prepareStatement("SELECT  filename FROM files " +
-                    "WHERE fileowner = (?) AND fileId = (?)");
+            PreparedStatement stmt = conn.prepareStatement("SELECT  filename, fileowner FROM files " +
+                    "WHERE fileId = (?)");
 
-            stmt.setString(1, fileowner);
-            stmt.setString(2, fileId);
+            stmt.setString(1, fileId);
             ResultSet rs = stmt.executeQuery();
             //there should be only one result
             rs.next();
-            return rs.getString("filename");
+            return new String[]{rs.getString("filename"), rs.getString("fileowner")};
         }   catch (SQLException e) {
             //Should never happen
             throw new IllegalArgumentException("No such file exists");

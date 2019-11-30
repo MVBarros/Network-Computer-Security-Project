@@ -19,6 +19,7 @@ public class BackupServerImpl extends TigBackupServiceGrpc.TigBackupServiceImplB
 
     public static TigKeyServiceGrpc.TigKeyServiceBlockingStub keyStub;
 
+    private static String BackupAPIKey = "fsaocmasoifjq90ru130rfDJ0cmasofgsiotu039q+3r1ikd$q$=)i0Q(=!rw=ir?=!i=d!c;wpofkafkqa";
 
     @Override
     public void listBackupFiles (Tig.ListBackupFilesRequest request, StreamObserver<Tig.ListFilesReply> reply) {
