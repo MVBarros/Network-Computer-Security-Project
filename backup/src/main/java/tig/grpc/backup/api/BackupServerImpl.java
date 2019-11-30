@@ -34,9 +34,9 @@ public class BackupServerImpl extends TigBackupServiceGrpc.TigBackupServiceImplB
 
     @Override
     public void recoverFile (Tig.RecoverFileRequest request, StreamObserver<Tig.FileChunkDownload> reply) {
-        logger.info(String.format("Recover file: %s", request.getFilename()));
+        logger.info(String.format("Recover file: %s", request.getFileName()));
 
-        String filename = request.getFilename();
+        String filename = request.getFileName();
         String owner = keyStub.getUsernameForSession(Tig.TigKeySessionIdMessage.newBuilder()
                                                                                 .setSessionId(request.getSessionId())
                                                                                 .build()).getUsername();

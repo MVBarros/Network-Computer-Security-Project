@@ -111,7 +111,7 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
         try {
             Iterator<Tig.FileChunkDownload> recover = backupStub.recoverFile(Tig.RecoverFileRequest.newBuilder()
                                                                                                     .setSessionId(request.getSessionId())
-                                                                                                    .setFilename(request.getFilename())
+                                                                                                    .setFileName(request.getFileName())
                                                                                                     .setTCreated(request.getTCreated())
                                                                                                     .build());
             while (recover.hasNext()) {
