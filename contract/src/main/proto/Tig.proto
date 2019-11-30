@@ -203,7 +203,7 @@ message ListBackupFilesRequest {
 message BackupFileUpload {
     bytes content = 1;
     string sessionId = 2;
-    string  fileName = 3;
+    string  fileId = 3;
     int32 sequence = 4;
     string t_created = 5;
 }
