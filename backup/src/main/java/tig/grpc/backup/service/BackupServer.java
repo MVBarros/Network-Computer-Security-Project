@@ -15,6 +15,7 @@ import java.io.File;
 
 import tig.grpc.backup.api.BackupServerImpl;
 import tig.grpc.contract.TigBackupServiceGrpc;
+import tig.grpc.contract.TigKeyBackupServiceGrpc;
 import tig.grpc.contract.TigKeyServiceGrpc;
 import tig.utils.db.PostgreSQLJDBC;
 import tig.utils.interceptor.ExceptionHandler;
@@ -66,7 +67,8 @@ public class BackupServer {
         ManagedChannel keyChannel = NettyChannelBuilder.forTarget(args[5])
                 .sslContext(clientContext)
                 .build();
-        TigKeyServiceGrpc.TigKeyServiceBlockingStub keyStub = TigKeyServiceGrpc.newBlockingStub(keyChannel);
+
+        TigKeyBackupServiceGrpc.TigKeyBackupServiceBlockingStub keyStub = TigKeyBackupServiceGrpc.newBlockingStub(keyChannel);
         BackupServerImpl.keyStub = keyStub;
         System.out.println("Connected to the key server successfully");
 

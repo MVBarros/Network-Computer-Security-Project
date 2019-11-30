@@ -39,12 +39,6 @@ public class FileDAO {
         BackupThread t = new BackupThread(fileContent, fileId, sessionId, LocalDateTime.now().toString());
         Thread thread = new Thread(t);
         thread.start();
-        try {
-            thread.join();
-        } catch (InterruptedException e) {
-            //Should never happen
-            e.printStackTrace();
-        }
     }
 
     public static void fileEdit(String sessionId, String fileId, byte[] fileContent, byte[] key, byte[] iv) {
@@ -66,12 +60,6 @@ public class FileDAO {
         BackupThread t = new BackupThread(fileContent, fileId, sessionId, LocalDateTime.now().toString());
         Thread thread = new Thread(t);
         thread.start();
-        try {
-            thread.join();
-        } catch (InterruptedException e) {
-            //Should never happen
-            e.printStackTrace();
-        }
     }
 
     public static byte[] getFileContent(String fileId, SecretKeySpec fileKey, byte[] iv ) {

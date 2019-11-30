@@ -9,6 +9,7 @@ import io.grpc.netty.NettyServerBuilder;
 import io.netty.handler.ssl.ClientAuth;
 import io.netty.handler.ssl.SslContext;
 import org.apache.log4j.Logger;
+import tig.grpc.keys.api.TigKeyBackupServiceImpl;
 import tig.grpc.keys.api.TigKeyServiceImpl;
 import tig.grpc.keys.session.TokenCleanupThread;
 import tig.utils.db.PostgreSQLJDBC;
@@ -26,9 +27,9 @@ public class KeyServer {
         System.out.println(KeyServer.class.getSimpleName());
 
         // check arguments
-        if (args.length < 5) {
+        if (args.length < 6) {
             System.err.println("Argument(s) missing!");
-            System.err.printf("<Usage> java %s port dbname certChainFile privateKeyFile trustCertCollection%n", KeyServer.class.getName());
+            System.err.printf("<Usage> java %s port dbname certChainFile privateKeyFile trustCertCollection backupPort%n", KeyServer.class.getName());
             return;
         }
 
@@ -64,7 +65,16 @@ public class KeyServer {
                 .addService(impl)
                 .build();
 
+        final Server server2 = NettyServerBuilder
+                .forPort(Integer.parseInt(args[5]))
+                .sslContext(context)
+                .intercept(new ExceptionHandler())
+                .addService(new TigKeyBackupServiceImpl())
+                .build();
+
+
         server.start();
+        server2.start();
 
         logger.info("Key Server started with authentication required");
 
@@ -74,6 +84,7 @@ public class KeyServer {
             public void run() {
                 logger.info("Shutdown Signal: Shutting down server");
                 server.shutdownNow();
+                server2.shutdownNow();
                 PostgreSQLJDBC.getInstance().deleteConn();
             }
         });
@@ -83,5 +94,6 @@ public class KeyServer {
 
         // Do not exit the main thread. Wait until server is terminated.
         server.awaitTermination();
+        server2.awaitTermination();
     }
 }

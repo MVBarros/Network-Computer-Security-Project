@@ -128,14 +128,16 @@ service TigKeyService {
     rpc loginTigKey (AccountRequest) returns (LoginReply);
     rpc logoutTigKey (SessionRequest) returns (google.protobuf.Empty);
     rpc keyFileTigKey (KeyFileTigKeyRequest) returns (KeyFileTigKeyReply);
-    rpc getUsernameForSession (TigKeySessionIdMessage) returns (TigKeyUsernameMessage);
-    //rpc keyFileRecoverTigKey (keyFileRecoverTigKeyRequest) returns (keyFileRecoverTigKeyReply);
     rpc canEditTigKey (KeyFileTigKeyRequest) returns (CanEditTigKeyReply);
     rpc listFileTigKey (TigKeySessionIdMessage) returns (ListFilesReply);
-    rpc getFileForBackup (TigKeySessionIdMessage) returns (TigKeyUsernameMessage);
     rpc accessControlFileTigKey (AccessControlRequest) returns (google.protobuf.Empty);
     rpc deleteFileTigKey (DeleteFileRequest) returns (DeleteFileReply);
     rpc newFileKey (NewFileRequest) returns (NewFileReply);
+}
+
+service TigKeyBackupService {
+    rpc getUsernameForSession (TigKeySessionIdMessage) returns (TigKeyUsernameMessage);
+    rpc getFileForBackup (TigKeySessionIdMessage) returns (TigKeyUsernameMessage);
 }
 
 message DeleteFileReply {

@@ -8,6 +8,7 @@ import tig.grpc.backup.dao.FileDAO;
 import tig.grpc.contract.Tig;
 import tig.grpc.contract.TigBackupServiceGrpc;
 import com.google.protobuf.Empty;
+import tig.grpc.contract.TigKeyBackupServiceGrpc;
 import tig.grpc.contract.TigKeyServiceGrpc;
 
 import java.util.List;
@@ -17,9 +18,7 @@ import java.util.Arrays;
 public class BackupServerImpl extends TigBackupServiceGrpc.TigBackupServiceImplBase {
     private final static Logger logger = Logger.getLogger(BackupServerImpl.class);
 
-    public static TigKeyServiceGrpc.TigKeyServiceBlockingStub keyStub;
-
-    private static String BackupAPIKey = "fsaocmasoifjq90ru130rfDJ0cmasofgsiotu039q+3r1ikd$q$=)i0Q(=!rw=ir?=!i=d!c;wpofkafkqa";
+    public static TigKeyBackupServiceGrpc.TigKeyBackupServiceBlockingStub keyStub;
 
     @Override
     public void listBackupFiles (Tig.ListBackupFilesRequest request, StreamObserver<Tig.ListFilesReply> reply) {

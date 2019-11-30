@@ -23,6 +23,7 @@
         <!-- application properties -->
         <mainclass>tig.grpc.keys.service.KeyServer</mainclass>
         <server.port>8090</server.port>
+        <server.backup.port>8095</server.backup.port>
         <db.name>src/main/resources/db/tigkeyserver</db.name>
         <db.password>root</db.password>
         <tig.server.url>localhost:8080</tig.server.url>
@@ -88,7 +89,8 @@
                         <argument>${basedir}/src/main/resources/certs/key-server.pem</argument>
                         <argument>${basedir}/src/main/resources/certs/key-server.key</argument>
                         <argument>${basedir}/src/main/resources/certs/ca.cert</argument>
-                        </arguments>
+                        <argument>${server.backup.port}</argument>
+                    </arguments>
                 </configuration>
             </plugin>
         </plugins>
