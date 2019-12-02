@@ -11,7 +11,7 @@ import java.util.List;
 
 public class FileDAO {
 
-    public static String getFileId(String filename, String fileowner) {
+    public static String getFileId(String fileowner, String filename) {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
         try {
             PreparedStatement stmt = conn.prepareStatement("SELECT  fileId FROM files " +

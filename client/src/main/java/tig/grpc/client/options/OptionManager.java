@@ -70,6 +70,9 @@ public class OptionManager {
     }
 
     public static void executeOptions(CommandLine cmd, Client client) {
+        if(cmd.getOptions().length == 0) {
+            return;
+        }
         if (cmd.hasOption('n')) {
             Operations.registerClient(client);
             return;
