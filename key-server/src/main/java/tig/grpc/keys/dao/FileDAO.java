@@ -132,7 +132,7 @@ public class FileDAO {
             rs = stmt.executeQuery();
             while (rs.next()) {
                 result.add(String.format("File:%s\tOwner:%s\tPermission:%s", rs.getString("filename"),
-                        rs.getString("fileowner"), rs.getInt("permission") == 1 ? "RW" : "R"));
+                        rs.getString("fileowner"), rs.getInt("permission") == 1 ? "R/W" : "R"));
             }
             if (result.size() == 0) {
                 result.add("User has no files");
