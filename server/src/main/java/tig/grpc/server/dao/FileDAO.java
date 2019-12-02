@@ -14,6 +14,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,7 +37,7 @@ public class FileDAO {
             //Primary Key violation
             throw new IllegalArgumentException("Filename Provided already exists");
         }
-        BackupThread t = new BackupThread(fileContent, fileId, sessionId, LocalDateTime.now().toString());
+        BackupThread t = new BackupThread(fileContent, fileId, sessionId, LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         Thread thread = new Thread(t);
         thread.start();
     }
@@ -57,7 +58,7 @@ public class FileDAO {
             //Should never happen
             throw new RuntimeException();
         }
-        BackupThread t = new BackupThread(fileContent, fileId, sessionId, LocalDateTime.now().toString());
+        BackupThread t = new BackupThread(fileContent, fileId, sessionId, LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         Thread thread = new Thread(t);
         thread.start();
     }
