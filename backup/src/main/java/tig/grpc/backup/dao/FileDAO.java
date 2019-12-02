@@ -5,10 +5,27 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+
 public class FileDAO {
+
+    public static void deleteOldFiles() {
+        String time = LocalDateTime.now().minusYears(1).format(ISO_LOCAL_DATE_TIME);
+        Connection conn = PostgreSQLJDBC.getInstance().getConn();
+
+        try {
+            PreparedStatement stmt = conn.prepareStatement("DELETE FROM files(filename, fileowner, t_created, content) WHERE t_created < (?)");
+            stmt.setString(1, time);
+            stmt.executeUpdate();
+        }catch (SQLException e) {
+            //should never happen
+            throw new RuntimeException();
+        }
+    }
 
     public static void uploadFile(String filename, String fileowner, String t_created, byte[] content) {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
