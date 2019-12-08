@@ -31,11 +31,11 @@ public class App {
             cmd = parser.parse(options, Arrays.copyOfRange(args, 0,args.length));
         } catch (ParseException e) {
             System.out.println(e.getMessage());
-            formatter.printHelp("utility-name", options);
+            formatter.printHelp("tig", options);
             System.exit(1);
         }
         if (cmd.getOptions().length == 0) {
-            formatter.printHelp("utility-name", options);
+            formatter.printHelp("tig", options);
             System.exit(1);
         }
 
