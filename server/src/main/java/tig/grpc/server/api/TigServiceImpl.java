@@ -63,9 +63,7 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
     public void deleteFile(Tig.DeleteFileRequest request, StreamObserver<Empty> responseObserver) {
         logger.info("Delete file");
         try {
-            Tig.DeleteFileReply reply = keyStub.deleteFileTigKey(request);
-            FileDAO.deleteFile(reply.getFileId());
-            responseObserver.onNext(Empty.newBuilder().build());
+            responseObserver.onNext(keyStub.deleteFileTigKey(request));
             responseObserver.onCompleted();
         }catch (StatusRuntimeException e) {
             throw new IllegalArgumentException(e.getMessage());

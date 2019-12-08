@@ -141,8 +141,6 @@ public class CustomProtocolOperations {
         }
     }
 
-
-
     public static void deleteFile(Client client, String filename) {
         try {
             System.out.println(String.format("Delete File %s ", filename));
