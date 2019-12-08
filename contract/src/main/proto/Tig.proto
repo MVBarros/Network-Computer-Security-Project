@@ -93,6 +93,7 @@ service CustomProtocolTigService {
     rpc logout (CustomProtocolMessage) returns (google.protobuf.Empty);
     rpc setAccessControl (CustomProtocolMessage) returns (google.protobuf.Empty);
     rpc listFiles (CustomProtocolMessage) returns (CustomProtocolMessage);
+    rpc listBackupFiles (CustomProtocolMessage) returns (CustomProtocolMessage);
     rpc deleteFile (CustomProtocolMessage) returns (google.protobuf.Empty);
 }
 

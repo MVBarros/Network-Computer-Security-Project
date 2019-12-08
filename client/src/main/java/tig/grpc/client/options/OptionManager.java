@@ -71,7 +71,7 @@ public class OptionManager {
 
     public static void executeOptions(CommandLine cmd, Client client) {
         if (cmd.hasOption('n')) {
-            Operations.registerClient(client);
+            CustomProtocolOperations.registerClient(client);
             return;
         }
         CustomProtocolOperations.loginClient(client);
@@ -89,15 +89,15 @@ public class OptionManager {
             return;
         }
         if (cmd.hasOption('r')) {
-            Operations.deleteFile(client, cmd.getOptionValues('r')[0]);
+            CustomProtocolOperations.deleteFile(client, cmd.getOptionValues('r')[0]);
             return;
         }
         if (cmd.hasOption('l')) {
-            Operations.listFiles(client);
+            CustomProtocolOperations.listFiles(client);
             return;
         }
         if (cmd.hasOption('b')) {
-            Operations.listRecoverFiles(client);
+            CustomProtocolOperations.listRecoverFiles(client);
             return;
         }
         if (cmd.hasOption('g')) {
@@ -107,13 +107,13 @@ public class OptionManager {
         if (cmd.hasOption('c')) {
             switch (cmd.getOptionValues("c")[1]) {
                 case "READ":
-                    Operations.setAccessControl(client, cmd.getOptionValues('c')[0], cmd.getOptionValues('c')[2], Tig.PermissionEnum.READ);
+                    CustomProtocolOperations.setAccessControl(client, cmd.getOptionValues('c')[0], cmd.getOptionValues('c')[2], Tig.PermissionEnum.READ);
                     break;
                 case "WRITE":
-                    Operations.setAccessControl(client, cmd.getOptionValues('c')[0], cmd.getOptionValues('c')[2], Tig.PermissionEnum.WRITE);
+                    CustomProtocolOperations.setAccessControl(client, cmd.getOptionValues('c')[0], cmd.getOptionValues('c')[2], Tig.PermissionEnum.WRITE);
                     break;
                 case "NONE":
-                    Operations.setAccessControl(client, cmd.getOptionValues('c')[0], cmd.getOptionValues('c')[2], Tig.PermissionEnum.NONE);
+                    CustomProtocolOperations.setAccessControl(client, cmd.getOptionValues('c')[0], cmd.getOptionValues('c')[2], Tig.PermissionEnum.NONE);
                     break;
                 default:
                     System.out.println("Invalid permission value, can only be READ, WRITE or NONE");

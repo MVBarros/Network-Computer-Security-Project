@@ -19,6 +19,7 @@ public class Client {
     private PrivateKey privKey;
     private PublicKey serverKey;
     private SecretKey sessionKey;
+    private String signerId;
 
     public TigServiceGrpc.TigServiceStub getAsyncStub() {
         return asyncStub;
@@ -71,6 +72,11 @@ public class Client {
     public void setSessionKey(SecretKey sessionKey) {
         this.sessionKey = sessionKey;
     }
+
+    public String getSignerId() { return signerId; }
+
+    public void setSignerId(String signerId) { this.signerId = signerId; }
+
 
     public CustomProtocolTigServiceGrpc.CustomProtocolTigServiceBlockingStub getCustomProtocolStub() {
         return customProtocolStub;

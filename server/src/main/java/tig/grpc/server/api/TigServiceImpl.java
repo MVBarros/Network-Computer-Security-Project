@@ -63,7 +63,6 @@ public class TigServiceImpl extends TigServiceGrpc.TigServiceImplBase {
     public void deleteFile(Tig.DeleteFileRequest request, StreamObserver<Empty> responseObserver) {
         logger.info("Delete file");
         try {
-            // FIXME
             Tig.DeleteFileReply reply = keyStub.deleteFileTigKey(request);
             FileDAO.deleteFile(reply.getFileId());
             responseObserver.onNext(Empty.newBuilder().build());

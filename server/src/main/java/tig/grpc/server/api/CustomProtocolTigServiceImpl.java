@@ -9,15 +9,13 @@ import tig.grpc.contract.Tig;
 import tig.grpc.contract.TigBackupServiceGrpc;
 import tig.grpc.contract.TigKeyServiceGrpc;
 import tig.grpc.server.dao.FileDAO;
+import tig.grpc.server.session.CustomUserToken;
 import tig.grpc.server.session.SessionAuthenticator;
 import tig.grpc.server.throttle.Throttler;
 import tig.utils.StringGenerator;
 import tig.utils.encryption.EncryptionUtils;
 import tig.utils.encryption.HashUtils;
-import tig.utils.keys.KeyGen;
 import tig.utils.serialization.ObjectSerializer;
-
-import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.*;
 
@@ -25,7 +23,6 @@ public class CustomProtocolTigServiceImpl extends CustomProtocolTigServiceGrpc.C
 
     public static PrivateKey privateKey;
     public static PublicKey publicKey;
-
 
     public static TigKeyServiceGrpc.TigKeyServiceBlockingStub keyStub;
     public static TigBackupServiceGrpc.TigBackupServiceBlockingStub backupStub;
@@ -103,9 +100,11 @@ public class CustomProtocolTigServiceImpl extends CustomProtocolTigServiceGrpc.C
             Throttler.failure(req.getUsername());
             throw new IllegalArgumentException(e.getMessage());
         }
+        //insert session key into memory
+        String signerId = StringGenerator.randomString(256);
+        SessionAuthenticator.insertCustomSession(signerId, key);
 
         message = ObjectSerializer.Serialize(reply);
-
         String nonce = StringGenerator.randomString(256);
 
         Tig.Content content = Tig.Content.newBuilder()
@@ -123,7 +122,7 @@ public class CustomProtocolTigServiceImpl extends CustomProtocolTigServiceGrpc.C
 
         signature = Tig.Signature.newBuilder()
                 .setValue(ByteString.copyFrom(sign))
-                .setSignerId(StringGenerator.randomString(256))
+                .setSignerId(signerId)
                 .build();
 
         //client
@@ -137,45 +136,35 @@ public class CustomProtocolTigServiceImpl extends CustomProtocolTigServiceGrpc.C
     }
 
     @Override
-    public void logout(Tig.CustomProtocolMessage request, StreamObserver<Empty> reply) {
-        //validate message
-        /*byte[] encryptedMessage = request.getMessage().toByteArray();
+    public void logout(Tig.CustomProtocolMessage request, StreamObserver<Empty> responseObserver) {
+        byte[] hash = request.getSignature().getValue().toByteArray();
+        String signerId = request.getSignature().getSignerId();
 
-        byte[] serializedSignature = request.getSignature().toByteArray();
-        Tig.Signature sign = (Tig.Signature)ObjectSerializer.Deserialize(serializedSignature);
-        byte[] signature = EncryptionUtils.decryptbytesRSAPriv(sign.getValue().toByteArray(), privateKey);
+        CustomUserToken sessionToken = SessionAuthenticator.authenticateSession(signerId);
+        Key sessionKey = sessionToken.getSessionKey();
 
-        //Get User Session Key
-        String signerId = sign.getSignerId();
-        CustomUserToken token = (CustomUserToken)SessionAuthenticator.authenticateSession(signerId);
-        Key sessionKey = token.getSessionKey();
-        byte[] message = EncryptionUtils.decryptbytesAES(encryptedMessage, (SecretKeySpec)sessionKey);
+        byte[] message = EncryptionUtils.decryptbytesAES(request.getMessage().toByteArray(), (SecretKeySpec) sessionKey);
+        hash = EncryptionUtils.decryptbytesRSAPriv(hash, privateKey);
 
-        if (!HashUtils.verifyMessageSignature(message, signature)) {
+        if (!HashUtils.verifyMessageSignature(message, hash)) {
             throw new IllegalArgumentException("Invalid Signature");
         }
-        Tig.CustomProtocolLogoutRequest logoutRequest = (Tig.CustomProtocolLogoutRequest)ObjectSerializer.Deserialize(message);
-        //FIXME check nonce
 
+        Tig.Content content = (Tig.Content) ObjectSerializer.Deserialize(message);
+
+        sessionToken.authenticateNonce(content.getNonce());
+
+        Tig.SessionRequest sessionRequest = (Tig.SessionRequest) ObjectSerializer.Deserialize(content.getRequest().toByteArray());
+        Tig.ListFilesReply files;
+
+        try {
+            keyStub.logoutTigKey(sessionRequest);
+        } catch (StatusRuntimeException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        }
         SessionAuthenticator.clearSession(signerId);
-        //generate response
-        Tig.CustomProtocolLogoutReply logoutReply = Tig.CustomProtocolLogoutReply.newBuilder()
-                .build();
-
-        byte[] replyMessage = ObjectSerializer.Serialize(logoutReply);
-        byte[] replySignature = HashUtils.hashBytes(replyMessage);
-        byte[] replyIv = EncryptionUtils.generateIv();
-
-        replyMessage = EncryptionUtils.encryptBytesAES(replyMessage, (SecretKeySpec)sessionKey);
-        replySignature = EncryptionUtils.encryptBytesRSAPriv(replySignature, privateKey);
-        Tig.CustomProtocolMessage actualReply = Tig.CustomProtocolMessage.newBuilder()
-                .setSignature(ByteString.copyFrom(replySignature))
-                .setMessage(ByteString.copyFrom(replyMessage))
-                .build();
-
-        reply.onNext(actualReply);
-        reply.onCompleted();*/
-
+        responseObserver.onNext(Empty.newBuilder().build());
+        responseObserver.onCompleted();
 
     }
 
@@ -183,14 +172,19 @@ public class CustomProtocolTigServiceImpl extends CustomProtocolTigServiceGrpc.C
     public void deleteFile (Tig.CustomProtocolMessage request, StreamObserver<Empty> responseObserver) {
         byte[] hash = request.getSignature().getValue().toByteArray();
         String signerId = request.getSignature().getSignerId();
-        Key sessionKey = SessionAuthenticator.authenticateSession(signerId).getSessionKey();
+
+        CustomUserToken sessionToken = SessionAuthenticator.authenticateSession(signerId);
+        Key sessionKey = sessionToken.getSessionKey();
+
         byte[] message = EncryptionUtils.decryptbytesAES(request.getMessage().toByteArray(), (SecretKeySpec) sessionKey);
         hash = EncryptionUtils.decryptbytesRSAPriv(hash, privateKey);
         if (!HashUtils.verifyMessageSignature(message, hash)) {
             throw new IllegalArgumentException("Invalid Signature");
         }
         Tig.Content content = (Tig.Content) ObjectSerializer.Deserialize(message);
-        //TODO verify nonces
+
+        sessionToken.authenticateNonce(content.getNonce());
+
         Tig.DeleteFileRequest deleteRequest = (Tig.DeleteFileRequest) ObjectSerializer.Deserialize(content.getRequest().toByteArray());
         try {
             Tig.DeleteFileReply reply = keyStub.deleteFileTigKey(deleteRequest);
@@ -209,7 +203,8 @@ public class CustomProtocolTigServiceImpl extends CustomProtocolTigServiceGrpc.C
         byte[] hash = request.getSignature().getValue().toByteArray();
         String signerId = request.getSignature().getSignerId();
 
-        Key sessionKey = SessionAuthenticator.authenticateSession(signerId).getSessionKey();
+        CustomUserToken sessionToken = SessionAuthenticator.authenticateSession(signerId);
+        Key sessionKey = sessionToken.getSessionKey();
 
         byte[] message = EncryptionUtils.decryptbytesAES(request.getMessage().toByteArray(), (SecretKeySpec) sessionKey);
         hash = EncryptionUtils.decryptbytesRSAPriv(hash, privateKey);
@@ -220,7 +215,8 @@ public class CustomProtocolTigServiceImpl extends CustomProtocolTigServiceGrpc.C
 
         Tig.Content content = (Tig.Content) ObjectSerializer.Deserialize(message);
 
-        //TODO verify nonces
+        sessionToken.authenticateNonce(content.getNonce());
+
         Tig.AccessControlRequest accessRequest = (Tig.AccessControlRequest) ObjectSerializer.Deserialize(content.getRequest().toByteArray());
         try {
             responseObserver.onNext(keyStub.accessControlFileTigKey(accessRequest));
@@ -235,7 +231,8 @@ public class CustomProtocolTigServiceImpl extends CustomProtocolTigServiceGrpc.C
         byte[] hash = request.getSignature().getValue().toByteArray();
         String signerId = request.getSignature().getSignerId();
 
-        Key sessionKey = SessionAuthenticator.authenticateSession(signerId).getSessionKey();
+        CustomUserToken sessionToken = SessionAuthenticator.authenticateSession(signerId);
+        Key sessionKey = sessionToken.getSessionKey();
 
         byte[] message = EncryptionUtils.decryptbytesAES(request.getMessage().toByteArray(), (SecretKeySpec) sessionKey);
         hash = EncryptionUtils.decryptbytesRSAPriv(hash, privateKey);
@@ -246,7 +243,8 @@ public class CustomProtocolTigServiceImpl extends CustomProtocolTigServiceGrpc.C
 
         Tig.Content content = (Tig.Content) ObjectSerializer.Deserialize(message);
 
-        //TODO verify nonces
+        sessionToken.authenticateNonce(content.getNonce());
+
         Tig.SessionRequest sessionRequest = (Tig.SessionRequest) ObjectSerializer.Deserialize(content.getRequest().toByteArray());
         Tig.ListFilesReply files;
 
@@ -286,7 +284,64 @@ public class CustomProtocolTigServiceImpl extends CustomProtocolTigServiceGrpc.C
                         .build()
         );
         responseObserver.onCompleted();
+    }
 
+    @Override
+    public void listBackupFiles (Tig.CustomProtocolMessage request, StreamObserver<Tig.CustomProtocolMessage> responseObserver) {
+        byte[] hash = request.getSignature().getValue().toByteArray();
+        String signerId = request.getSignature().getSignerId();
+
+        CustomUserToken sessionToken = SessionAuthenticator.authenticateSession(signerId);
+        Key sessionKey = sessionToken.getSessionKey();
+
+        byte[] message = EncryptionUtils.decryptbytesAES(request.getMessage().toByteArray(), (SecretKeySpec) sessionKey);
+        hash = EncryptionUtils.decryptbytesRSAPriv(hash, privateKey);
+
+        if (!HashUtils.verifyMessageSignature(message, hash)) {
+            throw new IllegalArgumentException("Invalid Signature");
+        }
+
+        Tig.Content content = (Tig.Content) ObjectSerializer.Deserialize(message);
+
+        sessionToken.authenticateNonce(content.getNonce());
+
+        Tig.SessionRequest sessionRequest = (Tig.SessionRequest) ObjectSerializer.Deserialize(content.getRequest().toByteArray());
+        Tig.ListFilesReply files;
+
+        try {
+            files = backupStub.listBackupFiles(Tig.ListBackupFilesRequest.newBuilder(Tig.ListBackupFilesRequest.newBuilder().setSessionId(sessionRequest.getSessionId()).build()).build());
+        } catch (StatusRuntimeException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        }
+
+        message = ObjectSerializer.Serialize(files);
+
+        String nonce = StringGenerator.randomString(256);
+
+        content = Tig.Content.newBuilder()
+                .setRequest(ByteString.copyFrom(message))
+                .setNonce(nonce).build();
+
+        message = ObjectSerializer.Serialize(content);
+
+        //hash
+        byte[] signature = HashUtils.hashBytes(message);
+
+        //encrypt hash
+        signature = EncryptionUtils.encryptBytesRSAPriv(signature, privateKey);
+        message = EncryptionUtils.encryptBytesAES(message, (SecretKeySpec) sessionKey);
+
+        Tig.Signature sign = Tig.Signature.newBuilder()
+                .setValue(ByteString.copyFrom(signature)).build();
+
+        //client
+        responseObserver.onNext(
+                Tig.CustomProtocolMessage.newBuilder()
+                        .setMessage(ByteString.copyFrom(message))
+                        .setSignature(sign)
+                        .build()
+        );
+        responseObserver.onCompleted();
     }
 
 }

@@ -15,16 +15,16 @@ public class SessionAuthenticator {
     }
 
 
-    public static CustomUserToken authenticateSession(String sessionId) {
+    public static CustomUserToken authenticateSession(String signerId) {
 
-        if (!sessions.containsKey(sessionId)) {
+        if (!sessions.containsKey(signerId)) {
             throw new IllegalArgumentException("Invalid SessionId");
         }
 
-        CustomUserToken token = sessions.get(sessionId);
+        CustomUserToken token = sessions.get(signerId);
 
         if (!token.authenticateToken()) {
-            sessions.remove(sessionId);
+            sessions.remove(signerId);
             throw new IllegalArgumentException("Session has expired");
         }
 

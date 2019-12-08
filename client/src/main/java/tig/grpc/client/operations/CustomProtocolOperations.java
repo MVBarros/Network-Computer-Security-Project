@@ -9,10 +9,21 @@ import tig.utils.encryption.EncryptionUtils;
 import tig.utils.encryption.HashUtils;
 import tig.utils.serialization.ObjectSerializer;
 
-import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import java.util.HashSet;
 
 public class CustomProtocolOperations {
+
+    public static final HashSet<String> nonces = new HashSet<>();
+
+    private static boolean verifyNonce(String nonce) {
+        if (nonces.contains(nonce)) {
+            System.out.println("Repeatead server message");
+            System.exit(1);
+        }
+        nonces.add(nonce);
+        return true;
+    }
 
     public static void registerClient(Client client) {
         try {
@@ -49,8 +60,6 @@ public class CustomProtocolOperations {
                             .setSignature(sign)
                             .build());
 
-
-            //TODO verify nonces
 
         } catch (StatusRuntimeException e) {
             System.out.print("Error registering user: ");
@@ -100,8 +109,6 @@ public class CustomProtocolOperations {
                             .setSignature(sign)
                             .build());
 
-            //unravel response
-            message = response.getMessage().toByteArray();
             message = EncryptionUtils.decryptbytesAES(response.getMessage().toByteArray(), secretKey);
 
             byte[] hash = response.getSignature().getValue().toByteArray();
@@ -111,12 +118,14 @@ public class CustomProtocolOperations {
                 throw new IllegalArgumentException("Invalid Signature");
             }
 
+            client.setSignerId(response.getSignature().getSignerId());
             Tig.Content content = (Tig.Content) ObjectSerializer.Deserialize(message);
 
-            //TODO verify nonces
+            verifyNonce(content.getNonce());
 
             Tig.LoginReply reply = (Tig.LoginReply) ObjectSerializer.Deserialize(content.getRequest().toByteArray());
             client.setSessionId(reply.getSessionId());
+            client.setSessionKey(secretKey);
             System.out.println(String.format("User %s Successfully logged in", client.getUsername()));
 
         } catch (StatusRuntimeException e) {
@@ -153,9 +162,10 @@ public class CustomProtocolOperations {
             signature = EncryptionUtils.encryptBytesRSAPub(signature, client.getServerKey());
             message = EncryptionUtils.encryptBytesAES(message, (SecretKeySpec) client.getSessionKey());
 
-            //TODO MANDAR SIGNERID
             Tig.Signature sign = Tig.Signature.newBuilder()
-                    .setValue(ByteString.copyFrom(signature)).build();
+                    .setValue(ByteString.copyFrom(signature))
+                    .setSignerId(client.getSignerId())
+                    .build();
 
             //server
             client.getCustomProtocolStub().logout(
@@ -166,7 +176,7 @@ public class CustomProtocolOperations {
             );
 
         } catch (StatusRuntimeException e) {
-            System.out.print("Error logging in: ");
+            System.out.print("Error logging out: ");
             System.out.println(e.getStatus().getDescription());
             System.out.println(e);
             System.exit(1);
@@ -198,9 +208,10 @@ public class CustomProtocolOperations {
             signature = EncryptionUtils.encryptBytesRSAPub(signature, client.getServerKey());
             message = EncryptionUtils.encryptBytesAES(message, (SecretKeySpec) client.getSessionKey());
 
-            //TODO SIGNER ID
             Tig.Signature sign = Tig.Signature.newBuilder()
-                    .setValue(ByteString.copyFrom(signature)).build();
+                    .setValue(ByteString.copyFrom(signature))
+                    .setSignerId(client.getSignerId())
+                    .build();
 
             //server
             client.getCustomProtocolStub().deleteFile(
@@ -247,9 +258,10 @@ public class CustomProtocolOperations {
             signature = EncryptionUtils.encryptBytesRSAPub(signature, client.getServerKey());
             message = EncryptionUtils.encryptBytesAES(message, (SecretKeySpec) client.getSessionKey());
 
-            //TODO SIGNER ID
             Tig.Signature sign = Tig.Signature.newBuilder()
-                    .setValue(ByteString.copyFrom(signature)).build();
+                    .setValue(ByteString.copyFrom(signature))
+                    .setSignerId(client.getSignerId())
+                    .build();
 
             //server
             client.getCustomProtocolStub().setAccessControl(
@@ -296,9 +308,10 @@ public class CustomProtocolOperations {
             message = EncryptionUtils.encryptBytesAES(message, (SecretKeySpec) client.getSessionKey());
 
 
-            //TODO MANDAR SIGNERID
             Tig.Signature sign = Tig.Signature.newBuilder()
-                    .setValue(ByteString.copyFrom(signature)).build();
+                    .setValue(ByteString.copyFrom(signature))
+                    .setSignerId(client.getSignerId())
+                    .build();
 
             //server
             Tig.CustomProtocolMessage response = client.getCustomProtocolStub().listFiles(
@@ -320,7 +333,8 @@ public class CustomProtocolOperations {
 
             content = (Tig.Content) ObjectSerializer.Deserialize(message);
 
-            //TODO verify nonces
+            verifyNonce(content.getNonce());
+
             Tig.ListFilesReply reply = (Tig.ListFilesReply) ObjectSerializer.Deserialize(content.getRequest().toByteArray());
 
             Object[] names = reply.getFileInfoList().toArray();
@@ -334,6 +348,76 @@ public class CustomProtocolOperations {
             System.exit(1);
         }
     }
+
+    public static void listRecoverFiles(Client client) {
+        try {
+            System.out.println("List all Files");
+
+            //request
+            Tig.SessionRequest request = Tig.SessionRequest.newBuilder()
+                    .setSessionId(client.getSessionId())
+                    .build();
+
+            //serialize request
+            byte[] message = ObjectSerializer.Serialize(request);
+
+            String nonce = StringGenerator.randomString(256);
+
+            Tig.Content content = Tig.Content.newBuilder()
+                    .setRequest(ByteString.copyFrom(message))
+                    .setNonce(nonce).build();
+
+            message = ObjectSerializer.Serialize(content);
+
+            //hash
+            byte[] signature = HashUtils.hashBytes(message);
+
+            //encrypt hash
+            signature = EncryptionUtils.encryptBytesRSAPub(signature, client.getServerKey());
+            message = EncryptionUtils.encryptBytesAES(message, (SecretKeySpec) client.getSessionKey());
+
+
+            Tig.Signature sign = Tig.Signature.newBuilder()
+                    .setValue(ByteString.copyFrom(signature))
+                    .setSignerId(client.getSignerId())
+                    .build();
+
+            //server
+            Tig.CustomProtocolMessage response = client.getCustomProtocolStub().listBackupFiles(
+                    Tig.CustomProtocolMessage.newBuilder()
+                            .setMessage(ByteString.copyFrom(message))
+                            .setSignature(sign)
+                            .build()
+            );
+
+            //Decrypt response
+            message = EncryptionUtils.decryptbytesAES(response.getMessage().toByteArray(), (SecretKeySpec) client.getSessionKey());
+
+            byte[] hash = response.getSignature().getValue().toByteArray();
+            hash = EncryptionUtils.decryptbytesRSAPub(hash, client.getServerKey());
+
+            if (!HashUtils.verifyMessageSignature(message, hash)) {
+                throw new IllegalArgumentException("Invalid Signature");
+            }
+
+            content = (Tig.Content) ObjectSerializer.Deserialize(message);
+
+            verifyNonce(content.getNonce());
+
+            Tig.ListFilesReply reply = (Tig.ListFilesReply) ObjectSerializer.Deserialize(content.getRequest().toByteArray());
+
+            Object[] names = reply.getFileInfoList().toArray();
+            for (Object name : names) {
+                System.out.println(name.toString() + "\n");
+            }
+
+        } catch (StatusRuntimeException e) {
+            System.out.print("Error listing files: ");
+            System.out.println(e.getStatus().getDescription());
+            System.exit(1);
+        }
+    }
+
 
 }
 

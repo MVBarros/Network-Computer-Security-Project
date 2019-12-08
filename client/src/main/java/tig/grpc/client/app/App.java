@@ -59,7 +59,7 @@ public class App {
             @Override
             public void run() {
                 if (client != null && client.getSessionId() != null) {
-                    Operations.logoutClient(client);
+                    CustomProtocolOperations.logoutClient(client);
                 }
                 channel.shutdownNow();
             }

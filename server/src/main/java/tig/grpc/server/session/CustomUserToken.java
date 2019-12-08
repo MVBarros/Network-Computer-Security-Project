@@ -2,11 +2,14 @@ package tig.grpc.server.session;
 
 import java.security.Key;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 
 public class CustomUserToken {
 
     private Key sessionKey;
     private LocalDateTime expiration;
+
+    public static final HashSet<String> nonces = new HashSet<String>();
 
     public CustomUserToken(LocalDateTime expiration, Key sessionKey) {
         this.expiration = expiration;
@@ -17,6 +20,13 @@ public class CustomUserToken {
         return !expiration.isBefore(LocalDateTime.now());
     }
 
+    public boolean authenticateNonce(String nonce) {
+        if (nonces.contains(nonce)) {
+            throw new IllegalArgumentException("Repeated message");
+        }
+        nonces.add(nonce);
+        return true;
+    }
 
     public Key getSessionKey() {
         return sessionKey;
