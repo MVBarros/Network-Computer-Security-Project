@@ -8,6 +8,7 @@ import tig.grpc.contract.CustomProtocolTigServiceGrpc;
 import tig.grpc.contract.Tig;
 import tig.grpc.contract.TigBackupServiceGrpc;
 import tig.grpc.contract.TigKeyServiceGrpc;
+import tig.grpc.server.dao.FileDAO;
 import tig.grpc.server.session.SessionAuthenticator;
 import tig.grpc.server.throttle.Throttler;
 import tig.utils.StringGenerator;
@@ -152,7 +153,9 @@ public class CustomProtocolTigServiceImpl extends CustomProtocolTigServiceGrpc.C
         //TODO verify nonces
         Tig.DeleteFileRequest deleteRequest = (Tig.DeleteFileRequest) ObjectSerializer.Deserialize(content.getRequest().toByteArray());
         try {
-            responseObserver.onNext(keyStub.deleteFileTigKey(deleteRequest));
+            Tig.DeleteFileReply reply = keyStub.deleteFileTigKey(deleteRequest);
+            FileDAO.deleteFile(reply.getFileId());
+            responseObserver.onNext(Empty.newBuilder().build());
             responseObserver.onCompleted();
         }catch (StatusRuntimeException e) {
             throw new IllegalArgumentException(e.getMessage());
