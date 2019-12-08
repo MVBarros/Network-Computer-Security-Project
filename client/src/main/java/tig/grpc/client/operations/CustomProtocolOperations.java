@@ -84,7 +84,7 @@ public class CustomProtocolOperations {
             //TODO verify nonces
 
             Tig.LoginReply reply = (Tig.LoginReply) ObjectSerializer.Deserialize(content.getRequest().toByteArray());
-
+            client.setSessionId(reply.getSessionId());
             System.out.println(String.format("User %s Successfully logged in", client.getUsername()));
 
         } catch (StatusRuntimeException e) {
