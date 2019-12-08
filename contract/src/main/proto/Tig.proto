@@ -92,27 +92,11 @@ service CustomProtocolTigService {
     rpc logout (CustomProtocolMessage) returns (CustomProtocolMessage);
 }
 
-message Signature {
-    string signerId = 1;
-    bytes value = 2; // hash of the message that is encrypted with the receiver public key
-}
-
+//login must have custom types because it envolves the exchange of keys, the rest of the messages don't
 message CustomLoginRequest {
     bytes message = 1; //message is a serialized AccountRequest
     bytes encryptionKey = 2; //encrypted with the server public key
-    bytes clientPubKey = 3;
-}
-
-message CustomProtocolLogoutRequest {
-    string nonce = 1;
-}
-
-message CustomProtocolLogoutReply {
-}
-
-message CustomProtocolMessage {
-    bytes message = 1; //message is a serialized message encrypted with the sessionKey
-    bytes signature = 2; //Signature is the hash
+    bytes clientPubKey = 3; //encoded can go in plain text
 }
 
 message CustomProtocolLoginReply {
@@ -121,8 +105,19 @@ message CustomProtocolLoginReply {
 }
 
 
-//**************************** Key Server ******************************
+message Signature {
+    string signerId = 1;
+    bytes value = 2; // hash of the message that is encrypted with the receiver public key
+    bytes nonce = 3; // to avoid replay attacks
+}
 
+message CustomProtocolMessage {
+    bytes message = 1; //message is a serialized message encrypted with the sessionKey
+    bytes signature = 2; //Signature is the hash
+}
+
+
+//**************************** Key Server ******************************
 service TigKeyService {
     rpc registerTigKey (AccountRequest) returns (google.protobuf.Empty);
     rpc loginTigKey (AccountRequest) returns (LoginReply);
