@@ -39,13 +39,17 @@ public class CustomProtocolOperations {
             builder.setPassword(client.getPassword());
             byte[] message = ObjectSerializer.Serialize(builder.build());
 
-            //Create Login Request by encripting the request with an AES Key
+            byte[] signature = HashUtils.hashBytes(message);
+            signature = EncryptionUtils.encryptBytesRSAPub(signature, client.getServerKey());
+
+            //Create Login Request by encrypting the request with an AES Key
             SecretKeySpec secretKey = (SecretKeySpec) EncryptionUtils.generateAESKey();
 
             message = EncryptionUtils.encryptBytesAES(message, secretKey);
 
             //Encrypt the key with the server key so only the server can decipher
             byte[] encryptedKey = EncryptionUtils.encryptBytesRSAPub(secretKey.getEncoded(), client.getServerKey());
+
             Tig.CustomLoginRequest loginRequest = Tig.CustomLoginRequest.newBuilder()
                     .setMessage(ByteString.copyFrom(message))
                     .setEncryptionKey(ByteString.copyFrom(encryptedKey))
@@ -54,8 +58,6 @@ public class CustomProtocolOperations {
 
             //create final message and signature
             message = ObjectSerializer.Serialize(loginRequest);
-            byte[] signature = HashUtils.hashBytes(message);
-            signature = EncryptionUtils.encryptBytesRSAPub(signature, client.getServerKey());
 
             Tig.Signature sign = Tig.Signature.newBuilder().setValue(ByteString.copyFrom(signature)).build();
 
