@@ -170,7 +170,6 @@ public class CustomProtocolOperations {
             Tig.Content content = Tig.Content.newBuilder()
                     .setRequest(ByteString.copyFrom(message))
                     .setNonce(nonce).build();
-
             message = ObjectSerializer.Serialize(content);
 
             byte[] signature = HashUtils.hashBytes(message);

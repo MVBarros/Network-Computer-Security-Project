@@ -184,7 +184,7 @@ public class Operations {
                     .setTarget(target)
                     .setPermission(permission).build());
         } catch (StatusRuntimeException e) {
-            System.out.print("Error deleting file: ");
+            System.out.print("Error setting access control: ");
             System.out.println(e.getStatus().getDescription());
             System.exit(1);
         }
