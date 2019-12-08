@@ -89,52 +89,49 @@ public class CustomProtocolOperations {
     }
 
     public static void logoutClient(Client client) {
-        /*try {
-            System.out.println(String.format("Login Client Custom Protocol %s", client.getUsername()
+        try {
+            System.out.println(String.format("Logout Client Custom Protocol %s", client.getUsername()
             ));
 
-            //Create Message
-            Tig.CustomProtocolLogoutRequest logoutRequest = Tig.CustomProtocolLogoutRequest.newBuilder().build();
-            byte[] message = ObjectSerializer.Serialize(logoutRequest);
+            Tig.SessionRequest request = Tig.SessionRequest.newBuilder()
+                                        .setSessionId(client.getSessionId())
+                                        .build();
 
-            //Create signature and encrypt it
+            //serialize request
+            byte[] message = ObjectSerializer.Serialize(request);
+
+            String nonce = StringGenerator.randomString(256);
+
+            Tig.Content content = Tig.Content.newBuilder()
+                    .setRequest(ByteString.copyFrom(message))
+                    .setNonce(nonce).build();
+            message = ObjectSerializer.Serialize(content);
+
+            //hash
             byte[] signature = HashUtils.hashBytes(message);
-            signature = EncryptionUtils.encryptBytesRSAPub(signature, client.getServerKey());
-            Tig.Signature sign = Tig.Signature.newBuilder().setSignerId(client.getSessionId()).setValue(ByteString.copyFrom(signature)).build();
-            signature = ObjectSerializer.Serialize(sign);
 
-            //Encrypt message
+            //encrypt hash
+            signature = EncryptionUtils.encryptBytesRSAPub(signature, client.getServerKey());
             message = EncryptionUtils.encryptBytesAES(message, (SecretKeySpec) client.getSessionKey());
 
+            //TODO MANDAR SIGNERID
+            Tig.Signature sign = Tig.Signature.newBuilder()
+                    .setValue(ByteString.copyFrom(signature)).build();
 
-            //logout user
-            Tig.CustomProtocolMessage response = client.getCustomProtocolStub().logout(
+            //server
+            client.getCustomProtocolStub().logout(
                     Tig.CustomProtocolMessage.newBuilder()
                             .setMessage(ByteString.copyFrom(message))
-                            .setSignature(ByteString.copyFrom(signature))
-                            .build());
-
-            //unravel response
-            byte[] responseBytes = response.getMessage().toByteArray();
-            byte[] responseSignature = response.getSignature().toByteArray();
-
-            //decrypt reply
-            responseBytes = EncryptionUtils.decryptbytesAES(responseBytes, (SecretKeySpec) client.getSessionKey());
-            Tig.CustomProtocolLogoutReply loginReply = (Tig.CustomProtocolLogoutReply) ObjectSerializer.Deserialize(responseBytes);
-
-            //decrypt signature and verify
-            responseSignature = EncryptionUtils.decryptbytesRSAPub(responseSignature, client.getServerKey());
-            HashUtils.verifyMessageSignature(responseBytes, responseSignature);
-
-            //FIXME Verify nonce
-            System.out.println(String.format("User %s Successfully logged out", client.getUsername()));
+                            .setSignature(sign)
+                            .build()
+            );
 
         } catch (StatusRuntimeException e) {
             System.out.print("Error logging in: ");
             System.out.println(e.getStatus().getDescription());
             System.out.println(e);
             System.exit(1);
-        }*/
+        }
     }
 
 
@@ -181,6 +178,7 @@ public class CustomProtocolOperations {
             signature = EncryptionUtils.encryptBytesRSAPub(signature, client.getServerKey());
             message = EncryptionUtils.encryptBytesAES(message, (SecretKeySpec) client.getSessionKey());
 
+            //TODO SIGNER ID
             Tig.Signature sign = Tig.Signature.newBuilder()
                     .setValue(ByteString.copyFrom(signature)).build();
 
@@ -228,6 +226,8 @@ public class CustomProtocolOperations {
             signature = EncryptionUtils.encryptBytesRSAPub(signature, client.getServerKey());
             message = EncryptionUtils.encryptBytesAES(message, (SecretKeySpec) client.getSessionKey());
 
+
+            //TODO MANDAR SIGNERID
             Tig.Signature sign = Tig.Signature.newBuilder()
                     .setValue(ByteString.copyFrom(signature)).build();
 
