@@ -16,6 +16,7 @@ import tig.utils.encryption.HashUtils;
 import tig.utils.keys.KeyGen;
 import tig.utils.serialization.ObjectSerializer;
 
+import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.*;
 
@@ -31,6 +32,67 @@ public class CustomProtocolTigServiceImpl extends CustomProtocolTigServiceGrpc.C
 
     @Override
     public void login(Tig.CustomProtocolMessage request, StreamObserver<Tig.CustomProtocolMessage> responseObserver) {
+        byte[] message = request.getMessage().toByteArray();
+        Tig.Signature signature = request.getSignature();
+        Tig.CustomLoginRequest loginRequest = (Tig.CustomLoginRequest)ObjectSerializer.Deserialize(message);
+
+        //get SessionKey
+        byte[] sessionKey = loginRequest.getEncryptionKey().toByteArray();
+        //decipher with server key
+        sessionKey = EncryptionUtils.decryptbytesRSAPriv(sessionKey, privateKey);
+        SecretKeySpec key = EncryptionUtils.getAesKey(sessionKey);
+
+        //decipher message with session key
+        message = loginRequest.getMessage().toByteArray();
+        message = EncryptionUtils.decryptbytesAES(message, key);
+        byte[] hash = signature.getValue().toByteArray();
+        hash = EncryptionUtils.decryptbytesRSAPriv(hash, privateKey);
+
+        if (!HashUtils.verifyMessageSignature(message, hash)) {
+            throw new IllegalArgumentException("Invalid Signature");
+        }
+
+        Tig.AccountRequest req = (Tig.AccountRequest) ObjectSerializer.Deserialize(message);
+        Tig.LoginReply reply;
+        try {
+            Throttler.throttle(req.getUsername());
+            reply = keyStub.loginTigKey(req);
+            Throttler.success(req.getUsername());
+        } catch(StatusRuntimeException e) {
+            Throttler.failure(req.getUsername());
+            throw new IllegalArgumentException(e.getMessage());
+        }
+
+        message = ObjectSerializer.Serialize(reply);
+
+        String nonce = StringGenerator.randomString(256);
+
+        Tig.Content content = Tig.Content.newBuilder()
+                .setRequest(ByteString.copyFrom(message))
+                .setNonce(nonce).build();
+
+        message = ObjectSerializer.Serialize(content);
+
+        //hash
+        byte[] sign = HashUtils.hashBytes(message);
+
+        //encrypt hash
+        sign = EncryptionUtils.encryptBytesRSAPriv(sign, privateKey);
+        message = EncryptionUtils.encryptBytesAES(message, key);
+
+        signature = Tig.Signature.newBuilder()
+                .setValue(ByteString.copyFrom(sign))
+                .setSignerId(StringGenerator.randomString(256))
+                .build();
+
+        //client
+        responseObserver.onNext(
+                Tig.CustomProtocolMessage.newBuilder()
+                        .setMessage(ByteString.copyFrom(message))
+                        .setSignature(signature)
+                        .build()
+        );
+        responseObserver.onCompleted();
     }
 
     @Override
@@ -71,9 +133,9 @@ public class CustomProtocolTigServiceImpl extends CustomProtocolTigServiceGrpc.C
                 .build();
 
         reply.onNext(actualReply);
-        reply.onCompleted();
+        reply.onCompleted();*/
 
-         */
+
     }
 
     @Override

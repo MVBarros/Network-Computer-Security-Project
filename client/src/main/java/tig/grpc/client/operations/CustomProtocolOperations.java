@@ -29,7 +29,7 @@ public class CustomProtocolOperations {
     }*/
 
     public static void loginClient(Client client) {
-        /*try {
+        try {
             System.out.println(String.format("Login Client Custom Protocol %s", client.getUsername()
             ));
 
@@ -39,8 +39,9 @@ public class CustomProtocolOperations {
             builder.setPassword(client.getPassword());
             byte[] message = ObjectSerializer.Serialize(builder.build());
 
-            //Create Login Request by encripting the request with a AES Key
+            //Create Login Request by encripting the request with an AES Key
             SecretKeySpec secretKey = (SecretKeySpec) EncryptionUtils.generateAESKey();
+
             message = EncryptionUtils.encryptBytesAES(message, secretKey);
 
             //Encrypt the key with the server key so only the server can decipher
@@ -56,11 +57,13 @@ public class CustomProtocolOperations {
             byte[] signature = HashUtils.hashBytes(message);
             signature = EncryptionUtils.encryptBytesRSAPub(signature, client.getServerKey());
 
+            Tig.Signature sign = Tig.Signature.newBuilder().setValue(ByteString.copyFrom(signature)).build();
+
             //login user
             Tig.CustomProtocolMessage response = client.getCustomProtocolStub().login(
                     Tig.CustomProtocolMessage.newBuilder()
                             .setMessage(ByteString.copyFrom(message))
-                            .setSignature(ByteString.copyFrom(signature))
+                            .setSignature(sign)
                             .build());
 
             //unravel response
@@ -85,7 +88,7 @@ public class CustomProtocolOperations {
             System.out.println(e.getStatus().getDescription());
             System.out.println(e);
             System.exit(1);
-        }*/
+        }
     }
 
     public static void logoutClient(Client client) {
