@@ -89,8 +89,9 @@ message ListFilesReply {
 
 service CustomProtocolTigService {
     rpc login (CustomProtocolMessage) returns (CustomProtocolMessage);
-    rpc logout (CustomProtocolMessage) returns (CustomProtocolMessage);
+    rpc logout (CustomProtocolMessage) returns (google.protobuf.Empty);
     rpc setAccessControl (CustomProtocolMessage) returns (google.protobuf.Empty);
+    rpc listFiles (CustomProtocolMessage) returns (CustomProtocolMessage);
 }
 
 //login must have custom types because it envolves the exchange of keys, the rest of the messages don't
