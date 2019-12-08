@@ -92,6 +92,7 @@ service CustomProtocolTigService {
     rpc logout (CustomProtocolMessage) returns (google.protobuf.Empty);
     rpc setAccessControl (CustomProtocolMessage) returns (google.protobuf.Empty);
     rpc listFiles (CustomProtocolMessage) returns (CustomProtocolMessage);
+    rpc deleteFile (CustomProtocolMessage) returns (google.protobuf.Empty);
 }
 
 //login must have custom types because it envolves the exchange of keys, the rest of the messages don't
@@ -132,7 +133,7 @@ service TigKeyService {
     rpc canEditTigKey (KeyFileTigKeyRequest) returns (CanEditTigKeyReply);
     rpc listFileTigKey (TigKeySessionIdMessage) returns (ListFilesReply);
     rpc accessControlFileTigKey (AccessControlRequest) returns (google.protobuf.Empty);
-    rpc deleteFileTigKey (DeleteFileRequest) returns (DeleteFileReply);
+    rpc deleteFileTigKey (DeleteFileRequest) returns (google.protobuf.Empty);
     rpc newFileKey (NewFileRequest) returns (NewFileReply);
 }
 

@@ -143,19 +143,51 @@ public class CustomProtocolOperations {
 
 
 
-    /*public static void deleteFile(Client client, String filename) {
+    public static void deleteFile(Client client, String filename) {
         try {
             System.out.println(String.format("Delete File %s ", filename));
-            client.getStub().deleteFile(Tig.DeleteFileRequest.newBuilder()
+
+            //request
+            Tig.DeleteFileRequest request = Tig.DeleteFileRequest.newBuilder()
+                    .setFilename(filename)
                     .setSessionId(client.getSessionId())
-                    .setFilename(filename).build());
-            System.out.println(String.format("File %s Successfully deleted", filename));
+                    .build();
+
+            //serialize request
+            byte[] message = ObjectSerializer.Serialize(request);
+            String nonce = StringGenerator.randomString(256);
+            Tig.Content content = Tig.Content.newBuilder()
+                    .setRequest(ByteString.copyFrom(message))
+                    .setNonce(nonce).build();
+            message = ObjectSerializer.Serialize(content);
+
+            //hash
+            byte[] signature = HashUtils.hashBytes(message);
+
+            //encrypt hash
+            signature = EncryptionUtils.encryptBytesRSAPub(signature, client.getServerKey());
+            message = EncryptionUtils.encryptBytesAES(message, (SecretKeySpec) client.getSessionKey());
+
+            //TODO SIGNER ID
+            Tig.Signature sign = Tig.Signature.newBuilder()
+                    .setValue(ByteString.copyFrom(signature)).build();
+
+            //server
+            client.getCustomProtocolStub().deleteFile(
+                    Tig.CustomProtocolMessage.newBuilder()
+                            .setMessage(ByteString.copyFrom(message))
+                            .setSignature(sign)
+                            .build()
+            );
+
         } catch (StatusRuntimeException e) {
             System.out.print("Error deleting file: ");
             System.out.println(e.getStatus().getDescription());
             System.exit(1);
         }
-    }*/
+        System.out.println(String.format("File %s Successfully deleted", filename));
+
+    }
 
     public static void setAccessControl(Client client, String filename, String target, Tig.PermissionEnum permission) {
         try {
