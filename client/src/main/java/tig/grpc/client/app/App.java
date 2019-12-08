@@ -34,6 +34,10 @@ public class App {
             formatter.printHelp("utility-name", options);
             System.exit(1);
         }
+        if (cmd.getOptions().length == 0) {
+            formatter.printHelp("utility-name", options);
+            System.exit(1);
+        }
 
         final String host = "localhost";//args[0];
         final int port = 8080;//Integer.parseInt(args[1]);
