@@ -88,6 +88,7 @@ message ListFilesReply {
 
 
 service CustomProtocolTigService {
+    rpc register (CustomProtocolMessage) returns (google.protobuf.Empty);
     rpc login (CustomProtocolMessage) returns (CustomProtocolMessage);
     rpc logout (CustomProtocolMessage) returns (google.protobuf.Empty);
     rpc setAccessControl (CustomProtocolMessage) returns (google.protobuf.Empty);

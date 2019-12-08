@@ -14,19 +14,51 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class CustomProtocolOperations {
 
-    /*public static void registerClient(Client client) {
+    public static void registerClient(Client client) {
         try {
-            System.out.println(String.format("Register Client %s", client.getUsername()));
-            client.getStub().register(Tig.AccountRequest.newBuilder()
-                    .setUsername(client.getUsername())
-                    .setPassword(client.getPassword()).build());
-            System.out.println(String.format("User %s Successfully registered", client.getUsername()));
+            System.out.println(String.format("Register Client Custom Protocol %s", client.getUsername()));
+            //Create and Serialize AccountRequest
+            Tig.AccountRequest.Builder builder = Tig.AccountRequest.newBuilder();
+            builder.setUsername(client.getUsername());
+            builder.setPassword(client.getPassword());
+            byte[] message = ObjectSerializer.Serialize(builder.build());
+
+            byte[] signature = HashUtils.hashBytes(message);
+            signature = EncryptionUtils.encryptBytesRSAPub(signature, client.getServerKey());
+
+            //Create Login Request by encrypting the request with an AES Key
+            SecretKeySpec secretKey = (SecretKeySpec) EncryptionUtils.generateAESKey();
+            message = EncryptionUtils.encryptBytesAES(message, secretKey);
+
+            //Encrypt the key with the server key so only the server can decipher
+            byte[] encryptedKey = EncryptionUtils.encryptBytesRSAPub(secretKey.getEncoded(), client.getServerKey());
+            Tig.CustomLoginRequest registerRequest = Tig.CustomLoginRequest.newBuilder()
+                    .setMessage(ByteString.copyFrom(message))
+                    .setEncryptionKey(ByteString.copyFrom(encryptedKey))
+                    .setClientPubKey(ByteString.copyFrom(client.getPubKey().getEncoded()))
+                    .build();
+
+            //create final message and signature
+            message = ObjectSerializer.Serialize(registerRequest);
+            Tig.Signature sign = Tig.Signature.newBuilder().setValue(ByteString.copyFrom(signature)).build();
+
+            //login user
+            client.getCustomProtocolStub().register(
+                    Tig.CustomProtocolMessage.newBuilder()
+                            .setMessage(ByteString.copyFrom(message))
+                            .setSignature(sign)
+                            .build());
+
+
+            //TODO verify nonces
+
         } catch (StatusRuntimeException e) {
             System.out.print("Error registering user: ");
             System.out.println(e.getStatus().getDescription());
             System.exit(1);
         }
-    }*/
+        System.out.println(String.format("User %s Successfully registered", client.getUsername()));
+    }
 
     public static void loginClient(Client client) {
         try {

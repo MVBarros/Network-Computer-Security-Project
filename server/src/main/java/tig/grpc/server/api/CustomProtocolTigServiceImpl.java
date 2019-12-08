@@ -30,6 +30,46 @@ public class CustomProtocolTigServiceImpl extends CustomProtocolTigServiceGrpc.C
     public static TigKeyServiceGrpc.TigKeyServiceBlockingStub keyStub;
     public static TigBackupServiceGrpc.TigBackupServiceBlockingStub backupStub;
 
+    @Override
+    public void register(Tig.CustomProtocolMessage request, StreamObserver<Empty> responseObserver) {
+        byte[] message = request.getMessage().toByteArray();
+        Tig.Signature signature = request.getSignature();
+        Tig.CustomLoginRequest registerRequest = (Tig.CustomLoginRequest)ObjectSerializer.Deserialize(message);
+
+        //get SessionKey
+        byte[] sessionKey = registerRequest.getEncryptionKey().toByteArray();
+        //decipher with server key
+        sessionKey = EncryptionUtils.decryptbytesRSAPriv(sessionKey, privateKey);
+        SecretKeySpec key = EncryptionUtils.getAesKey(sessionKey);
+
+        //decipher message with session key
+        message = registerRequest.getMessage().toByteArray();
+        message = EncryptionUtils.decryptbytesAES(message, key);
+        byte[] hash = signature.getValue().toByteArray();
+        hash = EncryptionUtils.decryptbytesRSAPriv(hash, privateKey);
+        if (!HashUtils.verifyMessageSignature(message, hash)) {
+            throw new IllegalArgumentException("Invalid Signature");
+        }
+        Tig.AccountRequest req = (Tig.AccountRequest) ObjectSerializer.Deserialize(message);
+        Empty reply;
+        try {
+            Throttler.throttle(req.getUsername());
+            reply = keyStub.registerTigKey(req);
+            Throttler.success(req.getUsername());
+        } catch(StatusRuntimeException e) {
+            Throttler.failure(req.getUsername());
+            throw new IllegalArgumentException(e.getMessage());
+        }
+
+        //client
+        try {
+            responseObserver.onNext(reply);
+            responseObserver.onCompleted();
+        }catch (StatusRuntimeException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        }
+    }
+
 
     @Override
     public void login(Tig.CustomProtocolMessage request, StreamObserver<Tig.CustomProtocolMessage> responseObserver) {
