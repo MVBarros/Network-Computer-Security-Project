@@ -28,13 +28,13 @@ You should then run `mvn compile exec:java` in the key-server, backup and server
 
 To run the client yo must first to `mvn clean install` on the client module. Then go into the `target` directory and run `java -jar tig-client-1.0.0-SNAPSHOT-jar-with-dependencies.jar` with the options you want to run. The avaliable options are:
 
-*  -b                                 Use to list Backup files
-*  -c <filename permission target>    Use to change Access Control options of a file
-*  -d <filename owner filepath>       Use to Download a file
-*  -e <filename owner filepath>       Use to Edit a file
-*  -g <filename t_created filepath>   Use to Get a backup file
-*  -l                                 Use to List all files
-*  -n                                 Use to register New user
-*  -r <filename>                      Use to Remove (delete) a file
-*  -u <filename filepath>             Use to Upload a new file
+*  `-b`                                 Use to list Backup files
+*  `-c filename permission target`    Use to change Access Control options of a file
+*  `-d filename owner filepath`       Use to Download a file
+*  `-e filename owner filepath`       Use to Edit a file
+*  `-g filename t_created filepath`   Use to Get a backup file
+*  `-l`                                 Use to List all files
+*  `-n`                                 Use to register New user
+*  `-r filename`                      Use to Remove (delete) a file
+*  `-u filename filepath`             Use to Upload a new file
 
