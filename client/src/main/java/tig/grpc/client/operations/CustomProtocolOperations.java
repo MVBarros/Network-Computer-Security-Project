@@ -41,12 +41,16 @@ public class CustomProtocolOperations {
             SecretKeySpec secretKey = (SecretKeySpec) EncryptionUtils.generateAESKey();
             message = EncryptionUtils.encryptBytesAES(message, secretKey);
 
+
+            byte[] pubKey = client.getPubKey().getEncoded();
+            pubKey = EncryptionUtils.encryptBytesAES(pubKey, secretKey);
+
             //Encrypt the key with the server key so only the server can decipher
             byte[] encryptedKey = EncryptionUtils.encryptBytesRSAPub(secretKey.getEncoded(), client.getServerKey());
             Tig.CustomLoginRequest registerRequest = Tig.CustomLoginRequest.newBuilder()
                     .setMessage(ByteString.copyFrom(message))
                     .setEncryptionKey(ByteString.copyFrom(encryptedKey))
-                    .setClientPubKey(ByteString.copyFrom(client.getPubKey().getEncoded()))
+                    .setClientPubKey(ByteString.copyFrom(pubKey))
                     .build();
 
             //create final message and signature
@@ -91,10 +95,13 @@ public class CustomProtocolOperations {
             //Encrypt the key with the server key so only the server can decipher
             byte[] encryptedKey = EncryptionUtils.encryptBytesRSAPub(secretKey.getEncoded(), client.getServerKey());
 
+            byte[] pubKey = client.getPubKey().getEncoded();
+            pubKey = EncryptionUtils.encryptBytesAES(pubKey, secretKey);
+
             Tig.CustomLoginRequest loginRequest = Tig.CustomLoginRequest.newBuilder()
                     .setMessage(ByteString.copyFrom(message))
                     .setEncryptionKey(ByteString.copyFrom(encryptedKey))
-                    .setClientPubKey(ByteString.copyFrom(client.getPubKey().getEncoded()))
+                    .setClientPubKey(ByteString.copyFrom(pubKey))
                     .build();
 
             //create final message and signature

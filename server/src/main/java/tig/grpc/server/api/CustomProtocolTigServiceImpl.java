@@ -33,16 +33,16 @@ public class CustomProtocolTigServiceImpl extends CustomProtocolTigServiceGrpc.C
         Tig.Signature signature = request.getSignature();
         Tig.CustomLoginRequest registerRequest = (Tig.CustomLoginRequest)ObjectSerializer.Deserialize(message);
 
-        //Get client pub key
-        byte[] pubKey = registerRequest.getClientPubKey().toByteArray();
-        PublicKey clientPubKey = EncryptionUtils.getPubRSAKey(pubKey);
-
         //get SessionKey
         byte[] sessionKey = registerRequest.getEncryptionKey().toByteArray();
         //decipher with server key
         sessionKey = EncryptionUtils.decryptbytesRSAPriv(sessionKey, privateKey);
         SecretKeySpec key = EncryptionUtils.getAesKey(sessionKey);
 
+        //Get client pub key
+        byte[] pubKey = registerRequest.getClientPubKey().toByteArray();
+        pubKey = EncryptionUtils.decryptbytesAES(pubKey, key);
+        PublicKey clientPubKey = EncryptionUtils.getPubRSAKey(pubKey);
 
         //decipher message with session key
         message = registerRequest.getMessage().toByteArray();
@@ -79,15 +79,17 @@ public class CustomProtocolTigServiceImpl extends CustomProtocolTigServiceGrpc.C
         Tig.Signature signature = request.getSignature();
         Tig.CustomLoginRequest loginRequest = (Tig.CustomLoginRequest)ObjectSerializer.Deserialize(message);
 
-        //Get client pub key
-        byte[] pubKey = loginRequest.getClientPubKey().toByteArray();
-        PublicKey clientPubKey = EncryptionUtils.getPubRSAKey(pubKey);
 
         //get SessionKey
         byte[] sessionKey = loginRequest.getEncryptionKey().toByteArray();
         //decipher with server key
         sessionKey = EncryptionUtils.decryptbytesRSAPriv(sessionKey, privateKey);
         SecretKeySpec key = EncryptionUtils.getAesKey(sessionKey);
+
+        //Get client pub key
+        byte[] pubKey = loginRequest.getClientPubKey().toByteArray();
+        pubKey = EncryptionUtils.decryptbytesAES(pubKey, key);
+        PublicKey clientPubKey = EncryptionUtils.getPubRSAKey(pubKey);
 
         //decipher message with session key
         message = loginRequest.getMessage().toByteArray();
