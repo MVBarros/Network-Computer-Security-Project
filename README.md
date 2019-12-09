@@ -10,13 +10,13 @@ Daniela Mendes
 
 Miguel Barros
 
-###Requirements:
+### Requirements:
 
 OpenSSL 1.1.1
 sqlite3 3.30.1
 Apache Maven 3.6.2 
 
-###Setup:
+### Setup:
 
 All of the modules must be configured with the correct keys. To do so, run the script `root-gen.sh`, which automattically creates and copies the key files to the respective folders. 
 
