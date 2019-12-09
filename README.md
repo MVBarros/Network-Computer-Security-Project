@@ -13,7 +13,9 @@ Miguel Barros
 ### Requirements:
 
 OpenSSL 1.1.1
+
 sqlite3 3.30.1
+
 Apache Maven 3.6.2 
 
 ### Setup:
