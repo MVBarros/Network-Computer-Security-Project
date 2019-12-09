@@ -18,6 +18,8 @@ Miguel Barros
 
 `Apache Maven 3.6.2`
 
+`openjdk version 1.8.0_232`
+
 ### Setup:
 
 All of the modules must be configured with the correct keys. To do so, run the script `root-gen.sh`, which automatically creates and copies the key files to the respective folders. 
