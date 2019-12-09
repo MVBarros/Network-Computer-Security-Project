@@ -1,6 +1,7 @@
 package tig.grpc.server.session;
 
 import java.security.Key;
+import java.security.PublicKey;
 import java.time.LocalDateTime;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -8,9 +9,9 @@ public class SessionAuthenticator {
 
     public static final ConcurrentHashMap<String, CustomUserToken> sessions = new ConcurrentHashMap<>();
 
-    public static String insertCustomSession(String sessionId, Key sessionKey) {
+    public static String insertCustomSession(String sessionId, Key sessionKey, PublicKey publicKey) {
         //Session Id valid for 5 minutes
-        sessions.put(sessionId, new CustomUserToken(LocalDateTime.now().plusMinutes(5), sessionKey));
+        sessions.put(sessionId, new CustomUserToken(LocalDateTime.now().plusMinutes(5), sessionKey, publicKey));
         return sessionId;
     }
 

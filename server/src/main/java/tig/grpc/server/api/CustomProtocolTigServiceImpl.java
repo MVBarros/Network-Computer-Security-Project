@@ -33,17 +33,22 @@ public class CustomProtocolTigServiceImpl extends CustomProtocolTigServiceGrpc.C
         Tig.Signature signature = request.getSignature();
         Tig.CustomLoginRequest registerRequest = (Tig.CustomLoginRequest)ObjectSerializer.Deserialize(message);
 
+        //Get client pub key
+        byte[] pubKey = registerRequest.getClientPubKey().toByteArray();
+        PublicKey clientPubKey = EncryptionUtils.getPubRSAKey(pubKey);
+
         //get SessionKey
         byte[] sessionKey = registerRequest.getEncryptionKey().toByteArray();
         //decipher with server key
         sessionKey = EncryptionUtils.decryptbytesRSAPriv(sessionKey, privateKey);
         SecretKeySpec key = EncryptionUtils.getAesKey(sessionKey);
 
+
         //decipher message with session key
         message = registerRequest.getMessage().toByteArray();
         message = EncryptionUtils.decryptbytesAES(message, key);
         byte[] hash = signature.getValue().toByteArray();
-        hash = EncryptionUtils.decryptbytesRSAPriv(hash, privateKey);
+        hash = EncryptionUtils.decryptbytesRSAPub(hash, clientPubKey);
         if (!HashUtils.verifyMessageSignature(message, hash)) {
             throw new IllegalArgumentException("Invalid Signature");
         }
@@ -74,6 +79,10 @@ public class CustomProtocolTigServiceImpl extends CustomProtocolTigServiceGrpc.C
         Tig.Signature signature = request.getSignature();
         Tig.CustomLoginRequest loginRequest = (Tig.CustomLoginRequest)ObjectSerializer.Deserialize(message);
 
+        //Get client pub key
+        byte[] pubKey = loginRequest.getClientPubKey().toByteArray();
+        PublicKey clientPubKey = EncryptionUtils.getPubRSAKey(pubKey);
+
         //get SessionKey
         byte[] sessionKey = loginRequest.getEncryptionKey().toByteArray();
         //decipher with server key
@@ -84,7 +93,7 @@ public class CustomProtocolTigServiceImpl extends CustomProtocolTigServiceGrpc.C
         message = loginRequest.getMessage().toByteArray();
         message = EncryptionUtils.decryptbytesAES(message, key);
         byte[] hash = signature.getValue().toByteArray();
-        hash = EncryptionUtils.decryptbytesRSAPriv(hash, privateKey);
+        hash = EncryptionUtils.decryptbytesRSAPub(hash, clientPubKey);
 
         if (!HashUtils.verifyMessageSignature(message, hash)) {
             throw new IllegalArgumentException("Invalid Signature");
@@ -102,7 +111,7 @@ public class CustomProtocolTigServiceImpl extends CustomProtocolTigServiceGrpc.C
         }
         //insert session key into memory
         String signerId = StringGenerator.randomString(256);
-        SessionAuthenticator.insertCustomSession(signerId, key);
+        SessionAuthenticator.insertCustomSession(signerId, key, clientPubKey);
 
         message = ObjectSerializer.Serialize(reply);
         String nonce = StringGenerator.randomString(256);
@@ -142,9 +151,10 @@ public class CustomProtocolTigServiceImpl extends CustomProtocolTigServiceGrpc.C
 
         CustomUserToken sessionToken = SessionAuthenticator.authenticateSession(signerId);
         Key sessionKey = sessionToken.getSessionKey();
+        PublicKey clientPubKey = sessionToken.getPublicKey();
 
         byte[] message = EncryptionUtils.decryptbytesAES(request.getMessage().toByteArray(), (SecretKeySpec) sessionKey);
-        hash = EncryptionUtils.decryptbytesRSAPriv(hash, privateKey);
+        hash = EncryptionUtils.decryptbytesRSAPub(hash, clientPubKey);
 
         if (!HashUtils.verifyMessageSignature(message, hash)) {
             throw new IllegalArgumentException("Invalid Signature");
@@ -175,9 +185,11 @@ public class CustomProtocolTigServiceImpl extends CustomProtocolTigServiceGrpc.C
 
         CustomUserToken sessionToken = SessionAuthenticator.authenticateSession(signerId);
         Key sessionKey = sessionToken.getSessionKey();
+        PublicKey clientPubKey = sessionToken.getPublicKey();
+
 
         byte[] message = EncryptionUtils.decryptbytesAES(request.getMessage().toByteArray(), (SecretKeySpec) sessionKey);
-        hash = EncryptionUtils.decryptbytesRSAPriv(hash, privateKey);
+        hash = EncryptionUtils.decryptbytesRSAPub(hash, clientPubKey);
         if (!HashUtils.verifyMessageSignature(message, hash)) {
             throw new IllegalArgumentException("Invalid Signature");
         }
@@ -205,9 +217,10 @@ public class CustomProtocolTigServiceImpl extends CustomProtocolTigServiceGrpc.C
 
         CustomUserToken sessionToken = SessionAuthenticator.authenticateSession(signerId);
         Key sessionKey = sessionToken.getSessionKey();
+        PublicKey clientPubKey = sessionToken.getPublicKey();
 
         byte[] message = EncryptionUtils.decryptbytesAES(request.getMessage().toByteArray(), (SecretKeySpec) sessionKey);
-        hash = EncryptionUtils.decryptbytesRSAPriv(hash, privateKey);
+        hash = EncryptionUtils.decryptbytesRSAPub(hash, clientPubKey);
 
         if (!HashUtils.verifyMessageSignature(message, hash)) {
             throw new IllegalArgumentException("Invalid Signature");
@@ -231,11 +244,14 @@ public class CustomProtocolTigServiceImpl extends CustomProtocolTigServiceGrpc.C
         byte[] hash = request.getSignature().getValue().toByteArray();
         String signerId = request.getSignature().getSignerId();
 
+
         CustomUserToken sessionToken = SessionAuthenticator.authenticateSession(signerId);
         Key sessionKey = sessionToken.getSessionKey();
+        PublicKey clientPubKey = sessionToken.getPublicKey();
+
 
         byte[] message = EncryptionUtils.decryptbytesAES(request.getMessage().toByteArray(), (SecretKeySpec) sessionKey);
-        hash = EncryptionUtils.decryptbytesRSAPriv(hash, privateKey);
+        hash = EncryptionUtils.decryptbytesRSAPub(hash, clientPubKey);
 
         if (!HashUtils.verifyMessageSignature(message, hash)) {
             throw new IllegalArgumentException("Invalid Signature");
@@ -293,9 +309,10 @@ public class CustomProtocolTigServiceImpl extends CustomProtocolTigServiceGrpc.C
 
         CustomUserToken sessionToken = SessionAuthenticator.authenticateSession(signerId);
         Key sessionKey = sessionToken.getSessionKey();
+        PublicKey clientPubKey = sessionToken.getPublicKey();
 
         byte[] message = EncryptionUtils.decryptbytesAES(request.getMessage().toByteArray(), (SecretKeySpec) sessionKey);
-        hash = EncryptionUtils.decryptbytesRSAPriv(hash, privateKey);
+        hash = EncryptionUtils.decryptbytesRSAPub(hash, clientPubKey);
 
         if (!HashUtils.verifyMessageSignature(message, hash)) {
             throw new IllegalArgumentException("Invalid Signature");

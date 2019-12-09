@@ -6,10 +6,9 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
+import java.security.*;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
 
 public class EncryptionUtils {
 
@@ -27,6 +26,15 @@ public class EncryptionUtils {
 
     public static SecretKeySpec getAesKey(byte[] encoding) {
         return new SecretKeySpec(encoding, 0, encoding.length, "AES");
+    }
+
+    public static PublicKey getPubRSAKey(byte[] encoding) {
+        try {
+            return KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(encoding));
+        }catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            //should never happen
+            throw new RuntimeException();
+        }
     }
 
         public static EncryptedFile encryptFile(byte[] originalFile, SecretKey key, byte[] iv) {

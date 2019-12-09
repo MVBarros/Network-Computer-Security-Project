@@ -35,7 +35,7 @@ public class CustomProtocolOperations {
             byte[] message = ObjectSerializer.Serialize(builder.build());
 
             byte[] signature = HashUtils.hashBytes(message);
-            signature = EncryptionUtils.encryptBytesRSAPub(signature, client.getServerKey());
+            signature = EncryptionUtils.encryptBytesRSAPriv(signature, client.getPrivKey());
 
             //Create Login Request by encrypting the request with an AES Key
             SecretKeySpec secretKey = (SecretKeySpec) EncryptionUtils.generateAESKey();
@@ -81,7 +81,7 @@ public class CustomProtocolOperations {
             byte[] message = ObjectSerializer.Serialize(builder.build());
 
             byte[] signature = HashUtils.hashBytes(message);
-            signature = EncryptionUtils.encryptBytesRSAPub(signature, client.getServerKey());
+            signature = EncryptionUtils.encryptBytesRSAPriv(signature, client.getPrivKey());
 
             //Create Login Request by encrypting the request with an AES Key
             SecretKeySpec secretKey = (SecretKeySpec) EncryptionUtils.generateAESKey();
@@ -159,7 +159,7 @@ public class CustomProtocolOperations {
             byte[] signature = HashUtils.hashBytes(message);
 
             //encrypt hash
-            signature = EncryptionUtils.encryptBytesRSAPub(signature, client.getServerKey());
+            signature = EncryptionUtils.encryptBytesRSAPriv(signature, client.getPrivKey());
             message = EncryptionUtils.encryptBytesAES(message, (SecretKeySpec) client.getSessionKey());
 
             Tig.Signature sign = Tig.Signature.newBuilder()
@@ -205,7 +205,7 @@ public class CustomProtocolOperations {
             byte[] signature = HashUtils.hashBytes(message);
 
             //encrypt hash
-            signature = EncryptionUtils.encryptBytesRSAPub(signature, client.getServerKey());
+            signature = EncryptionUtils.encryptBytesRSAPriv(signature, client.getPrivKey());
             message = EncryptionUtils.encryptBytesAES(message, (SecretKeySpec) client.getSessionKey());
 
             Tig.Signature sign = Tig.Signature.newBuilder()
@@ -255,7 +255,7 @@ public class CustomProtocolOperations {
             byte[] signature = HashUtils.hashBytes(message);
 
             //encrypt hash
-            signature = EncryptionUtils.encryptBytesRSAPub(signature, client.getServerKey());
+            signature = EncryptionUtils.encryptBytesRSAPriv(signature, client.getPrivKey());
             message = EncryptionUtils.encryptBytesAES(message, (SecretKeySpec) client.getSessionKey());
 
             Tig.Signature sign = Tig.Signature.newBuilder()
@@ -304,7 +304,7 @@ public class CustomProtocolOperations {
             byte[] signature = HashUtils.hashBytes(message);
 
             //encrypt hash
-            signature = EncryptionUtils.encryptBytesRSAPub(signature, client.getServerKey());
+            signature = EncryptionUtils.encryptBytesRSAPriv(signature, client.getPrivKey());
             message = EncryptionUtils.encryptBytesAES(message, (SecretKeySpec) client.getSessionKey());
 
 
@@ -373,7 +373,7 @@ public class CustomProtocolOperations {
             byte[] signature = HashUtils.hashBytes(message);
 
             //encrypt hash
-            signature = EncryptionUtils.encryptBytesRSAPub(signature, client.getServerKey());
+            signature = EncryptionUtils.encryptBytesRSAPriv(signature, client.getPrivKey());
             message = EncryptionUtils.encryptBytesAES(message, (SecretKeySpec) client.getSessionKey());
 
 
