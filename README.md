@@ -12,17 +12,17 @@ Miguel Barros
 
 ### Requirements:
 
-OpenSSL 1.1.1
+`OpenSSL 1.1.1`
 
-sqlite3 3.30.1
+`sqlite3 3.30.1`
 
-Apache Maven 3.6.2 
+`Apache Maven 3.6.2`
 
 ### Setup:
 
-All of the modules must be configured with the correct keys. To do so, run the script `root-gen.sh`, which automattically creates and copies the key files to the respective folders. 
+All of the modules must be configured with the correct keys. To do so, run the script `root-gen.sh`, which automatically creates and copies the key files to the respective folders. 
 
-They must also have the respective database setups. To do so you need to run the schema.sql file in /src/main/resources/db of the server, key-server and backup modules. The client has no database and as such no script is needed.
+They must also have the respective database setups. To do so you need to run the `schema.sql` file in `/src/main/resources/db` of the server, key-server and backup modules. The client has no database and as such no script is needed.
 
 We recomend you run `mvn clean install` on the root directory to install all dependencies for the project. 
 
