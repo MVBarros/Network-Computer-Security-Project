@@ -7,9 +7,6 @@
     <version>1.0.0.RELEASE</version>
     <packaging>pom</packaging>
 
-
-
-
     <modules>
         <module>client</module>
         <module>contract</module>
