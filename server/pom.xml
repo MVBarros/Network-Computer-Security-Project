@@ -24,8 +24,8 @@
         <mainclass>tig.grpc.server.service.DocumentServer</mainclass>
         <server.port>8080</server.port>
         <db.name>src/main/resources/db/tigserver</db.name>
-        <keyserver.url>localhost:8090</keyserver.url>
-        <backupserver.url>localhost:8091</backupserver.url>
+        <keyserver.url>192.168.50.10:8090</keyserver.url>
+        <backupserver.url>192.168.50.9:8091</backupserver.url>
 
     </properties>
 

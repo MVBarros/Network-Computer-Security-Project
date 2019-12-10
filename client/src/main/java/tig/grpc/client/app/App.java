@@ -39,7 +39,7 @@ public class App {
             System.exit(1);
         }
 
-        final String host = "localhost";//args[0];
+        final String host = "192.168.56.10";//args[0];
         final int port = 8080;//Integer.parseInt(args[1]);
         final String target = host + ":" + port;
 
