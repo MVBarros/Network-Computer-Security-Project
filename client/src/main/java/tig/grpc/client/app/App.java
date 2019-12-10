@@ -40,7 +40,7 @@ public class App {
         }
 
         final String host = "192.168.56.10";//args[0];
-        final int port = 8080;//Integer.parseInt(args[1]);
+        final int port = 8090;//Integer.parseInt(args[1]);
         final String target = host + ":" + port;
 
         final ManagedChannel channel = NettyChannelBuilder.forAddress(host, port)

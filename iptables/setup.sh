@@ -19,10 +19,10 @@ iptables -P FORWARD DROP
 #iptables -P OUTPUT DROP
 
 #allow server to send requests to key-server and vice versa
-iptables -A FORWARD -p tcp -s 192.168.56.10 --sport 8080 -d 192.168.50.10 --dport 8090 -j ACCEPT
-iptables -A FORWARD -p tcp -s 192.168.50.10 --sport 8090 -d 192.168.56.10 --dport 8080 -j ACCEPT
+iptables -A FORWARD -p tcp -s 192.168.56.10  -d 192.168.50.10 --dport 8090 -j ACCEPT
+iptables -A FORWARD -p tcp -s 192.168.50.10 --sport 8090 -d 192.168.56.10  -j ACCEPT
 
 
 #allow server to send requests to backup-bd and vice versa
-iptables -A FORWARD -p tcp -s 192.168.56.10 --sport 8080 -d 192.168.50.9 --dport 8091 -j ACCEPT
-iptables -A FORWARD -p tcp -s 192.168.50.9 --sport 8091 -d 192.168.56.10 --dport 8080 -j ACCEPT
+iptables -A FORWARD -p tcp -s 192.168.56.10 -d 192.168.50.9 --dport 8091 -j ACCEPT
+iptables -A FORWARD -p tcp -s 192.168.50.9 --sport 8091 -d 192.168.56.10 -j ACCEPT
