@@ -28,7 +28,7 @@
         <!-- application properties -->
         <mainclass>tig.grpc.client.app.App</mainclass>
 
-        <server.host>localhost</server.host>
+        <server.host>192.168.56.10</server.host>
         <server.port>8080</server.port>
     </properties>
 
