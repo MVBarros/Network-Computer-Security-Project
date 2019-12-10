@@ -8,7 +8,6 @@ import io.grpc.netty.NettyChannelBuilder;
 import io.grpc.netty.NettyServerBuilder;
 import io.netty.handler.ssl.SslContext;
 import org.apache.log4j.Logger;
-import tig.grpc.contract.Tig;
 import tig.grpc.contract.TigBackupServiceGrpc;
 import tig.grpc.contract.TigKeyServiceGrpc;
 import tig.grpc.server.api.CustomProtocolTigServiceImpl;

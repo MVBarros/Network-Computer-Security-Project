@@ -52,12 +52,11 @@ public class EncryptionUtils {
         public static byte[] decryptFile(EncryptedFile encryptedFile, SecretKeySpec key) {
             try {
                 Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-            cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(encryptedFile.getIv()));
-            return cipher.doFinal(encryptedFile.getContent());
+                cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(encryptedFile.getIv()));
+                return cipher.doFinal(encryptedFile.getContent());
         } catch (Exception e) {
             //Should never happen
-            e.printStackTrace();
-            throw new RuntimeException();
+            throw new IllegalArgumentException("File appears to be corrupted, restore from backup");
         }
     }
 
@@ -68,7 +67,6 @@ public class EncryptionUtils {
             return cipher.doFinal(encryptedBytes);
         } catch (Exception e) {
             //Should never happen
-            e.printStackTrace();
             throw new RuntimeException();
         }
     }
