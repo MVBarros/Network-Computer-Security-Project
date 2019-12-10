@@ -9,8 +9,8 @@ Vagrant.configure("2") do |config|
   config.ssh.insert_key = false
   config.vbguest.auto_update = true
   config.vm.box_check_update = false
-
- config.vm.define "server" do |server_config|
+    
+  config.vm.define "server" do |server_config|
     server_config.vm.box = "ubuntu/bionic64"
     server_config.vm.hostname = "server"
     server_config.vm.network "private_network", ip: "192.168.56.10"
