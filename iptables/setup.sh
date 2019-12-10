@@ -8,7 +8,7 @@
 # backup-bd port -> 8091
 
 #Note: Cannot block input and output due to vagrant using ssh to control the machines
-
+#Note: Cannot know a priori src ports as they are set random by 
 #delete former policies
 iptables -F
 
