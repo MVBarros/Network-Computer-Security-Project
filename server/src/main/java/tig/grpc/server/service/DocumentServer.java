@@ -92,9 +92,12 @@ public class DocumentServer {
                 .addService(customImpl)
                 .build();
 
+
         server.start();
 
         logger.info("Server started");
+
+        System.out.println(server.getPort());
 
         //So we can use CTRL-C when testing
         Runtime.getRuntime().addShutdownHook(new Thread() {
