@@ -86,7 +86,7 @@ public class FileDAO {
     public static String updateFileKey(FileKey key, String filename, String fileowner) {
         Connection conn = PostgreSQLJDBC.getInstance().getConn();
         try {
-            String fileId = getFileId(filename, fileowner);
+            String fileId = getFileId(fileowner, filename);
             PreparedStatement key_stmt = conn.prepareStatement("UPDATE files SET encryption_key=(?), iv=(?) WHERE filename=(?) AND fileowner=(?)");
             key_stmt.setBytes(1, key.getKey());
             key_stmt.setBytes(2, key.getIv());

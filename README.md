@@ -42,11 +42,11 @@ The VMS that are create are:
 * `server`
 * `tig-firewall`
 * `key-server`
-* `backup`
+* `backup-bd`
 
 To enter a VM do `vagrant ssh <vm name>`.
 
-Before running any servers it is recomended you setup the firewall. Enter the `tig-firewall` VM and run the command `sudo /home/vagrant/proj/iptables/setup.sh` 
+Before running any servers it is recomended you setup the firewall. Enter the `tig-firewall` VM and run the command `sudo /home/vagrant/proj/iptables/setup.sh`. You might also need to enable packet forwarding. Issue the following command: `sudo sysctl net.ipv4.ip_forward=1`
 
 We hope the names are self explanatory. Each VM has a shared folder of the project directory in the path `/home/vagrant/proj`. In the run folder you will find a script to run each of the Servers (`run_server.sh`, `run_backup.sh`, `run_keys.sh`). 
 
