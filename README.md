@@ -20,17 +20,39 @@ Miguel Barros
 
 `openjdk version 1.8.0_232`
 
+`Vagrant 2.2.6`
+
+`Virtualbox 6.0`
+
 ### Setup:
 
 All of the modules must be configured with the correct keys. To do so, run the script `root-gen.sh`, which automatically creates and copies the key files to the respective folders. 
 
 They must also have the respective database setups. To do so you need to run the `schema.sql` file in `/src/main/resources/db` of the server, key-server and backup modules. The client has no database and as such no script is needed.
 
-We recomend you run `mvn clean install` on the root directory to install all dependencies for the project. 
+We recomend you run `mvn clean install` on the root directory to install all dependencies for the project and create all of the respective jars. 
 
-You should then run `mvn compile exec:java` in the key-server, backup and server modules by that order (note that starting them in a different order will mean the system will not run)
+The project is configured with hardcoded IPs that are assigned to each VM in the vagrant file.
 
-To run the client yo must first to `mvn clean install` on the client module. Then go into the `target` directory and run `java -jar tig-client-1.0.0-SNAPSHOT-jar-with-dependencies.jar` with the options you want to run. The avaliable options are:
+To create and start the VMs run vagrant up in the folder containing the Vagrantfile. Note that each VM has 512 MBs of RAM and that the script takes a long time to finish.
+
+
+The VMS that are create are:
+* `client`
+* `server`
+* `tig-firewall`
+* `key-server`
+* `backup`
+
+To enter a VM do `vagrant ssh <vm name>`.
+
+Before running any servers it is recomended you setup the firewall. Enter the `tig-firewall` VM and run the command `sudo /home/vagrant/proj/iptables/setup.sh` 
+
+We hope the names are self explanatory. Each VM has a shared folder of the project directory in the path `/home/vagrant/proj`. In the run folder you will find a script to run each of the Servers (`run_server.sh`, `run_backup.sh`, `run_keys.sh`). 
+
+Run each server in the respective VM in a different terminal window.
+
+To run the client you must enter the client VM. Then go into the `target` directory of the client module and run `java -jar tig-client-1.0.0-SNAPSHOT-jar-with-dependencies.jar` with the options you want to run. The avaliable options are:
 
 *  `-b`                                 Use to list Backup files
 *  `-c filename permission target`    Use to change Access Control options of a file
@@ -42,3 +64,5 @@ To run the client yo must first to `mvn clean install` on the client module. The
 *  `-r filename`                      Use to Remove (delete) a file
 *  `-u filename filepath`             Use to Upload a new file
 
+
+Have fun backing up your files safely!
